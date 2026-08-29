@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.6.10 원격시장 · 공선항해 · 자동저장</title>
+<title>TRAMP LINE 1962 · v3.6.10.1 원격시장 · 공선항해 · 자동저장</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -514,7 +514,7 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 
 @media(max-width:860px){#pages{height:auto;max-height:none;flex:1 1 auto;min-height:0}#pages .page{min-height:0}}
 
-/* v3.6.10 main menu + save/load slots */
+/* v3.6.10.1 main menu + save/load slots */
 #main-menu{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));background:rgba(18,27,29,.86);overflow:auto}
 #main-menu.on{display:flex}
 .mm-panel{width:min(760px,100%);background:var(--paper);border:1px solid var(--rule);box-shadow:0 18px 70px rgba(0,0,0,.42);padding:18px}
@@ -522,6 +522,10 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .mm-title .era{font-family:var(--face-num);font-size:var(--fs-micro);letter-spacing:.22em;color:var(--magenta);text-transform:uppercase}
 .mm-title h1{font-family:var(--face-title);font-size:clamp(28px,6vw,52px);font-weight:400;letter-spacing:.05em;margin:4px 0 3px}
 .mm-title p{margin:0;color:var(--ink2);font-size:var(--fs-cap);line-height:1.5}
+.mm-version{display:inline-block;margin-top:7px;padding:2px 7px;border:1px solid var(--line);
+font-family:var(--face-num);font-size:var(--fs-micro);letter-spacing:.08em;color:var(--ink2);
+background:rgba(246,244,236,.72)}
+
 .mm-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .mm-actions button{min-height:48px;font-family:var(--face-name);font-size:var(--fs-body);letter-spacing:.08em}
 .mm-actions .primary{background:var(--ink);color:var(--paper)}
@@ -555,6 +559,7 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
+      <div class="mm-version">CONTENT v3.6.10.1</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -755,6 +760,7 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.6.10.1</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -967,6 +973,7 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 </div>
 <div id="tip" role="tooltip"></div>
 <script>
+const TRAMP_LINE_CONTENT_VERSION='3.6.10.1';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -8468,13 +8475,13 @@ $('f-cash').onkeydown=(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();
 $('fs-close').onclick=()=>{$('finstatement').classList.remove('on');$('f-cash').focus();};
 
 /* V3610_REMOTE_MARKET_PATCH
-   v3.6.10 — 원격 시장정보 / 공선 재배치 / A-B 자동저장 / 대기 / 속도 단순화
+   v3.6.10.1 — 원격 시장정보 / 공선 재배치 / A-B 자동저장 / 대기 / 속도 단순화
 */
 const V3610_AUTO_KEYS=['TRAMP_LINE_1962_AUTOSAVE_A','TRAMP_LINE_1962_AUTOSAVE_B'];
 const V3610_AUTO_META_SUFFIX='_META';
 let v3610LastAutoReal=0;
 let v3610LastSemantic='';
-/* v3.6.10 wait target is stored in st for save/load persistence */
+/* v3.6.10.1 wait target is stored in st for save/load persistence */
 let v3610RemotePrevPaused=true;
 
 function v3610Hash(s){
@@ -8572,7 +8579,7 @@ function v3610AutoSave(reason='자동',force=false){
     const s=$('v3610-autosave-state');
     if(s)s.textContent=`자동저장 · ${new Date(now).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})}`;
     return true;
-  }catch(e){console.warn('[v3.6.10 autosave]',e);return false;}
+  }catch(e){console.warn('[v3.6.10.1 autosave]',e);return false;}
 }
 function v3610SemanticTick(){
   v3610NormalizeSpeed();
@@ -8777,14 +8784,14 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.6.10 · 월드맵 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.6.10.1 · 월드맵 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
 const CAMPAIGN_COMPAT=new Set(['TLC-0.2','TLC-0.2.1','TLC-0.2.2','TLC-0.2.3','TLC-0.2.4','TLC-0.2.5','TLC-0.2.6','TLC-0.2.7','TLC-0.3.0','TLC-0.4.0','TLC-0.4.1','TLC-0.4.2','TLC-0.4.3','TLC-0.4.4','TLC-0.4.5','TLC-0.4.6',CAMPAIGN_VERSION]);
 const SAVE_KEY = 'TRAMP_LINE_1962_CAMPAIGN'; // v3.6.8 이하 단일 저장 호환용
 
-// v3.6.10 HOTFIX: v3.6.10 메인메뉴 통합 과정에서 누락된 캠페인 직렬화 코어 복구.
+// v3.6.10.1 HOTFIX: v3.6.10.1 메인메뉴 통합 과정에서 누락된 캠페인 직렬화 코어 복구.
 // 이 함수들이 빠지면 window.__tl export에서 ReferenceError가 발생해 BOOT_NEW 처리와 최종 부팅이 중단된다.
 function campaignPack() {
 if (asking) throw new Error('판단창이 열린 동안에는 저장할 수 없다');
