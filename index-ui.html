@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · UI 시안 · 국면 중심 화면</title>
+<title>TRAMP LINE 1962 · UI 시안 · 부두 화면</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -526,6 +526,61 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .nw-note{display:block;margin-top:4px;color:var(--ink2);font-size:var(--fs-micro);line-height:1.45}
 .nw-cond{font-family:var(--face-num);font-size:var(--fs-micro);color:var(--ink2)}
 
+
+/* ── 부두 화면 ── */
+#wharf{position:absolute;inset:0;background:var(--paper);display:flex;flex-direction:column;z-index:4;overflow:hidden}
+#wharf[hidden]{display:none}
+.wh-head{display:flex;align-items:center;gap:6px;padding:5px 7px;border-bottom:1px solid var(--rule);background:#ece9df}
+.wh-head b{font-family:var(--face-title);font-size:var(--fs-cap);font-weight:400;flex:1 1 auto;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#wharf-tabs{flex:0 0 auto}
+#wharf-tabs button{min-height:28px;padding:0 9px;flex:0 0 auto}
+#wharf-hide{flex:0 0 auto;min-height:28px;padding:0 9px}
+#wharf-show{position:absolute;right:8px;top:8px;z-index:5;min-height:30px;padding:0 10px;flex:0 0 auto;
+  border:1px solid var(--rule);background:var(--paper)}
+#wharf-show[hidden]{display:none}
+.wh-canvaswrap{flex:0 0 auto;padding:6px 8px 0;display:flex;justify-content:center}
+#wharf-cv{display:block}
+#wharf-cv[hidden]{display:none}
+.wh-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:7px 9px 10px;font-size:var(--fs-micro);line-height:1.5}
+.wh-empty,.wh-note{color:var(--ink2);line-height:1.55}
+.wh-empty b{color:var(--ink)}
+.wh-sel{border:1px solid var(--line);background:#f0eee5;padding:6px 8px;margin-bottom:5px}
+.wh-sel b{font-family:var(--face-num);font-size:var(--fs-cap)}
+.wh-sel span{display:block;color:var(--ink2);margin-top:2px}
+.wh-acts button{min-height:34px;padding:0 4px;font-size:var(--fs-micro)}
+.wh-time{display:grid;gap:3px;margin-bottom:6px}
+.wh-row{display:grid;grid-template-columns:104px minmax(0,1fr);gap:6px;align-items:center}
+.wh-row.head .wh-track{background:none}
+.wh-rowk{font-size:var(--fs-micro);line-height:1.25;min-width:0;overflow:hidden}
+.wh-rowk em{display:block;font-style:normal;color:var(--ink2);font-size:var(--fs-micro)}
+.wh-track{position:relative;height:16px;border:1px solid var(--line);background:#efece3}
+.wh-track i{position:absolute;top:0;bottom:0;display:block}
+.wh-track i.lay{background:rgba(70,100,110,.30);border-left:1px solid #4f6f79;border-right:1px solid #4f6f79}
+.wh-track i.sea{background:rgba(43,42,38,.35)}
+.wh-track i.eta{width:2px;background:var(--ink)}
+.wh-track i.eta.bad{width:3px;background:var(--magenta)}
+.wh-state{font-family:var(--face-num);font-size:var(--fs-micro);color:var(--ink2)}
+.wh-kpi{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:6px 0}
+.wh-kpi>div{background:var(--paper);padding:4px 5px;min-width:0}
+.wh-kpi span{display:block;color:var(--ink2);font-size:var(--fs-micro)}
+.wh-kpi b{display:block;font-family:var(--face-num);font-size:var(--fs-micro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wh-warn{border-left:3px solid var(--magenta);padding:5px 7px;background:#f3ecef;margin-bottom:6px}
+.wh-ok{border-left:3px solid var(--line);padding:5px 7px;background:#eeece4;margin-bottom:6px}
+.wh-confirm{font-weight:700}
+.wh-gangs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px}
+.wh-gang{display:block;text-align:left;padding:7px 8px;margin:0;border:1px solid var(--line);background:rgba(246,244,236,.6);min-height:64px}
+.wh-gang[aria-pressed="true"]{border-color:var(--magenta);background:#f3ecef;color:var(--ink)}
+.wh-gang[aria-pressed="true"] b{color:var(--magenta)}
+.wh-gang[aria-pressed="true"] small{color:var(--ink2)}
+.wh-axis{position:relative;height:13px;margin-left:110px;border-bottom:1px solid var(--line);margin-bottom:2px}
+.wh-axis i{position:absolute;top:0;width:1px;height:5px;background:var(--line)}
+.wh-axis span{position:absolute;top:2px;font-family:var(--face-num);font-size:8px;color:var(--ink2);transform:translateX(2px)}
+@media(max-width:430px){.wh-axis{margin-left:84px}}
+.wh-gang b{display:block;font-family:var(--face-title);font-size:var(--fs-cap);font-weight:400}
+.wh-gang span{display:block;font-family:var(--face-num);font-size:var(--fs-micro);margin-top:2px}
+.wh-gang small{display:block;color:var(--ink2);font-size:var(--fs-micro);margin-top:2px;line-height:1.35}
+@media(max-width:430px){.wh-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}.wh-row{grid-template-columns:78px minmax(0,1fr)}}
 /* ── UI 시안 · 국면 중심 화면 ── */
 #todo{align-items:center}
 #act-row{display:flex;border-top:1px solid var(--rule)}
@@ -667,6 +722,20 @@ background:rgba(246,244,236,.72)}
   <!-- ── 가운데: 해도. 여기에는 아무것도 얹지 않는다 ── -->
   <main id="sheet">
     <canvas id="chart"></canvas>
+    <section id="wharf" hidden>
+      <header class="wh-head">
+        <b id="wharf-title">부두</b>
+        <div class="btnrow" id="wharf-tabs">
+          <button data-whv="STOW" aria-pressed="true">적부</button>
+          <button data-whv="PLAN" aria-pressed="false">항차</button>
+          <button data-whv="GANG" aria-pressed="false">하역</button>
+        </div>
+        <button id="wharf-hide" aria-label="해도 보기">해도</button>
+      </header>
+      <div class="wh-canvaswrap"><canvas id="wharf-cv"></canvas></div>
+      <div id="wharf-body" class="wh-body"></div>
+    </section>
+    <button id="wharf-show" hidden>부두 화면</button>
     <aside id="port-approach" aria-live="polite" aria-hidden="true">
       <div class="pa-head"><b id="pa-title">항만 접근</b><button id="pa-close" aria-label="항만 풍경 닫기">×</button></div>
       <canvas id="pa-canvas" width="200" height="112"></canvas>
@@ -7937,7 +8006,8 @@ const x = planCurrentWork(); if (!x) return;
 const ev = sim.queues[S.at].activeMult(sim.t), w = sim.weather.atPort(S.at, sim.t);
 const rain = w.hs > 2.5 ? 2 : w.hs > 1.5 ? 1 : 0;
 const eff = ev.stop ? 0 : workEfficiency(sim.t, st.night) * ev.mult;
-if(eff>0)st.left-=portDischargeRate(sim.company,S.at,x.c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(P.workMode==='LOAD'?contractLoadMultiplier(x.c):contractHandlingMultiplier(x.c))*crewWorkFactor(playerCrew(),'cargo')*eff*DT/HOUR; directCrewTick('WORK',DT,{night:!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H)}); if(st.voyageRisk&&!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H))st.voyageRisk.nightWorkH+=DT/HOUR;
+if(eff>0)st.left-=portDischargeRate(sim.company,S.at,x.c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(P.workMode==='LOAD'?contractLoadMultiplier(x.c):contractHandlingMultiplier(x.c))*crewWorkFactor(playerCrew(),'cargo')*wharfGangFactor()*eff*DT/HOUR;
+if(eff>0){const gc=wharfGangCostPerHour()*DT/HOUR; if(gc){S.cash-=gc; st.acc.night+=gc;}} directCrewTick('WORK',DT,{night:!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H)}); if(st.voyageRisk&&!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H))st.voyageRisk.nightWorkH+=DT/HOUR;
 { const f=stepPort(S, DT, sim.bunkerPrice).fuelCost; st.acc.fuel += f; }
 if (eff > 0 && !(hourOfDay(sim.t) >= WORK.START_H && hourOfDay(sim.t) < WORK.END_H)) {
 S.cash -= WORK.NIGHT_SURCHARGE * DT / HOUR; st.acc.night += WORK.NIGHT_SURCHARGE * DT / HOUR;
@@ -8918,7 +8988,7 @@ sim = Sim.load(body.sim);
 for (const k of Object.keys(st)) delete st[k];
 Object.assign(st,body.st);
 st.acc??={fuel:0,op:0,fee:0,agency:0,pilot:0,night:0,dem:0,repair:0,claim:0};
-navState(); if(st.pilotIn==='RUN')st.pilotIn=null;st.acc.agency??=0;st.acc.claim??=0;st.voyageRisk??={maxHs:0,roughHours:0,nightWorkH:0};
+navState(); st.gangs??='FOCUS'; wharfSel=-1; if(st.pilotIn==='RUN')st.pilotIn=null;st.acc.agency??=0;st.acc.claim??=0;st.voyageRisk??={maxHs:0,roughHours:0,nightWorkH:0};
 if (st.plan?.active && (st.plan.schema ?? 1) < 2) {
 const P=st.plan; P.schema=2; P.pendingLoad ??= []; P.pendingUnload ??= [];
 P.waitMode ??= st.phase?.startsWith('적재') ? 'LOAD' : st.phase?.startsWith('양하') ? 'DISCH' : null;
@@ -10235,8 +10305,305 @@ function uiBoot() {
   $('todo-act').onclick = () => { const a = uiPrimary(); a.run?.(); };
   $('act-row').appendChild($('h-skip'));
   uiMount('h-speed', $('speed-row'));   // 요소는 그대로 두고 자리만 옮긴다 (저장 복원이 이 id를 쓴다)
+  uiPark('h-market');                   // #quick 을 지우기 전에 피신시킨다
   $('quick')?.remove();
   uiSwitch('now');
+}
+
+// ── 부두 화면 ─────────────────────────────────────────────────
+// 정박·적재·양하 동안에는 해도에 볼 것이 없다. 그 자리에 배의 단면을 놓는다.
+//  · 적부  — 화물을 부피만큼의 블록으로 선창에 넣는다. 용적·혼적·양하역순·흘수가 규칙이다.
+//  · 항차  — 계약들의 적기 창과 도착 시각을 시간표로 겹쳐 본다.
+//  · 하역  — 하역반을 한 창에 몰 것인가 두 창에 나눌 것인가.
+const WHARF_COLOR = {
+  COAL:'#3b3a36', ORE:'#5d4a43', OIL:'#2f3b42', STEEL:'#6b6f73', MACHINE:'#7d6a4f',
+  TIMBER:'#8d7b53', GRAIN:'#b09a5e', FOOD:'#a4894f', GENERAL:'#8a8574', REEFER:'#6f8b8d',
+};
+const GANGS = {
+  FOCUS: { key:'FOCUS', name:'한 창에 집중', mult:1.00, cost:0,    fatigue:1.0, desc:'하역반 하나가 한 선창을 끝내고 옮겨간다. 기본' },
+  SPLIT: { key:'SPLIT', name:'두 창에 분산', mult:1.38, cost:130, fatigue:1.55, desc:'반을 갈라 두 선창을 동시에 연다. 빠르지만 사람값이 든다' },
+};
+let wharfView = 'STOW';      // STOW | PLAN | GANG
+let wharfSel = -1;           // 선택한 블록
+let wharfCv = null, wharfCx = null;
+
+function wharfActive() { return st.phase !== '항해' && !st.leg; }
+function wharfDrafting() { return draftPlan && draftPlan.length > 0 && !st.plan?.active; }
+// 지금 그릴 화물 목록 — 계획을 짜는 중이면 초안, 아니면 실제 적재분
+function wharfItems() {
+  if (wharfDrafting()) return draftPlan.map((x, i) => ({ i, c:x.c, tons:x.tons, hold:x.hold, live:false }));
+  const P = st.plan;
+  if (P?.active) return (P.items ?? []).filter(x => !x.delivered)
+    .map((x, i) => ({ i, c:x.c, tons:x.tons, hold:x.hold ?? 1, live:true, loaded:x.loaded }));
+  if (st.contract && st.tons) return [{ i:0, c:st.contract, tons:st.tons, hold:1, live:true, loaded:true }];
+  return [];
+}
+function wharfGangFactor() {
+  const g = GANGS[st.gangs ?? 'FOCUS'] ?? GANGS.FOCUS;
+  if (g.key === 'SPLIT' && !wharfTwoHoldsBusy()) return 1;
+  return g.mult;
+}
+function wharfTwoHoldsBusy() {
+  const items = wharfItems().filter(x => !x.delivered);
+  return new Set(items.map(x => x.hold)).size >= 2;
+}
+function wharfGangCostPerHour() {
+  const g = GANGS[st.gangs ?? 'FOCUS'] ?? GANGS.FOCUS;
+  return g.key === 'SPLIT' && wharfTwoHoldsBusy() ? g.cost : 0;
+}
+
+// ── 적부도 ───────────────────────────────────────────────────
+function wharfLayout() {
+  const W = wharfCv.width / (window.devicePixelRatio || 1), H = wharfCv.height / (window.devicePixelRatio || 1);
+  const pad = Math.max(14, W * 0.05);
+  const x0 = pad + 24, x1 = W - pad;
+  const deck = H * 0.30, keel = H * 0.74;
+  const caps = SHIP.holds, tot = caps.reduce((a, b) => a + b, 0);
+  // 선수(오른쪽)에 기관실과 선교를 두고 나머지를 선창으로 나눈다
+  const holdArea = (x1 - x0) * 0.70, hx0 = x0 + (x1 - x0) * 0.10;
+  const boxes = []; let cx = hx0;
+  for (let i = 0; i < caps.length; i++) {
+    const w = holdArea * (caps[i] / tot);
+    boxes.push({ hold:i + 1, cap:caps[i], x:cx, w:w - 4, y:deck + 6, h:keel - deck - 6 });
+    cx += w;
+  }
+  return { W, H, x0, x1, deck, keel, boxes };
+}
+function wharfDrawHull(L) {
+  const cx = wharfCx, { x0, x1, deck, keel } = L;
+  cx.save();
+  cx.strokeStyle = '#2b2a26'; cx.lineWidth = 1.4; cx.fillStyle = '#e9e6dc';
+  cx.beginPath();
+  cx.moveTo(x0 + 10, deck);
+  cx.lineTo(x1 - 26, deck);
+  cx.quadraticCurveTo(x1, deck, x1, deck + (keel - deck) * 0.35);   // 선수 플레어
+  cx.lineTo(x1 - 6, keel - 6);
+  cx.quadraticCurveTo(x1 - 14, keel, x1 - 30, keel);
+  cx.lineTo(x0 + 26, keel);
+  cx.quadraticCurveTo(x0 + 6, keel, x0 + 4, keel - 14);             // 선미
+  cx.lineTo(x0 + 10, deck);
+  cx.closePath(); cx.fill(); cx.stroke();
+  // 선교·연돌·데릭
+  cx.fillStyle = '#ded9cb';
+  cx.fillRect(x1 - (x1 - x0) * 0.24, deck - 22, (x1 - x0) * 0.13, 22);
+  cx.strokeRect(x1 - (x1 - x0) * 0.24, deck - 22, (x1 - x0) * 0.13, 22);
+  cx.fillStyle = '#2b2a26';
+  cx.fillRect(x1 - (x1 - x0) * 0.185, deck - 34, 7, 14);
+  for (const b of L.boxes) {
+    cx.beginPath(); cx.moveTo(b.x + b.w / 2, deck); cx.lineTo(b.x + b.w / 2, deck - 26); cx.stroke();
+    cx.beginPath(); cx.moveTo(b.x + b.w / 2, deck - 24); cx.lineTo(b.x + b.w / 2 + 16, deck - 8); cx.stroke();
+  }
+  cx.restore();
+}
+function wharfDraw() {
+  if (!wharfCv) return;
+  const dpr = window.devicePixelRatio || 1;
+  const r = wharfCv.parentElement.getBoundingClientRect();
+  const cssW = Math.max(240, r.width - 16), cssH = Math.max(150, Math.min(r.height * 0.52, 300));
+  if (wharfCv.width !== Math.round(cssW * dpr) || wharfCv.height !== Math.round(cssH * dpr)) {
+    wharfCv.width = Math.round(cssW * dpr); wharfCv.height = Math.round(cssH * dpr);
+    wharfCv.style.width = cssW + 'px'; wharfCv.style.height = cssH + 'px';
+  }
+  const cx = wharfCx; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.clearRect(0, 0, cssW, cssH);
+  const L = wharfLayout();
+  wharfDrawHull(L);
+  const items = wharfItems();
+  // 흘수선
+  const tons = items.reduce((a, x) => a + (x.live && x.loaded === false ? 0 : x.tons), 0);
+  const d = draft(tons), dmax = PORTS[sim.ship.at]?.draft ?? 99;
+  const fr = Math.max(0, Math.min(1, (d - SHIP.draftEmpty) / (SHIP.draftFull - SHIP.draftEmpty)));
+  const wy = L.keel - (L.keel - L.deck) * (0.20 + fr * 0.62);
+  cx.save();
+  const deep = d > dmax - 0.4;
+  cx.strokeStyle = deep ? '#b0006e' : '#4f6f79'; cx.lineWidth = 1.2; cx.setLineDash([7, 4]);
+  cx.beginPath(); cx.moveTo(L.x0 - 6, wy); cx.lineTo(L.x1 + 6, wy); cx.stroke(); cx.setLineDash([]);
+  cx.fillStyle = deep ? '#b0006e' : '#4f6f79'; cx.font = '10px ui-monospace, monospace';
+  cx.textBaseline = 'middle'; cx.textAlign = 'right';
+  cx.fillText('흘수', L.x0 - 8, wy); cx.textAlign = 'left';
+  cx.textBaseline = 'bottom';
+  cx.fillText(`흘수 ${d.toFixed(2)}m · ${PORTS[sim.ship.at]?.name ?? ''} 수심 ${dmax.toFixed(1)}m` +
+              (deep ? ' · 여유 없음' : ''), L.x0, L.H - 4);
+  cx.restore();
+
+  const holds = planHoldState(items.map(x => ({ c:x.c, tons:x.tons, hold:x.hold })), SHIP);
+  const hits = [];
+  for (const b of L.boxes) {
+    const h = holds.find(x => x.hold === b.hold);
+    cx.save();
+    cx.strokeStyle = h.ok ? '#8c8878' : '#b0006e'; cx.lineWidth = h.ok ? 1 : 1.8;
+    cx.setLineDash(h.barrier ? [4, 3] : []);
+    cx.strokeRect(b.x, b.y, b.w, b.h); cx.setLineDash([]);
+    // 블록을 밑에서부터 쌓는다 — 부피 비례
+    let y = b.y + b.h;
+    const mine = items.filter(x => x.hold === b.hold);
+    for (const it of mine) {
+      const vol = it.tons * CARGO[it.c.cargo].sf;
+      const hh = Math.max(6, b.h * Math.min(1, vol / b.cap));
+      y -= hh;
+      cx.fillStyle = WHARF_COLOR[it.c.cargo] ?? '#7a766a';
+      cx.globalAlpha = it.live && it.loaded === false ? 0.35 : 1;
+      cx.fillRect(b.x + 2, y, b.w - 4, hh - 1);
+      cx.globalAlpha = 1;
+      if (wharfSel === it.i) { cx.strokeStyle = '#b0006e'; cx.lineWidth = 2.2; cx.strokeRect(b.x + 2, y, b.w - 4, hh - 1); }
+      if (hh >= 15) {
+        cx.fillStyle = '#f6f4ec'; cx.font = '600 10px ui-monospace, monospace'; cx.textBaseline = 'middle';
+        const left = `${CARGO[it.c.cargo].name} ${it.tons}t`, to = PORTS[it.c.to]?.name ?? '';
+        const lw = cx.measureText(left).width, tw = cx.measureText(to).width;
+        if (lw + tw + 20 <= b.w) {
+          cx.fillText(left, b.x + 6, y + hh / 2);
+          cx.textAlign = 'right'; cx.fillText(to, b.x + b.w - 6, y + hh / 2); cx.textAlign = 'left';
+        } else if (lw + 12 <= b.w) {
+          cx.fillText(left, b.x + 6, y + hh / 2);
+        } else {
+          cx.fillText(`${it.tons}t`, b.x + 6, y + hh / 2);
+        }
+      }
+      hits.push({ i:it.i, x:b.x + 2, y, w:b.w - 4, h:hh });
+    }
+    // 용적 표시
+    cx.fillStyle = h.ok ? '#6c6a61' : '#b0006e';
+    cx.font = '10px ui-monospace, monospace'; cx.textBaseline = 'top';
+    cx.fillText(`${b.hold}번창 ${Math.round(h.used)}/${b.cap}㎥`, b.x, b.y + b.h + 5);
+    if (!h.ok && h.incompatible.length) {
+      cx.fillText(`혼적 불가 ${h.incompatible.map(p => `${CARGO[p[0]].name}·${CARGO[p[1]].name}`)[0]}`, b.x, b.y + b.h + 18);
+    } else if (h.barrier) cx.fillText('격벽 필요 · 유효용적 −8%', b.x, b.y + b.h + 18);
+    cx.restore();
+  }
+  wharfCv.__hits = hits;
+}
+function wharfHit(ev) {
+  const r = wharfCv.getBoundingClientRect();
+  const x = ev.clientX - r.left, y = ev.clientY - r.top;
+  for (const h of (wharfCv.__hits ?? [])) if (x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) return h.i;
+  return -1;
+}
+
+// ── 아래 띠 ──────────────────────────────────────────────────
+function wharfStowStrip() {
+  const items = wharfItems();
+  if (!items.length) {
+    return `<div class="wh-empty">선창이 비어 있다. <b>항차 계획</b>에서 화물을 골라 넣으십시오.</div>`;
+  }
+  const it = items.find(x => x.i === wharfSel);
+  if (!it) return `<div class="wh-empty">블록을 누르면 그 화물을 옮기거나 양을 바꿀 수 있다.</div>`;
+  const c = it.c, vol = Math.round(it.tons * CARGO[c.cargo].sf);
+  const editable = wharfDrafting();
+  return `<div class="wh-sel"><b>${CARGO[c.cargo].name} ${it.tons}t</b>` +
+    `<span>${PORTS[c.from].name}→${PORTS[c.to].name} · ${vol}㎥ · 적재계수 ${CARGO[c.cargo].sf.toFixed(2)} · ${it.hold}번창</span></div>` +
+    (editable
+      ? `<div class="btnrow wh-acts">
+           <button data-wh="hold1" aria-pressed="${it.hold === 1}">1번창</button>
+           <button data-wh="hold2" aria-pressed="${it.hold === 2}">2번창</button>
+           <button data-wh="minus">−50t</button><button data-wh="plus">+50t</button>
+           <button data-wh="up">↑</button><button data-wh="down">↓</button>
+           <button data-wh="remove">제외</button>
+         </div>`
+      : `<div class="wh-note">항차가 확정된 뒤에는 적부를 바꿀 수 없다. 다음 계획에서 고르십시오.</div>`);
+}
+function wharfPlanBoard() {
+  if (wharfDrafting()) {
+    const E = (typeof planEvaluation === 'function') ? planEvaluation() : null;
+    if (!E) return '<div class="wh-empty">계획을 읽을 수 없다.</div>';
+    const t0 = sim.t, span = Math.max(DAY * 3, (E.schedule.at(-1)?.at ?? t0 + DAY * 6) - t0);
+    const bar = (a, b, cls, label) =>
+      `<i class="${cls}" style="left:${((a - t0) / span * 100).toFixed(1)}%;width:${(Math.max(0.6, (b - a) / span * 100)).toFixed(1)}%" title="${label}"></i>`;
+    const loadAt = (port) => (E.schedule ?? []).find(z => z.kind === 'load' && z.port === port)?.at ?? null;
+    const rows = draftPlan.map((x) => {
+      const eta = loadAt(x.c.from);
+      const ok = eta == null || (eta >= x.c.laycanStart && eta <= x.c.laycanEnd);
+      return `<div class="wh-row"><span class="wh-rowk">${CARGO[x.c.cargo].name}<em>${PORTS[x.c.from].name}→${PORTS[x.c.to].name}</em></span>` +
+        `<div class="wh-track">${bar(x.c.laycanStart, x.c.laycanEnd, 'lay', '적기')}` +
+        (eta != null ? `<i class="eta ${ok ? '' : 'bad'}" style="left:${((eta - t0) / span * 100).toFixed(1)}%"></i>` : '') +
+        `</div></div>`;
+    }).join('');
+    const legs = (E.schedule ?? []).filter(x => x.kind === 'sea').map(x =>
+      `<i class="sea" style="left:${((x.at - t0) / span * 100).toFixed(1)}%;width:${Math.max(0.8, (((x.end ?? (x.at + x.nm / 9.8 * HOUR)) - x.at) / span * 100)).toFixed(1)}%"></i>`).join('');
+    const warn = [...(E.errors ?? []).map(x => `⛔ ${x}`), ...(E.warnings ?? []).map(x => `△ ${x}`)];
+    const ticks = (() => {
+      const out = []; const d0 = Math.floor(t0 / DAY);
+      for (let k = 0; k <= Math.ceil(span / DAY); k++) {
+        const tt = (d0 + k) * DAY; if (tt < t0) continue;
+        const pos = (tt - t0) / span * 100; if (pos > 99) break;
+        const dt = gameDate(tt);
+        out.push(`<i style="left:${pos.toFixed(1)}%"></i><span style="left:${pos.toFixed(1)}%">${dt.getUTCMonth() + 1}/${dt.getUTCDate()}</span>`);
+      }
+      return out.join('');
+    })();
+    return `<div class="wh-axis">${ticks}</div>` +
+      `<div class="wh-time"><div class="wh-row head"><span class="wh-rowk">항해</span><div class="wh-track">${legs}</div></div>${rows}</div>` +
+      `<div class="wh-kpi">${[['총 운송', E.totalTons + 't'], ['최대 적재', `${E.maxOnboardTons}/${SHIP.cargoMax}t`],
+         ['예상 순익', `${E.estNet >= 0 ? '+' : '−'}${won(Math.abs(E.estNet))}원`], ['예상 기간', E.days.toFixed(1) + '일'],
+         ['공선', E.emptyNm.toFixed(0) + '해리']].map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` +
+      (warn.length ? `<div class="wh-warn">${warn.join('<br>')}</div>` : `<div class="wh-ok">용적·혼적·흘수·적기가 모두 맞는다.</div>`) +
+      `<div class="btnrow"><button data-wh="market">계약 더 고른다</button>` +
+      `<button data-wh="confirm" ${E.ok ? '' : 'disabled'} class="wh-confirm">이 계획으로 확정 · ${draftPlan.length}건</button></div>`;
+  }
+  const P = st.plan;
+  if (!P?.active) return `<div class="wh-empty">아직 항차가 없다. <b>항차 계획</b>에서 계약을 고르면 여기에 시간표가 그려진다.</div>`;
+  const rows = (P.items ?? []).map(x =>
+    `<div class="wh-row"><span class="wh-rowk">${CARGO[x.c.cargo].name}<em>${PORTS[x.c.from].name}→${PORTS[x.c.to].name}</em></span>` +
+    `<div class="wh-state">${x.delivered ? '양하 완료' : x.loaded ? '선적 중 · 운송 중' : '적재 대기'} · ${x.tons}t · ${x.hold ?? 1}번창</div></div>`).join('');
+  return `<div class="wh-time">${rows}</div><div class="wh-note">확정된 항차다. 남은 것은 적기 안에 대는 일뿐이다.</div>`;
+}
+function wharfGangBoard() {
+  const working = st.phase === '적재' || st.phase === '양하';
+  const two = wharfTwoHoldsBusy();
+  const cur = st.gangs ?? 'FOCUS';
+  const cards = Object.values(GANGS).map(g => {
+    const off = g.key === 'SPLIT' && !two;
+    return `<button class="wh-gang" data-wh="gang:${g.key}" aria-pressed="${cur === g.key}" ${off ? 'disabled' : ''}>` +
+      `<b>${g.name}</b><span>하역속도 ×${g.mult.toFixed(2)}${g.cost ? ` · 시간당 ${won(g.cost)}원` : ' · 추가비 없음'}</span>` +
+      `<small>${off ? '두 선창에 화물이 있어야 나눌 수 있다' : g.desc}</small></button>`;
+  }).join('');
+  const rate = working ? (() => { try {
+      const x = st.plan?.active ? planCurrentWork() : null, c = x?.c ?? st.contract;
+      if (!c) return null;
+      return portDischargeRate(sim.company, sim.ship.at, c.cargo, sim.ship.state.CARGOGR, 0, 0) * wharfGangFactor();
+    } catch (_) { return null; } })() : null;
+  return `<div class="wh-gangs">${cards}</div>` +
+    `<div class="wh-note">${working
+      ? `현재 하역률 약 ${rate ? rate.toFixed(0) : '—'}t/시간 · 허용정박 ${(st.laytimeLeft / HOUR).toFixed(0)}시간` +
+        `${st.night ? ' · 야간작업 중' : ''}<br>분산은 사람값이 들지만 체선이 붙기 시작하면 대개 싸게 먹힌다.`
+      : '하역이 시작되면 이 배치가 실제 작업속도에 적용된다.'}</div>` +
+    `<div class="btnrow"><button data-wh="night" aria-pressed="${!!st.night}">야간작업 ${st.night ? '중지' : '시작'}</button></div>`;
+}
+function wharfPaint() {
+  const box = $('wharf'); if (!box) return;
+  const on = wharfActive();
+  box.hidden = !on || wharfHidden;
+  $('wharf-show').hidden = !(on && wharfHidden);
+  if (box.hidden) return;
+  for (const b of $('wharf-tabs').children) b.setAttribute('aria-pressed', String(b.dataset.whv === wharfView));
+  const body = $('wharf-body');
+  if (wharfView === 'STOW') { $('wharf-cv').hidden = false; body.innerHTML = wharfStowStrip(); }
+  else if (wharfView === 'PLAN') { $('wharf-cv').hidden = true; body.innerHTML = wharfPlanBoard(); }
+  else { $('wharf-cv').hidden = false; body.innerHTML = wharfGangBoard(); }
+  if (!$('wharf-cv').hidden) wharfDraw();
+  $('wharf-title').textContent =
+    `${PORTS[sim.ship.at]?.name ?? ''} · ${st.phase}` +
+    (st.berthAt && st.phase.includes('대기') ? ` · 접안 ${clock(st.berthAt)}` : '');
+}
+let wharfHidden = false;
+function wharfBoot() {
+  wharfCv = $('wharf-cv'); wharfCx = wharfCv.getContext('2d');
+  wharfCv.addEventListener('pointerdown', (e) => { const i = wharfHit(e); wharfSel = (i === wharfSel ? -1 : i); wharfPaint(); });
+  $('wharf-tabs').onclick = (e) => { const b = e.target.closest('button[data-whv]'); if (b) { wharfView = b.dataset.whv; wharfPaint(); } };
+  $('wharf-hide').onclick = () => { wharfHidden = true; wharfPaint(); };
+  $('wharf-show').onclick = () => { wharfHidden = false; wharfPaint(); };
+  $('wharf-body').onclick = (e) => {
+    const b = e.target.closest('button[data-wh]'); if (!b || b.disabled) return;
+    const a = b.dataset.wh;
+    if (a.startsWith('gang:')) { st.gangs = a.slice(5); say(`하역반 — ${GANGS[st.gangs].name}`, 'b'); return wharfPaint(); }
+    if (a === 'night') { $('h-night').click(); return wharfPaint(); }
+    if (a === 'market') return $('h-market').click();
+    if (a === 'confirm') { const E = planEvaluation(); if (!E?.ok) return;
+      acceptPlanned(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold })), E); wharfSel = -1; return wharfPaint(); }
+    if (wharfSel < 0 || !wharfDrafting()) return;
+    editDraft(wharfSel, a === 'hold1' ? 'hold1' : a === 'hold2' ? 'hold2' : a);
+    if (a === 'remove') wharfSel = -1;
+    wharfPaint();
+  };
 }
 
 const WD = ['일', '월', '화', '수', '목', '금', '토'];
@@ -10362,6 +10729,7 @@ box.innerHTML=`<b>${PORTS[S.at].name} ${st.phase}</b> · 풍 ${String(deg).padSt
 $('practice-help').innerHTML=practiceHelpHTML();
 paintNavWatch();
 uiPaintNow();
+wharfPaint();
 if (document.querySelector('#tabs [data-page="company"]')?.getAttribute('aria-selected') === 'true') uiPaintCompany();
 paintAnalysis();
 renderNightDecision();
@@ -10467,7 +10835,8 @@ const ev = sim.queues[S.at].activeMult(sim.t);
 const w = sim.weather.atPort(S.at, sim.t);
 const rain = w.hs > 2.5 ? 2 : w.hs > 1.5 ? 1 : 0;
 const eff = ev.stop ? 0 : workEfficiency(sim.t, st.night) * ev.mult;
-if(eff>0)st.left-=portDischargeRate(sim.company,S.at,c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(st.phase==='적재'?contractLoadMultiplier(c):contractHandlingMultiplier(c))*crewWorkFactor(playerCrew(),'cargo')*eff*DT/3600; directCrewTick('WORK',DT,{night:!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H)}); if(st.voyageRisk&&!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H))st.voyageRisk.nightWorkH+=DT/HOUR;
+if(eff>0)st.left-=portDischargeRate(sim.company,S.at,c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(st.phase==='적재'?contractLoadMultiplier(c):contractHandlingMultiplier(c))*crewWorkFactor(playerCrew(),'cargo')*wharfGangFactor()*eff*DT/3600;
+if(eff>0){const gc=wharfGangCostPerHour()*DT/3600; if(gc){S.cash-=gc; st.acc.night+=gc;}} directCrewTick('WORK',DT,{night:!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H)}); if(st.voyageRisk&&!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H))st.voyageRisk.nightWorkH+=DT/HOUR;
 { const f = stepPort(S, DT, sim.bunkerPrice).fuelCost; st.acc.fuel += f; }
 if (eff > 0 && !(hourOfDay(sim.t) >= WORK.START_H && hourOfDay(sim.t) < WORK.END_H)) {
 S.cash -= WORK.NIGHT_SURCHARGE * DT / 3600;
@@ -10599,6 +10968,7 @@ coach('start');
 try{if(localStorage.getItem('TRAMP_LINE_1962_BOOT_NEW')==='1'){localStorage.removeItem('TRAMP_LINE_1962_BOOT_NEW');mainMenuSessionActive=true;$('main-menu').classList.remove('on');}}catch(_){}
 renderSaveSlots();
 uiBoot();
+wharfBoot();
 fit(); requestAnimationFrame(loop);
 </script>
 </body>
