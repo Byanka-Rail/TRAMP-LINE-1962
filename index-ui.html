@@ -568,6 +568,20 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .wh-warn{border-left:3px solid var(--magenta);padding:5px 7px;background:#f3ecef;margin-bottom:6px}
 .wh-ok{border-left:3px solid var(--line);padding:5px 7px;background:#eeece4;margin-bottom:6px}
 .wh-confirm{font-weight:700}
+.wh-char{font-family:var(--face-title);font-size:var(--fs-cap);margin-bottom:5px}
+.wh-gauges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:6px}
+.wh-g{background:var(--paper);padding:4px 6px 5px;min-width:0}
+.wh-g span{display:block;color:var(--ink2);font-size:var(--fs-micro)}
+.wh-g b{display:block;font-family:var(--face-num);font-size:var(--fs-cap);font-weight:700}
+.wh-g i{display:block;height:4px;border:1px solid var(--line);background:#ddd9ca;margin:3px 0 2px}
+.wh-g i em{display:block;height:100%;background:var(--ink)}
+.wh-g small{display:block;color:var(--ink2);font-size:var(--fs-micro);line-height:1.3}
+.wh-g.warn b{color:var(--magenta)}
+.wh-g.warn i em{background:var(--magenta);opacity:.6}
+.wh-g.bad b{color:var(--magenta)}
+.wh-g.bad i em{background:var(--magenta)}
+.wh-slots button{min-height:32px;font-size:var(--fs-micro);padding:0 3px}
+.wh-slots{margin-bottom:4px}
 .wh-gangs{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px}
 .wh-gang{display:block;text-align:left;padding:7px 8px;margin:0;border:1px solid var(--line);background:rgba(246,244,236,.6);min-height:64px}
 .wh-gang[aria-pressed="true"]{border-color:var(--magenta);background:#f3ecef;color:var(--ink)}
@@ -580,7 +594,8 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .wh-gang b{display:block;font-family:var(--face-title);font-size:var(--fs-cap);font-weight:400}
 .wh-gang span{display:block;font-family:var(--face-num);font-size:var(--fs-micro);margin-top:2px}
 .wh-gang small{display:block;color:var(--ink2);font-size:var(--fs-micro);margin-top:2px;line-height:1.35}
-@media(max-width:430px){.wh-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}.wh-row{grid-template-columns:78px minmax(0,1fr)}}
+@media(max-width:430px){.wh-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}.wh-row{grid-template-columns:78px minmax(0,1fr)}
+.wh-gauges{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* ── UI 시안 · 국면 중심 화면 ── */
 #todo{align-items:center}
 #act-row{display:flex;border-top:1px solid var(--rule)}
@@ -3681,14 +3696,14 @@ function normalizeShipCrew(ship,t=0){if(!ship)return null;ship.crewOps??={};cons
 function normalizeCargoClaims(co,t=0){co.cargoClaims??={history:[],premiumMult:1,lastReviewMonth:-1};const x=co.cargoClaims;x.history??=[];x.premiumMult=Number.isFinite(x.premiumMult)?x.premiumMult:1;x.lastReviewMonth??=-1;x.history=x.history.filter(h=>!h?.t||t-h.t<730*DAY);return x}
 function crewWorkFactor(c,field='cargo'){if(!c)return 1;const skill=c[field]??60,fat=c.fatigue??20;return fleetClamp(.88+(skill-50)/220-(Math.max(0,fat-45))/260,.72,1.13)}
 function playerCrew(){const s=(sim?.company?.ships??[]).find(x=>x.role==='PLAYER'&&!x.sold);return normalizeShipCrew(s,sim?.t??0)}
-function directCrewTick(mode,dt,ctx={}){const c=playerCrew();if(!c)return;let perDay=0;if(mode==='SEA')perDay=1.0+(st.eot==='FULL'?1.0:st.eot==='SERVICE'?.35:0)+((ctx.hs??0)>3.5 ? .75 : 0);else if(mode==='WORK')perDay=ctx.night?2.6:1.4;else perDay=-1.2;c.fatigue=fleetClamp(c.fatigue+perDay*dt/DAY,0,100);if(mode==='SEA'){c.deck=fleetClamp(c.deck+0.010*dt/DAY,20,95);c.engine=fleetClamp(c.engine+0.012*dt/DAY,20,95)}if(mode==='WORK')c.cargo=fleetClamp(c.cargo+0.014*dt/DAY,20,95)}
+function directCrewTick(mode,dt,ctx={}){const c=playerCrew();if(!c)return;let perDay=0;if(mode==='SEA')perDay=1.0+(st.eot==='FULL'?1.0:st.eot==='SERVICE'?.35:0)+((ctx.hs??0)>3.5 ? .75 : 0)+(()=>{try{return stowFatigueBonus()}catch(_){return 0}})();else if(mode==='WORK')perDay=ctx.night?2.6:1.4;else perDay=-1.2;c.fatigue=fleetClamp(c.fatigue+perDay*dt/DAY,0,100);if(mode==='SEA'){c.deck=fleetClamp(c.deck+0.010*dt/DAY,20,95);c.engine=fleetClamp(c.engine+0.012*dt/DAY,20,95)}if(mode==='WORK')c.cargo=fleetClamp(c.cargo+0.014*dt/DAY,20,95)}
 function crewContainFailure(fail,rng){const c=playerCrew();if(!c||!rng)return false;const skill=fail==='ENGINE'||fail==='COOLING'?c.engine:c.deck;const p=fleetClamp(.03+(skill-50)/220-(c.fatigue??0)/520,.02,.30);return rng.chance(p)}
 function cargoClaimTerms(co){normalizeFinance(co);const p=INSURANCE_PLANS[co.finance.insurance]??INSURANCE_PLANS.MINIMUM;return p.key==='FULL'?{coverage:.85,deduct:.06}:p.key==='STANDARD'?{coverage:.65,deduct:.10}:{coverage:.28,deduct:.18}}
 function cargoClaimBase(cargo){return {GENERAL:.008,FOOD:.011,GRAIN:.009,TIMBER:.014,MACHINE:.018,STEEL:.010,COAL:.006,ORE:.006,REEFER:.030,OIL:.012}[cargo]??.010}
 function claimLabelForCargo(cargo){return cargo==='REEFER'?'냉장상태 이상':cargo==='TIMBER'?'고박·취급 손상':cargo==='MACHINE'?'중량화물 취급손상':cargo==='FOOD'||cargo==='GRAIN'?'습손·오염 클레임':'화물 파손·오손 클레임'}
 function updateCargoPremium(co,t){const x=normalizeCargoClaims(co,t),recent=x.history.filter(h=>t-h.t<365*DAY),count=recent.length,gross=recent.reduce((a,h)=>a+(h.gross??0),0),scale=Math.max(18000,companyDwt(co)*3.2);x.premiumMult=fleetClamp(.94+count*.07+gross/scale*.28,.90,2.20);return x.premiumMult}
 function cargoLiabilityMonthlyPremium(co,t=0){const x=normalizeCargoClaims(co,t),p=INSURANCE_PLANS[normalizeFinance(co).insurance]??INSURANCE_PLANS.MINIMUM,tier=p.key==='FULL'?1.35:p.key==='STANDARD'?1:.58;return Math.round((320+companyDwt(co)*.035)*tier*x.premiumMult)}
-function assessCargoClaim(co,c,tons,t,ctx={}){const crew=ctx.crew??playerCrew(),state=ctx.state??sim.ship.state,maxHs=ctx.maxHs??0,handling=contractHandlingMultiplier(c),base=cargoClaimBase(c.cargo),fat=crew?.fatigue??20,skill=crew?.cargo??60,gear=state?.CARGOGR??80,hull=state?.HULL??85;let p=base*(1+Math.max(0,maxHs-2.0)*.18)*(1+Math.max(0,65-gear)/95)*(1+Math.max(0,65-hull)/120)*(1+Math.max(0,fat-45)/90)*(1+Math.max(0,1-handling)*.65)*(1-Math.max(-.15,Math.min(.28,(skill-55)/180)));p=fleetClamp(p,.002,.13);const rng=ctx.rng??sim.rng.crew;if(!rng||!rng.chance(p))return null;const freight=Math.max(1,(c.perTon??0)*tons),gross=Math.max(420,Math.round(freight*rng.range(.05,.18))),T=cargoClaimTerms(co),ded=Math.max(240,Math.round(gross*T.deduct)),insurance=Math.max(0,Math.round(Math.max(0,gross-ded)*T.coverage)),net=gross-insurance;const x=normalizeCargoClaims(co,t),row={t,cargo:c.cargo,from:c.from,to:c.to,tons,gross,insurance,net,label:claimLabelForCargo(c.cargo),shipId:ctx.shipId??'GEUMHA'};x.history.push(row);if(x.history.length>80)x.history.splice(0,x.history.length-80);const sh=co.organization?.shippers?.[shipperKey(c)];if(sh)sh.score=fleetClamp((sh.score??50)-Math.min(10,2+net/1200),0,100);updateCargoPremium(co,t);return row}
+function assessCargoClaim(co,c,tons,t,ctx={}){if(ctx.shipId==='GEUMHA'){try{ctx={...ctx,stowRisk:stowDamageBonus()}}catch(_){}}const crew=ctx.crew??playerCrew(),state=ctx.state??sim.ship.state,maxHs=ctx.maxHs??0,handling=contractHandlingMultiplier(c),base=cargoClaimBase(c.cargo),fat=crew?.fatigue??20,skill=crew?.cargo??60,gear=state?.CARGOGR??80,hull=state?.HULL??85;let p=base*(1+Math.max(0,maxHs-2.0)*.18)*(1+Math.max(0,65-gear)/95)*(1+Math.max(0,65-hull)/120)*(1+Math.max(0,fat-45)/90)*(1+Math.max(0,1-handling)*.65)*(1-Math.max(-.15,Math.min(.28,(skill-55)/180)));p=fleetClamp(p+(ctx.stowRisk??0),.002,.20);const rng=ctx.rng??sim.rng.crew;if(!rng||!rng.chance(p))return null;const freight=Math.max(1,(c.perTon??0)*tons),gross=Math.max(420,Math.round(freight*rng.range(.05,.18))),T=cargoClaimTerms(co),ded=Math.max(240,Math.round(gross*T.deduct)),insurance=Math.max(0,Math.round(Math.max(0,gross-ded)*T.coverage)),net=gross-insurance;const x=normalizeCargoClaims(co,t),row={t,cargo:c.cargo,from:c.from,to:c.to,tons,gross,insurance,net,label:claimLabelForCargo(c.cargo),shipId:ctx.shipId??'GEUMHA'};x.history.push(row);if(x.history.length>80)x.history.splice(0,x.history.length-80);const sh=co.organization?.shippers?.[shipperKey(c)];if(sh)sh.score=fleetClamp((sh.score??50)-Math.min(10,2+net/1200),0,100);updateCargoPremium(co,t);return row}
 function fleetCargoClaim(co,s,cap,P,monthIndex,t){if(!P?.items?.length)return null;const crew=normalizeShipCrew(s,t),worst=P.items.slice().sort((a,b)=>cargoClaimBase(b.c.cargo)-cargoClaimBase(a.c.cargo))[0];if(!worst)return null;const c=worst.c,skillK=1-Math.max(-.12,Math.min(.25,(crew.cargo-55)/180)),fatK=1+Math.max(0,crew.fatigue-45)/100,capK=1-Math.max(-.10,Math.min(.22,((cap?.maintenance??50)-50)/200)),p=fleetClamp(cargoClaimBase(c.cargo)*skillK*fatK*capK,.002,.11),roll=fleetWave(s.id,monthIndex,71);if(roll>=p)return null;const freight=Math.max(500,(c.perTon??1)*worst.tons),gross=Math.max(450,Math.round(freight*(.05+fleetWave(s.id,monthIndex,72)*.13))),T=cargoClaimTerms(co),ded=Math.max(240,Math.round(gross*T.deduct)),insurance=Math.max(0,Math.round(Math.max(0,gross-ded)*T.coverage)),net=gross-insurance,row={t,cargo:c.cargo,from:c.from,to:c.to,tons:worst.tons,gross,insurance,net,label:claimLabelForCargo(c.cargo),shipId:s.id};const x=normalizeCargoClaims(co,t);x.history.push(row);if(x.history.length>80)x.history.splice(0,x.history.length-80);const sh=co.organization?.shippers?.[shipperKey(c)];if(sh)sh.score=fleetClamp((sh.score??50)-Math.min(10,2+net/1200),0,100);x.premiumMult=updateCargoPremium(co,t);crew.claims=(crew.claims??0)+1;return row}
 
 function normalizeCompany(co, t=0) {
@@ -7816,6 +7831,7 @@ const list=mode==='LOAD'?st.plan.pendingLoad:st.plan.pendingUnload;
 if (mode==='LOAD') planApplyLaycanOutcome(list);
 st.phase=mode==='LOAD'?'적재':'양하';
 planSetWork(list,mode);
+if(mode!=='LOAD'){try{stowPayShifting(sim.ship.at)}catch(_){}}
 const x=planCurrentWork();
 say(`${mode==='LOAD'?'적재':'양하'} 시작 — ${x?`${CARGO[x.c.cargo].name} ${x.tons}t · ${x.hold}번창`:''}`, 'b');
 }
@@ -8006,7 +8022,7 @@ const x = planCurrentWork(); if (!x) return;
 const ev = sim.queues[S.at].activeMult(sim.t), w = sim.weather.atPort(S.at, sim.t);
 const rain = w.hs > 2.5 ? 2 : w.hs > 1.5 ? 1 : 0;
 const eff = ev.stop ? 0 : workEfficiency(sim.t, st.night) * ev.mult;
-if(eff>0)st.left-=portDischargeRate(sim.company,S.at,x.c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(P.workMode==='LOAD'?contractLoadMultiplier(x.c):contractHandlingMultiplier(x.c))*crewWorkFactor(playerCrew(),'cargo')*wharfGangFactor()*eff*DT/HOUR;
+if(eff>0)st.left-=portDischargeRate(sim.company,S.at,x.c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(P.workMode==='LOAD'?contractLoadMultiplier(x.c):contractHandlingMultiplier(x.c))*crewWorkFactor(playerCrew(),'cargo')*wharfGangFactor()*stowRateFactor()*eff*DT/HOUR;
 if(eff>0){const gc=wharfGangCostPerHour()*DT/HOUR; if(gc){S.cash-=gc; st.acc.night+=gc;}} directCrewTick('WORK',DT,{night:!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H)}); if(st.voyageRisk&&!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H))st.voyageRisk.nightWorkH+=DT/HOUR;
 { const f=stepPort(S, DT, sim.bunkerPrice).fuelCost; st.acc.fuel += f; }
 if (eff > 0 && !(hourOfDay(sim.t) >= WORK.START_H && hourOfDay(sim.t) < WORK.END_H)) {
@@ -8031,7 +8047,7 @@ const loss=speedLoss(w.hs,rel)*SHIP.seaLossMult;
 st.stw=Math.max(3.5,target*(1-Math.min(0.75,loss/100)));
 const cur=surfaceCurrent(q.lat,q.lon,sim.t);
 st.current=cur;st.currentAlong=cur.east*Math.cos(course)+cur.north*Math.sin(course);
-st.curV=Math.max(2.5,st.stw+st.currentAlong);
+st.curV=Math.max(2.5,st.stw+st.currentAlong-stowSpeedPenalty());
 const r=stepSea(S,DT,st.stw,w.hs,rel,sim.rng,sim.bunkerPrice);
 st.acc.fuel+=r.fuelCost;
 navTick(DT,{q,w,cur,along:st.currentAlong});
@@ -10310,6 +10326,191 @@ function uiBoot() {
   uiSwitch('now');
 }
 
+// ── 적부 퍼즐 · 칸 넷 · 축 셋 ──────────────────────────────────
+// 제약을 전부 만족시킬 수 없게 짠다. 용적을 채우면 배가 물러지고,
+// 무거운 것을 아래로 내리면 하역이 느려지고, 양하 순서를 맞추면 용적이 남는다.
+// 고르는 것은 최적해가 아니라 무엇을 포기할까이다.
+const SLOTS = [
+  { id:'1L', no:1, deck:'LOWER', name:'1번 하창',     short:'1하', cap:700, rate:0.82, kg:0.34 },
+  { id:'1T', no:1, deck:'TWEEN', name:'1번 상갑판창', short:'1상', cap:560, rate:1.26, kg:0.68 },
+  { id:'2L', no:2, deck:'LOWER', name:'2번 하창',     short:'2하', cap:620, rate:0.82, kg:0.35 },
+  { id:'2T', no:2, deck:'TWEEN', name:'2번 상갑판창', short:'2상', cap:520, rate:1.26, kg:0.70 },
+];
+const SLOT_BY_ID = Object.fromEntries(SLOTS.map(s => [s.id, s]));
+// 상갑판창 해치로는 들어가지 않는 화물 — 무겁고 덩어리가 크다
+const LOWER_ONLY = new Set(['MACHINE']);   // 중량물만 — 상갑판 해치에 들어가지 않는다
+const STAB = {
+  lightW: 600, lightKg: 0.42,   // 경하중량과 그 무게중심
+  kmFrac: 0.615, depth: 6.4,    // 메타센터 높이와 형심
+  good: [0.55, 1.10],           // 적정 GM 구간 (m)
+  tender: 0.35, stiff: 1.55,
+};
+const SHIFT_COST_PER_TON = 14;
+
+function slotOf(it) {
+  if (it.slot && SLOT_BY_ID[it.slot]) {
+    if (LOWER_ONLY.has(it.c.cargo) && SLOT_BY_ID[it.slot].deck === 'TWEEN') return it.slot[0] + 'L';
+    return it.slot;
+  }
+  return (it.hold === 2 ? '2' : '1') + 'L';
+}
+function slotSet(it, id) {
+  if (!SLOT_BY_ID[id]) return false;
+  if (LOWER_ONLY.has(it.c.cargo) && SLOT_BY_ID[id].deck === 'TWEEN') return false;
+  it.slot = id; it.hold = SLOT_BY_ID[id].no;
+  return true;
+}
+// 칸별 상태 — 용적과 쌓인 순서
+function stowState(items) {
+  const map = Object.fromEntries(SLOTS.map(s => [s.id, { ...s, used:0, stack:[] }]));
+  for (const it of items) {
+    const b = map[slotOf(it)];
+    b.used += it.tons * CARGO[it.c.cargo].sf;
+    b.stack.push(it);                       // 나중에 넣은 것이 위
+  }
+  for (const b of Object.values(map)) { b.pct = b.used / b.cap * 100; b.over = b.used > b.cap + 1e-6; }
+  return map;
+}
+// 복원성 — 무게를 어디에 두었는가
+function stowStability(items) {
+  let w = STAB.lightW, m = STAB.lightW * STAB.lightKg;
+  for (const it of items) { const s = SLOT_BY_ID[slotOf(it)]; w += it.tons; m += it.tons * s.kg; }
+  const kg = m / Math.max(1, w);
+  const gm = (STAB.kmFrac - kg) * STAB.depth;
+  let level, note, damage = 0, speed = 0, fatigue = 0;
+  if (gm < STAB.tender) { level = 'bad'; note = '물러서 위험하다 — 큰 물결 하나에 눕는다';
+    damage = 0.055; speed = 0.9; fatigue = 1.9; }
+  else if (gm < STAB.good[0]) { level = 'warn'; note = '무르다 — 롤링이 크고 느리다';
+    damage = 0.022; speed = 0.4; fatigue = 1.0; }
+  else if (gm <= STAB.good[1]) { level = 'good'; note = '알맞다'; }
+  else if (gm <= STAB.stiff) { level = 'warn'; note = '뻣뻣하다 — 되돌아오는 힘이 세다';
+    damage = 0.018; speed = 0.2; fatigue = 0.8; }
+  else { level = 'bad'; note = '급동요 — 짧고 사나운 롤링에 화물이 상한다';
+    damage = 0.050; speed = 0.5; fatigue = 1.7; }
+  return { gm, kg, level, note, damage, speed, fatigue };
+}
+// 양하 순서 — 나중 항 화물이 먼저 항 화물을 덮고 있으면 재취급이다
+function stowRouteOrder(items) {
+  const seen = [];
+  for (const it of items) if (!seen.includes(it.c.to)) seen.push(it.c.to);
+  try {
+    const E = (typeof lastPlanEval === 'object' && lastPlanEval) ? lastPlanEval : null;
+    const route = E?.route ?? st.plan?.route ?? null;
+    if (route?.length) {
+      const r = route.filter(p => seen.includes(p));
+      for (const p of seen) if (!r.includes(p)) r.push(p);
+      return r;
+    }
+  } catch (_) {}
+  return seen;
+}
+function stowShifting(items) {
+  const order = stowRouteOrder(items);
+  const rank = (p) => { const i = order.indexOf(p); return i < 0 ? 99 : i; };
+  const map = stowState(items);
+  const rows = [];
+  for (const b of Object.values(map)) {
+    // 같은 칸 안 — 위에 얹힌 것이 더 나중 항이면 그것을 들어내야 한다
+    for (let i = 0; i < b.stack.length; i++) for (let j = i + 1; j < b.stack.length; j++) {
+      const below = b.stack[i], above = b.stack[j];
+      if (rank(above.c.to) > rank(below.c.to))
+        rows.push({ port:below.c.to, tons:above.tons, why:`${b.name} 안에서 ${CARGO[above.c.cargo].name}을 들어낸다` });
+    }
+  }
+  // 상갑판창이 같은 번호 하창의 뚜껑이다
+  for (const no of [1, 2]) {
+    const T = map[no + 'T'], L = map[no + 'L'];
+    for (const low of L.stack) for (const up of T.stack) {
+      if (rank(up.c.to) > rank(low.c.to))
+        rows.push({ port:low.c.to, tons:up.tons, why:`${T.name}을 열어야 ${L.name}에 닿는다` });
+    }
+  }
+  const tons = rows.reduce((a, x) => a + x.tons, 0);
+  return { rows, tons, cost:Math.round(tons * SHIFT_COST_PER_TON), order };
+}
+// 하역 속도 — 지금 작업 중인 화물이 어느 칸에 있는가
+function stowWorkRate(items) {
+  if (!items.length) return 1;
+  let w = 0, r = 0;
+  for (const it of items) { const s = SLOT_BY_ID[slotOf(it)]; w += it.tons; r += it.tons * s.rate; }
+  return w ? r / w : 1;
+}
+function stowSnapshot(items) {
+  const use = items ?? wharfItems();
+  const map = stowState(use), stab = stowStability(use), shift = stowShifting(use);
+  const over = Object.values(map).filter(b => b.over);
+  const volPct = Object.values(map).reduce((a, b) => a + b.used, 0) /
+                 SLOTS.reduce((a, s) => a + s.cap, 0) * 100;
+  return { map, stab, shift, over, volPct, rate:stowWorkRate(use), items:use };
+}
+// 지금 판의 성격을 한 줄로 — 무엇을 얻고 무엇을 버렸는지
+function stowCharacter(S) {
+  const bits = [];
+  if (S.over.length) bits.push('용적이 넘친다');
+  if (S.stab.level === 'bad') bits.push(S.stab.gm < STAB.tender ? '배가 위험하게 무르다' : '배가 사납게 뻣뻣하다');
+  else if (S.stab.level === 'warn') bits.push(S.stab.gm < STAB.good[0] ? '조금 무르다' : '조금 뻣뻣하다');
+  if (S.shift.tons > 0) bits.push(`재취급 ${S.shift.tons}t`);
+  if (S.rate >= 1.12) bits.push('하역은 빠르다');
+  else if (S.rate <= 0.9) bits.push('하역이 느리다');
+  if (S.volPct >= 88) bits.push('선복을 거의 다 썼다');
+  else if (S.volPct <= 55) bits.push('선복이 남는다');
+  return bits.length ? bits.join(' · ') : '무난하다';
+}
+
+// ── 결과 배선 ────────────────────────────────────────────────
+function stowLive() {
+  // 항해·하역 중 실제로 배에 있는 화물
+  const P = st.plan;
+  if (P?.active) return (P.items ?? []).filter(x => x.loaded && !x.delivered);
+  if (st.contract && st.tons && (st.phase === '항해' || st.phase === '양하' || st.phase === '양하 대기'))
+    return [{ c:st.contract, tons:st.tons, hold:1, slot:st.stowSolo ?? '1L' }];
+  return [];
+}
+let stowCacheKey = '', stowCacheVal = null;
+function stowCurrent() {
+  const live = stowLive();
+  const key = live.map(x => `${x.c.id}:${x.tons}:${slotOf(x)}`).join('|');
+  if (key !== stowCacheKey) { stowCacheKey = key; stowCacheVal = stowSnapshot(live); }
+  return stowCacheVal;
+}
+function stowSpeedPenalty() {           // 항해 중 대지속력 손실 (kn)
+  if (!stowLive().length) return 0;
+  return stowCurrent().stab.speed;
+}
+function stowDamageBonus() {            // 화물 클레임 확률 가산
+  if (!stowLive().length) return 0;
+  return stowCurrent().stab.damage;
+}
+function stowFatigueBonus() {           // 항해 중 하루당 피로 가산
+  if (!stowLive().length) return 0;
+  return stowCurrent().stab.fatigue;
+}
+function stowRateFactor() {             // 하역 속도 배수
+  const P = st.plan;
+  let items = [];
+  if (P?.active) items = (P.items ?? []).filter(x => !x.delivered);
+  else if (st.contract) items = [{ c:st.contract, tons:st.tons, hold:1, slot:st.stowSolo ?? '1L' }];
+  if (!items.length) return 1;
+  return stowWorkRate(items);
+}
+// 양하를 시작할 때, 덮고 있던 화물을 들어낸 값을 치른다
+function stowPayShifting(port) {
+  const P = st.plan;
+  const items = P?.active ? (P.items ?? []).filter(x => !x.delivered) : [];
+  if (items.length < 2) return;
+  const S = stowShifting(items);
+  const here = S.rows.filter(r => r.port === port);
+  if (!here.length) return;
+  const tons = here.reduce((a, x) => a + x.tons, 0);
+  const rate = Math.max(1, portDischargeRate(sim.company, port, items[0].c.cargo, sim.ship.state.CARGOGR, 0, 0));
+  const hours = tons / rate / 16 * 24;
+  const cost = Math.round(tons * SHIFT_COST_PER_TON);
+  st.left = (st.left ?? 0) + tons * 0.55;            // 들어냈다 다시 싣는 몫
+  sim.ship.cash -= cost; st.acc.night = (st.acc.night ?? 0) + cost;
+  say(`【재취급】 ${PORTS[port].name} — 위에 얹힌 ${tons}t을 들어냈다가 다시 싣는다 · ` +
+      `약 ${hours.toFixed(1)}시간 · ${won(cost)}원`, 'm');
+}
+
 // ── 부두 화면 ─────────────────────────────────────────────────
 // 정박·적재·양하 동안에는 해도에 볼 것이 없다. 그 자리에 배의 단면을 놓는다.
 //  · 적부  — 화물을 부피만큼의 블록으로 선창에 넣는다. 용적·혼적·양하역순·흘수가 규칙이다.
@@ -10331,11 +10532,11 @@ function wharfActive() { return st.phase !== '항해' && !st.leg; }
 function wharfDrafting() { return draftPlan && draftPlan.length > 0 && !st.plan?.active; }
 // 지금 그릴 화물 목록 — 계획을 짜는 중이면 초안, 아니면 실제 적재분
 function wharfItems() {
-  if (wharfDrafting()) return draftPlan.map((x, i) => ({ i, c:x.c, tons:x.tons, hold:x.hold, live:false }));
+  if (wharfDrafting()) return draftPlan.map((x, i) => ({ i, c:x.c, tons:x.tons, hold:x.hold, slot:x.slot, live:false }));
   const P = st.plan;
   if (P?.active) return (P.items ?? []).filter(x => !x.delivered)
-    .map((x, i) => ({ i, c:x.c, tons:x.tons, hold:x.hold ?? 1, live:true, loaded:x.loaded }));
-  if (st.contract && st.tons) return [{ i:0, c:st.contract, tons:st.tons, hold:1, live:true, loaded:true }];
+    .map((x, i) => ({ i, c:x.c, tons:x.tons, hold:x.hold ?? 1, slot:x.slot, live:true, loaded:x.loaded }));
+  if (st.contract && st.tons) return [{ i:0, c:st.contract, tons:st.tons, hold:1, slot:st.stowSolo, live:true, loaded:true }];
   return [];
 }
 function wharfGangFactor() {
@@ -10356,18 +10557,23 @@ function wharfGangCostPerHour() {
 function wharfLayout() {
   const W = wharfCv.width / (window.devicePixelRatio || 1), H = wharfCv.height / (window.devicePixelRatio || 1);
   const pad = Math.max(14, W * 0.05);
-  const x0 = pad + 24, x1 = W - pad;
-  const deck = H * 0.30, keel = H * 0.74;
-  const caps = SHIP.holds, tot = caps.reduce((a, b) => a + b, 0);
-  // 선수(오른쪽)에 기관실과 선교를 두고 나머지를 선창으로 나눈다
-  const holdArea = (x1 - x0) * 0.70, hx0 = x0 + (x1 - x0) * 0.10;
+  const x0 = pad + 26, x1 = W - pad;
+  const deck = H * 0.26, keel = H * 0.76;
+  const tween = deck + (keel - deck) * 0.40;          // 상갑판창과 하창의 경계
+  const byNo = {};
+  for (const s of SLOTS) (byNo[s.no] ??= []).push(s);
+  const nos = Object.keys(byNo).map(Number).sort();
+  const totals = nos.map(n => byNo[n].reduce((a, s) => a + s.cap, 0));
+  const tot = totals.reduce((a, b) => a + b, 0);
+  const area = (x1 - x0) * 0.68, hx0 = x0 + (x1 - x0) * 0.09;
   const boxes = []; let cx = hx0;
-  for (let i = 0; i < caps.length; i++) {
-    const w = holdArea * (caps[i] / tot);
-    boxes.push({ hold:i + 1, cap:caps[i], x:cx, w:w - 4, y:deck + 6, h:keel - deck - 6 });
-    cx += w;
-  }
-  return { W, H, x0, x1, deck, keel, boxes };
+  nos.forEach((n, i) => {
+    const w = area * (totals[i] / tot) - 5;
+    boxes.push({ slot:byNo[n].find(s => s.deck === 'TWEEN'), x:cx, w, y:deck + 4, h:tween - deck - 4 });
+    boxes.push({ slot:byNo[n].find(s => s.deck === 'LOWER'), x:cx, w, y:tween + 2, h:keel - tween - 4 });
+    cx += w + 5;
+  });
+  return { W, H, x0, x1, deck, keel, tween, boxes };
 }
 function wharfDrawHull(L) {
   const cx = wharfCx, { x0, x1, deck, keel } = L;
@@ -10389,7 +10595,11 @@ function wharfDrawHull(L) {
   cx.strokeRect(x1 - (x1 - x0) * 0.24, deck - 22, (x1 - x0) * 0.13, 22);
   cx.fillStyle = '#2b2a26';
   cx.fillRect(x1 - (x1 - x0) * 0.185, deck - 34, 7, 14);
+  cx.globalAlpha = .45; cx.beginPath();
+  cx.moveTo(x0 + 8, L.tween); cx.lineTo(x1 - 14, L.tween); cx.stroke(); cx.globalAlpha = 1;
+  const seen = new Set();
   for (const b of L.boxes) {
+    if (seen.has(b.slot.no)) continue; seen.add(b.slot.no);
     cx.beginPath(); cx.moveTo(b.x + b.w / 2, deck); cx.lineTo(b.x + b.w / 2, deck - 26); cx.stroke();
     cx.beginPath(); cx.moveTo(b.x + b.w / 2, deck - 24); cx.lineTo(b.x + b.w / 2 + 16, deck - 8); cx.stroke();
   }
@@ -10426,48 +10636,41 @@ function wharfDraw() {
               (deep ? ' · 여유 없음' : ''), L.x0, L.H - 4);
   cx.restore();
 
-  const holds = planHoldState(items.map(x => ({ c:x.c, tons:x.tons, hold:x.hold })), SHIP);
+  const SS = stowSnapshot(items);
   const hits = [];
   for (const b of L.boxes) {
-    const h = holds.find(x => x.hold === b.hold);
+    const st8 = SS.map[b.slot.id];
     cx.save();
-    cx.strokeStyle = h.ok ? '#8c8878' : '#b0006e'; cx.lineWidth = h.ok ? 1 : 1.8;
-    cx.setLineDash(h.barrier ? [4, 3] : []);
+    cx.strokeStyle = st8.over ? '#b0006e' : '#8c8878'; cx.lineWidth = st8.over ? 1.8 : 1;
+    cx.setLineDash(b.slot.deck === 'TWEEN' ? [3, 2] : []);
     cx.strokeRect(b.x, b.y, b.w, b.h); cx.setLineDash([]);
-    // 블록을 밑에서부터 쌓는다 — 부피 비례
     let y = b.y + b.h;
-    const mine = items.filter(x => x.hold === b.hold);
-    for (const it of mine) {
+    for (const it of st8.stack) {
       const vol = it.tons * CARGO[it.c.cargo].sf;
-      const hh = Math.max(6, b.h * Math.min(1, vol / b.cap));
+      const hh = Math.max(5, b.h * Math.min(1, vol / b.slot.cap));
       y -= hh;
       cx.fillStyle = WHARF_COLOR[it.c.cargo] ?? '#7a766a';
-      cx.globalAlpha = it.live && it.loaded === false ? 0.35 : 1;
-      cx.fillRect(b.x + 2, y, b.w - 4, hh - 1);
-      cx.globalAlpha = 1;
+      cx.globalAlpha = it.live && it.loaded === false ? 0.34 : 1;
+      cx.fillRect(b.x + 2, y, b.w - 4, hh - 1); cx.globalAlpha = 1;
       if (wharfSel === it.i) { cx.strokeStyle = '#b0006e'; cx.lineWidth = 2.2; cx.strokeRect(b.x + 2, y, b.w - 4, hh - 1); }
-      if (hh >= 15) {
-        cx.fillStyle = '#f6f4ec'; cx.font = '600 10px ui-monospace, monospace'; cx.textBaseline = 'middle';
+      if (hh >= 13) {
+        cx.fillStyle = '#f6f4ec'; cx.font = '600 9px ui-monospace, monospace'; cx.textBaseline = 'middle';
         const left = `${CARGO[it.c.cargo].name} ${it.tons}t`, to = PORTS[it.c.to]?.name ?? '';
         const lw = cx.measureText(left).width, tw = cx.measureText(to).width;
-        if (lw + tw + 20 <= b.w) {
-          cx.fillText(left, b.x + 6, y + hh / 2);
-          cx.textAlign = 'right'; cx.fillText(to, b.x + b.w - 6, y + hh / 2); cx.textAlign = 'left';
-        } else if (lw + 12 <= b.w) {
-          cx.fillText(left, b.x + 6, y + hh / 2);
-        } else {
-          cx.fillText(`${it.tons}t`, b.x + 6, y + hh / 2);
-        }
+        if (lw + tw + 18 <= b.w) { cx.fillText(left, b.x + 5, y + hh / 2);
+          cx.textAlign = 'right'; cx.fillText(to, b.x + b.w - 5, y + hh / 2); cx.textAlign = 'left'; }
+        else if (lw + 10 <= b.w) cx.fillText(left, b.x + 5, y + hh / 2);
+        else cx.fillText(`${it.tons}t`, b.x + 5, y + hh / 2);
       }
       hits.push({ i:it.i, x:b.x + 2, y, w:b.w - 4, h:hh });
     }
-    // 용적 표시
-    cx.fillStyle = h.ok ? '#6c6a61' : '#b0006e';
-    cx.font = '10px ui-monospace, monospace'; cx.textBaseline = 'top';
-    cx.fillText(`${b.hold}번창 ${Math.round(h.used)}/${b.cap}㎥`, b.x, b.y + b.h + 5);
-    if (!h.ok && h.incompatible.length) {
-      cx.fillText(`혼적 불가 ${h.incompatible.map(p => `${CARGO[p[0]].name}·${CARGO[p[1]].name}`)[0]}`, b.x, b.y + b.h + 18);
-    } else if (h.barrier) cx.fillText('격벽 필요 · 유효용적 −8%', b.x, b.y + b.h + 18);
+    // 칸 이름과 용적은 칸 안 왼쪽 위에
+    cx.font = '8px ui-monospace, monospace'; cx.textBaseline = 'top'; cx.textAlign = 'left';
+    const tag = `${b.slot.short} ${Math.round(st8.used)}/${b.slot.cap}`;
+    const tw2 = cx.measureText(tag).width + 6;
+    cx.fillStyle = 'rgba(246,244,236,.88)'; cx.fillRect(b.x + 1, b.y + 1, Math.min(tw2, b.w - 2), 11);
+    cx.fillStyle = st8.over ? '#b0006e' : '#6c6a61';
+    cx.fillText(tag, b.x + 4, b.y + 2);
     cx.restore();
   }
   wharfCv.__hits = hits;
@@ -10480,26 +10683,51 @@ function wharfHit(ev) {
 }
 
 // ── 아래 띠 ──────────────────────────────────────────────────
+function wharfSiblings(it) { return (draftPlan ?? []).filter(x => x.c.id === it.c.id); }
+function wharfGauge(k, txt, pct, level, sub) {
+  return `<div class="wh-g ${level ?? ''}"><span>${k}</span><b>${txt}</b>` +
+         `<i><em style="width:${Math.max(0, Math.min(100, pct)).toFixed(0)}%"></em></i>` +
+         `<small>${sub}</small></div>`;
+}
 function wharfStowStrip() {
   const items = wharfItems();
   if (!items.length) {
     return `<div class="wh-empty">선창이 비어 있다. <b>항차 계획</b>에서 화물을 골라 넣으십시오.</div>`;
   }
+  const S = stowSnapshot(items);
+  const gmPct = Math.max(0, Math.min(100, S.stab.gm / 2.0 * 100));
+  const gauges =
+    wharfGauge('용적', `${S.volPct.toFixed(0)}%`, S.volPct, S.over.length ? 'bad' : S.volPct > 88 ? 'warn' : '',
+      S.over.length ? `${S.over.map(b => b.name).join('·')} 초과` : `남은 ${Math.round(SLOTS.reduce((a, x) => a + x.cap, 0) - Object.values(S.map).reduce((a, b) => a + b.used, 0))}㎥`) +
+    wharfGauge('복원성 GM', `${S.stab.gm.toFixed(2)}m`, gmPct, S.stab.level === 'good' ? '' : S.stab.level,
+      S.stab.note + (S.stab.damage ? ` · 손상 +${(S.stab.damage * 100).toFixed(1)}%p · 속력 −${S.stab.speed.toFixed(1)}kn` : '')) +
+    wharfGauge('재취급', S.shift.tons ? `${S.shift.tons}t` : '없음', S.shift.tons ? Math.min(100, S.shift.tons / 6) : 0,
+      S.shift.tons > 260 ? 'bad' : S.shift.tons ? 'warn' : '',
+      S.shift.tons ? `${won(S.shift.cost)}원 · ${[...new Set(S.shift.rows.map(r => PORTS[r.port]?.name))].join('·')}에서 들어낸다` : '덮인 화물이 없다') +
+    wharfGauge('하역', `×${S.rate.toFixed(2)}`, (S.rate - 0.8) / 0.5 * 100, S.rate <= 0.88 ? 'warn' : '',
+      S.rate >= 1.1 ? '상갑판창이 많아 빠르다' : S.rate <= 0.9 ? '하창이 많아 느리다' : '보통');
+  const head = `<div class="wh-char">${stowCharacter(S)}</div><div class="wh-gauges">${gauges}</div>`;
   const it = items.find(x => x.i === wharfSel);
-  if (!it) return `<div class="wh-empty">블록을 누르면 그 화물을 옮기거나 양을 바꿀 수 있다.</div>`;
-  const c = it.c, vol = Math.round(it.tons * CARGO[c.cargo].sf);
+  if (!it) return head + `<div class="wh-empty">블록을 누르면 그 화물을 다른 칸으로 옮기거나 양을 바꿀 수 있다.</div>`;
+  const c = it.c, vol = Math.round(it.tons * CARGO[c.cargo].sf), cur = slotOf(it);
   const editable = wharfDrafting();
-  return `<div class="wh-sel"><b>${CARGO[c.cargo].name} ${it.tons}t</b>` +
-    `<span>${PORTS[c.from].name}→${PORTS[c.to].name} · ${vol}㎥ · 적재계수 ${CARGO[c.cargo].sf.toFixed(2)} · ${it.hold}번창</span></div>` +
+  const low = LOWER_ONLY.has(c.cargo);
+  const slots = SLOTS.map(sl => {
+    const off = low && sl.deck === 'TWEEN';
+    return `<button data-wh="slot:${sl.id}" aria-pressed="${cur === sl.id}" ${off || !editable ? 'disabled' : ''}>${sl.name}</button>`;
+  }).join('');
+  return head +
+    `<div class="wh-sel"><b>${CARGO[c.cargo].name} ${it.tons}t</b>` +
+    `<span>${PORTS[c.from].name}→${PORTS[c.to].name} · ${vol}㎥ · 적재계수 ${CARGO[c.cargo].sf.toFixed(2)} · ${SLOT_BY_ID[cur].name}` +
+    (low ? ' · 상갑판창 해치에 들어가지 않는다' : '') + `</span></div>` +
+    `<div class="btnrow wh-slots">${slots}</div>` +
     (editable
-      ? `<div class="btnrow wh-acts">
-           <button data-wh="hold1" aria-pressed="${it.hold === 1}">1번창</button>
-           <button data-wh="hold2" aria-pressed="${it.hold === 2}">2번창</button>
-           <button data-wh="minus">−50t</button><button data-wh="plus">+50t</button>
-           <button data-wh="up">↑</button><button data-wh="down">↓</button>
-           <button data-wh="remove">제외</button>
-         </div>`
-      : `<div class="wh-note">항차가 확정된 뒤에는 적부를 바꿀 수 없다. 다음 계획에서 고르십시오.</div>`);
+      ? `<div class="btnrow wh-acts"><button data-wh="minus">−50t</button><button data-wh="plus">+50t</button>` +
+        `<button data-wh="up">먼저 싣기</button><button data-wh="down">나중 싣기</button></div>` +
+        `<div class="btnrow wh-acts"><button data-wh="split" ${it.tons >= 200 ? '' : 'disabled'}>두 칸에 나눠 싣기</button>` +
+        `<button data-wh="merge" ${wharfSiblings(it).length > 1 ? '' : 'disabled'}>한 칸으로 합치기</button>` +
+        `<button data-wh="remove">제외</button></div>`
+      : `<div class="wh-note">항차가 확정된 뒤에는 적부를 바꿀 수 없다.</div>`);
 }
 function wharfPlanBoard() {
   if (wharfDrafting()) {
@@ -10596,10 +10824,49 @@ function wharfBoot() {
     const a = b.dataset.wh;
     if (a.startsWith('gang:')) { st.gangs = a.slice(5); say(`하역반 — ${GANGS[st.gangs].name}`, 'b'); return wharfPaint(); }
     if (a === 'night') { $('h-night').click(); return wharfPaint(); }
+    if (a === 'split' || a === 'merge') {
+      if (wharfSel < 0 || !wharfDrafting()) return;
+      const it = draftPlan[wharfSel]; if (!it) return;
+      if (a === 'split') {
+        if (it.tons < 200) { say('나누기에는 200톤은 있어야 한다', 'm'); return; }
+        if (draftPlan.length >= PLAN_MAX_FIXTURES) { say('한 항차에 묶을 수 있는 몫을 다 썼다', 'm'); return; }
+        const half = Math.max(PLAN_MIN_TONS, Math.round(it.tons / 2 / 50) * 50);
+        const rest = it.tons - half; if (rest < PLAN_MIN_TONS) { say('나누면 한쪽이 너무 작다', 'm'); return; }
+        const now = stowState(draftPlan);
+        const spare = SLOTS.filter(sl => !(LOWER_ONLY.has(it.c.cargo) && sl.deck === 'TWEEN'))
+          .map(sl => ({ sl, free: sl.cap - (now[sl.id]?.used ?? 0) }))
+          .sort((a, b) => b.free - a.free)[0];
+        const part = { c:it.c, tons:rest, hold:it.hold, slot:spare ? spare.sl.id : slotOf(it) };
+        part.hold = SLOT_BY_ID[part.slot].no;
+        it.tons = half;
+        draftPlan.splice(wharfSel + 1, 0, part);
+        say(`${CARGO[it.c.cargo].name}을 ${half}t / ${rest}t 으로 나눠 싣는다`, '');
+      } else {
+        const sibs = wharfSiblings(it);
+        if (sibs.length < 2) return;
+        const total = sibs.reduce((a, x) => a + x.tons, 0);
+        const keep = sibs[0]; keep.tons = total;
+        for (let k = draftPlan.length - 1; k >= 0; k--) if (draftPlan[k] !== keep && draftPlan[k].c.id === it.c.id) draftPlan.splice(k, 1);
+        wharfSel = draftPlan.indexOf(keep);
+        say(`${CARGO[it.c.cargo].name} ${total}t 을 한 칸으로 합쳤다`, '');
+      }
+      renderDraftPlan(); return wharfPaint();
+    }
+    if (a.startsWith('slot:')) {
+      if (wharfSel < 0 || !wharfDrafting()) return;
+      const it = draftPlan[wharfSel]; if (!it) return;
+      if (!slotSet(it, a.slice(5))) { say('이 화물은 그 칸에 들어가지 않는다', 'm'); return; }
+      renderDraftPlan(); return wharfPaint();
+    }
     if (a === 'market') return $('h-market').click();
     if (a === 'confirm') { const E = planEvaluation(); if (!E?.ok) return;
-      acceptPlanned(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold })), E); wharfSel = -1; return wharfPaint(); }
+      acceptPlanned(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold, slot:slotOf(x) })), E); wharfSel = -1; return wharfPaint(); }
     if (wharfSel < 0 || !wharfDrafting()) return;
+    if (a === 'plus') {
+      const it = draftPlan[wharfSel];
+      const others = wharfSiblings(it).reduce((s, x) => s + (x === it ? 0 : x.tons), 0);
+      if (it.tons + PLAN_STEP_TONS + others > it.c.tons) { say('계약 물량을 넘는다', 'm'); return; }
+    }
     editDraft(wharfSel, a === 'hold1' ? 'hold1' : a === 'hold2' ? 'hold2' : a);
     if (a === 'remove') wharfSel = -1;
     wharfPaint();
@@ -10835,7 +11102,7 @@ const ev = sim.queues[S.at].activeMult(sim.t);
 const w = sim.weather.atPort(S.at, sim.t);
 const rain = w.hs > 2.5 ? 2 : w.hs > 1.5 ? 1 : 0;
 const eff = ev.stop ? 0 : workEfficiency(sim.t, st.night) * ev.mult;
-if(eff>0)st.left-=portDischargeRate(sim.company,S.at,c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(st.phase==='적재'?contractLoadMultiplier(c):contractHandlingMultiplier(c))*crewWorkFactor(playerCrew(),'cargo')*wharfGangFactor()*eff*DT/3600;
+if(eff>0)st.left-=portDischargeRate(sim.company,S.at,c.cargo,ev.gear??S.state.CARGOGR,w.hs,rain)*(st.phase==='적재'?contractLoadMultiplier(c):contractHandlingMultiplier(c))*crewWorkFactor(playerCrew(),'cargo')*wharfGangFactor()*stowRateFactor()*eff*DT/3600;
 if(eff>0){const gc=wharfGangCostPerHour()*DT/3600; if(gc){S.cash-=gc; st.acc.night+=gc;}} directCrewTick('WORK',DT,{night:!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H)}); if(st.voyageRisk&&!(hourOfDay(sim.t)>=WORK.START_H&&hourOfDay(sim.t)<WORK.END_H))st.voyageRisk.nightWorkH+=DT/HOUR;
 { const f = stepPort(S, DT, sim.bunkerPrice).fuelCost; st.acc.fuel += f; }
 if (eff > 0 && !(hourOfDay(sim.t) >= WORK.START_H && hourOfDay(sim.t) < WORK.END_H)) {
@@ -10901,7 +11168,7 @@ const loss = speedLoss(w.hs, rel) * SHIP.seaLossMult;
 st.stw=Math.max(3.5,target*(1-Math.min(0.75,loss/100)));
 const cur=surfaceCurrent(q.lat,q.lon,sim.t);
 st.current=cur;st.currentAlong=cur.east*Math.cos(course)+cur.north*Math.sin(course);
-st.curV=Math.max(2.5,st.stw+st.currentAlong);
+st.curV=Math.max(2.5,st.stw+st.currentAlong-stowSpeedPenalty());
 const r = stepSea(S, DT, st.stw, w.hs, rel, sim.rng, sim.bunkerPrice);
 st.acc.fuel += r.fuelCost;
 navTick(DT,{q,w,cur,along:st.currentAlong});
@@ -10959,7 +11226,8 @@ DIP_ACTIONS, normalizeDiplomacy, syncDiplomacy, diplomacyStatus, diplomacyAction
 LOAN_PRODUCTS, INSURANCE_PLANS, CHARTER_OFFERS, normalizeFinance, financeSnapshot, financeRating, financeCreditLimit, loanTerms, takeLoan, repayLoan, charterIn, charterPrepareRedelivery, charterReturnEarly, charterEarlyReturnQuote, charterRedeliveryQuote, normalizeCorporateDeals, corporateDealsMonthlyTick, buyLiquidationAuction, acquireRivalCompany, setInsurancePlan, financeMonthlyTick, openFinance,
 PE_BANKS, PE_OFFICES, PE_ACTIONS, PE_RIVAL_PATRON, normalizePoliticalEconomy, peAgenda, peRefreshFinanceTerms, peSetMainBank, peInstitutionAction, peLegacyLobbyEffect, peMonthlyTick, peSnapshot, openPoliticalEconomy,
 MG_FACTIONS, MG_ROLES, EXECUTIVE_POOL, normalizeManagement, managementSnapshot, managementFactionSnapshot, availableExecutiveCandidates, promoteFleetChief, demoteFleetChief, hireExecutive, dismissExecutive, supportManagementFaction, managementMonthlyTick, openManagement,
-get asking() { return asking; },
+get asking() { return asking; }, get draftPlan(){ return draftPlan; },
+SLOTS, SLOT_BY_ID, slotOf, slotSet, stowSnapshot, stowStability, stowShifting, stowCharacter, wharfItems, wharfPaint,
 navState, navLegReset, navTick, navOpportunities, navDoFix, navAskFix, navDriftCorrect, navProgressFactor, navPenalty, navNearestLand, navLoranChain, navSunAlt, paintNavWatch, navToggleMode, navBuyLoran,
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
 say('금하호 · 1,600 재화중량톤 · 부산 정박 중', 'b');
