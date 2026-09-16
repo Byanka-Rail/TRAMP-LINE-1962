@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.8.0 국면 중심 화면 · 부두</title>
+<title>TRAMP LINE 1962 · v3.8.1</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -688,7 +688,7 @@ background:rgba(246,244,236,.72)}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.8.0</div>
+      <div class="mm-version">CONTENT v3.8.1</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -918,7 +918,7 @@ background:rgba(246,244,236,.72)}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.0 · 국면 중심 화면 · 부두</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.1 · 운임·원가 재보정</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1132,7 +1132,7 @@ background:rgba(246,244,236,.72)}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.8.0';
+const TRAMP_LINE_CONTENT_VERSION='3.8.1';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -1817,7 +1817,12 @@ return {portId,price,maxLift,supply:b.supply,index:b.index,note:b.note};
 }
 
 const FREIGHT_K = 21.9;
+// 거리와 무관하게 톤마다 드는 하역·취급 원가. 실제 트램프의 최소운임에 해당한다.
+const FREIGHT_HANDLING = 20;
+const freightBase = (d, cargo) => (FREIGHT_HANDLING + FREIGHT_K * Math.pow(Math.max(1, d) / 100, .75)) * CARGO[cargo].fr;
 const DEMURRAGE_RATE = 0.08;
+// 입출항 1회당 도선·예선 표준 비용. 계획 화면이 이만큼은 미리 잡아 둔다.
+const PILOTAGE_ALLOWANCE = 700;
 const WEAR = {
 ENGINE:  { sea:0.35, port:0.02, loadExp:2.5 },
 COOLING: { sea:0.30, port:0.02, loadExp:1.8 },
@@ -2477,7 +2482,7 @@ let cargo=weightedPick(r,CARGO_IDS,c=>{if(c==='OIL'&&!TRADE[from]?.produce?.incl
 const destScope=cargo==='OIL'?scope.filter(p=>TRADE[p]?.consume?.includes('OIL')):scope;const to=weightedPick(r,destScope,p=>{const need=this.tradeWeight(p,cargo,'DEMAND',t),short=Math.max(.2,1.55-(this.stock?.[p]?.[cargo]??1)),lane=(1/Math.pow(1+dist(from,p)/1200,.18))*oceanLaneWeight(from,p,cargo);return .03+need*short*lane});if(!to)return null;
 const d=dist(from,to),serviceClass=contractClassForDistance(d),classCfg=CONTRACT_CLASSES[serviceClass],fs=this.tradeWeight(from,cargo,'SUPPLY',t),fd=this.tradeWeight(to,cargo,'DEMAND',t),vol=Math.max(.78,Math.min(1.18,.92+.07*(fs+fd-2)+.05*((this.stock[from][cargo]??1)-(this.stock[to][cargo]??1))));
 const tons=worldContractLot(from,cargo,d,r,vol,t),flowPremium=Math.max(.88,Math.min(1.20,1+.07*(fd-fs)+.035*((1-(this.stock[to][cargo]??1))+((this.stock[from][cargo]??1)-1))));
-const perTon=FREIGHT_K*Math.pow(d/100,.75)*CARGO[cargo].fr*this.supplyFactor(from,to,cargo)*flowPremium*classCfg.premium*(this.rivals&&this._pressure?this._pressure(this.rivals,from,to,cargo):1)*r.range(.90,1.12)*shippingEconomyIndexForCargo(this,cargo);
+const perTon=freightBase(d,cargo)*this.supplyFactor(from,to,cargo)*flowPremium*classCfg.premium*(this.rivals&&this._pressure?this._pressure(this.rivals,from,to,cargo):1)*r.range(.90,1.12)*shippingEconomyIndexForCargo(this,cargo);
 const manifest=pickManifest(from,cargo,r),bb=makeBreakbulkHandling(cargo,r),rl=dischargeRate(from,cargo,100,0,0)*bb.handlingFactor,rd=dischargeRate(to,cargo,100,0,0)*bb.handlingFactor;
 const elapsed=((tons/rl)/16*24+(tons/rd)/16*24)*HOUR*(6/7);
 const slackRoll = r.next();
@@ -2506,7 +2511,7 @@ const r = this.rng.npc, taken = [];
 this.posted[at] = this.posted[at].filter((c) => {
 if(c.heldBy==='PLAYER'&&c.warehouseHold&&c.holdUntil>t)return true;
 if (c.expires <= t) return false;
-const attract = Math.min(2, c.perTon / (FREIGHT_K * Math.pow(c.d / 100, 0.75) * CARGO[c.cargo].fr));
+const attract = Math.min(2, c.perTon / freightBase(c.d, c.cargo));
 if (r.chance(1 - Math.pow(1 - 0.04 * attract, hours))) {
 taken.push({ c, by: rivals && whoTook ? whoTook(rivals, c, r) : null });
 return false;
@@ -2536,7 +2541,7 @@ function shippingMarketIntel(market,portId,t,co,rivals){
 const q=shippingIntelQuality(co,portId),list=(market?.posted?.[portId]??[]).filter(c=>c.expires>t),publicList=list.filter(c=>!(c.heldBy==='PLAYER'&&c.warehouseHold));
 const postedTons=publicList.reduce((a,c)=>a+(c.tons??0),0),baseTons=(POST_BASE[portId]??4)*SHIP.cargoMax*.66;
 const nowIdx=outwardCargoIndex(market,portId,t),i14=outwardCargoIndex(market,portId,t+14*DAY),i45=outwardCargoIndex(market,portId,t+45*DAY),comp=portCompetingTonnage(rivals,portId,t),compScale=comp.total/Math.max(900,baseTons*.75);
-const rateSamples=publicList.map(c=>c.perTon/Math.max(1,FREIGHT_K*Math.pow(c.d/100,.75)*CARGO[c.cargo].fr)).filter(Number.isFinite),rateIdx=rateSamples.length?rateSamples.reduce((a,b)=>a+b,0)/rateSamples.length:market.cycle;
+const rateSamples=publicList.map(c=>c.perTon/Math.max(1,freightBase(c.d,c.cargo))).filter(Number.isFinite),rateIdx=rateSamples.length?rateSamples.reduce((a,b)=>a+b,0)/rateSamples.length:market.cycle;
 const noisy=(ratio,h)=>{const n=(tlHash01(`${portId}|${Math.floor(t/(7*DAY))}|${h}`)-.5)*2*(1-q)*.32;return Math.max(.55,Math.min(1.65,ratio*(1+n)));};
 const net14=noisy((i14/Math.max(.2,nowIdx))/(1+.16*compScale),14),net45=noisy((i45/Math.max(.2,nowIdx))/(1+.10*compScale),45),inquiryScore=.58*(postedTons/Math.max(1,baseTons))+.42*nowIdx;
 const inquiry=inquiryScore>1.42?'매우 많음':inquiryScore>1.12?'많음':inquiryScore>.84?'보통':'적음',tonnage=compScale>1.25?'과잉':compScale>.78?'많음':compScale>.38?'보통':'부족',rate=rateIdx>1.18?'강세':rateIdx>1.05?'견조':rateIdx>.93?'보합':rateIdx>.82?'약세':'침체',outlook=v=>v>1.15?'↑↑ 증가':v>1.04?'↑ 증가':v<.84?'↓↓ 감소':v<.96?'↓ 감소':'→ 보합';
@@ -2845,7 +2850,8 @@ schedule.push({kind:'sea', from:leg.from, to:leg.to, at, end:cursor, nm, tons});
 const revenue = sum(items, (x)=>x.c.perTon * x.tons * boon);
 const seaCostDay = Number.isFinite(opts.seaDayCost) ? opts.seaDayCost : seaDay(bunkerPrice);
 const portCostDay = Number.isFinite(opts.portDayCost) ? opts.portDayCost : portDay(bunkerPrice);
-const estCost = opts.bunkerMarket&&ship===SHIP ? (seaH/24*(COST.crewDay+COST.foodDay+COST.maintDay+COST.insDay)+portElapsedH/24*(COST.crewDay+COST.foodDay+COST.maintDay+COST.insDay)+bunkerFuelEst+portElapsedH/24*SHIP.auxFuel*bunkerPlanningPrice(opts.company,from,t,bunkerPrice)+portFees) : (seaH / 24 * seaCostDay + portElapsedH / 24 * portCostDay + portFees);
+const pilotageEst = (ship===SHIP) ? (flow.calls.length + 1) * PILOTAGE_ALLOWANCE : 0;
+const estCost = pilotageEst + (opts.bunkerMarket&&ship===SHIP ? (seaH/24*(COST.crewDay+COST.foodDay+COST.maintDay+COST.insDay)+portElapsedH/24*(COST.crewDay+COST.foodDay+COST.maintDay+COST.insDay)+bunkerFuelEst+portElapsedH/24*SHIP.auxFuel*bunkerPlanningPrice(opts.company,from,t,bunkerPrice)+portFees) : (seaH / 24 * seaCostDay + portElapsedH / 24 * portCostDay + portFees));
 const estNet = revenue - estCost;
 const days = Math.max(0.01, (cursor - t) / DAY);
 const totalTons = sum(items, (x)=>x.tons);
@@ -3177,7 +3183,7 @@ function warehouseReleaseContract(co,market,portId,id,tSec){const w=warehouseEnt
 function warehouseTakeContract(co,c){if(!c)return {taken:false};const pid=c.warehousePort??c.from,w=warehouseEntry(co,pid);const i=w?.bookings?.findIndex(x=>x.id===c.id)??-1;if(i<0&&!c.warehouseHold)return {taken:false};const book=i>=0?w.bookings.splice(i,1)[0]:null;c.warehousePrepared=true;c.warehouseHold=false;c.heldBy=null;c.holdUntil=0;return {taken:true,book,portId:pid};}
 function warehouseLoadMultiplier(c){return (c?.warehousePrepared||(c?.warehouseHold&&c?.heldBy==='PLAYER'))?1+(PORT_OPS_CONTRACTS.WAREHOUSE.loadBoost??0):1;}
 function warehouseHousekeeping(co,market,tSec){normalizeStrategy(co);const expired=[];for(const [pid,b] of Object.entries(co?.strategy?.branches??{})){normalizePortOpsEntry(b);const keep=[];for(const book of b.warehouse.bookings){if((book.holdUntil??Infinity)>tSec){keep.push(book);continue;}const c=warehouseFindContract(market,pid,book.id);if(c){market.posted[pid]=market.posted[pid].filter(x=>x.id!==book.id);}expired.push({portId:pid,book});}b.warehouse.bookings=keep;}return expired;}
-function warehouseGenerateTransship(co,market,source,deliveredTons,tSec,reach=Infinity,portFilter=null){if(!source||source.transshipDepth>=1||source.cargo==='OIL')return null;const hub=source.to;if(!warehouseEnabled(co,hub))return null;const free=warehouseAvailableTons(co,hub);if(free<WAREHOUSE_RULES.transshipMin)return null;const ratio=PORT_OPS_CONTRACTS.WAREHOUSE.transshipRatio??0.28;let tons=Math.round(Math.min(WAREHOUSE_RULES.transshipMax,deliveredTons*ratio,free)/50)*50;if(tons<WAREHOUSE_RULES.transshipMin)return null;const preferred=PORT_IDS.filter(p=>p!==hub&&p!==source.from&&(!portFilter||portFilter(p))&&dist(hub,p)<=reach&&TRADE[p]?.consume?.includes(source.cargo));const fallback=PORT_IDS.filter(p=>p!==hub&&p!==source.from&&(!portFilter||portFilter(p))&&dist(hub,p)<=reach);const pool=(preferred.length?preferred:fallback).sort((a,b)=>(market.stock?.[a]?.[source.cargo]??1)-(market.stock?.[b]?.[source.cargo]??1)||dist(hub,a)-dist(hub,b)||a.localeCompare(b));const to=pool[0];if(!to)return null;const d=dist(hub,to),perTon=FREIGHT_K*Math.pow(d/100,.75)*CARGO[source.cargo].fr*market.supplyFactor(hub,to,source.cargo)*WAREHOUSE_RULES.transshipPremium;const freight=Math.round(perTon*tons),rl=dischargeRate(hub,source.cargo,100,0,0),rd=dischargeRate(to,source.cargo,100,0,0),elapsed=((tons/rl)/16*24+(tons/rd)/16*24)*HOUR*(6/7);const c={id:`WH-${hub}-${to}-${Math.floor(tSec)}-${String(source.id).slice(-6)}`,from:hub,to,cargo:source.cargo,tons,d,perTon:freight/tons,freight,laycanStart:tSec+6*HOUR,laycanEnd:tSec+8*DAY,laytime:elapsed*1.22,slack:1.22,wibon:false,demurrage:freight*DEMURRAGE_RATE,despatch:freight*DEMURRAGE_RATE*.5,credit:88,posted:tSec,expires:tSec+9*DAY,originalExpires:tSec+9*DAY,transship:true,transshipDepth:(source.transshipDepth??0)+1,heldBy:'PLAYER',warehouseHold:true,warehousePrepared:false,warehousePort:hub,holdUntil:tSec+9*DAY,manifest:source.manifest??CARGO[source.cargo].name,packageType:source.packageType??BREAKBULK_PACK[source.cargo]?.pack??'재래화물',handlingFactor:contractHandlingMultiplier(source),flowRegion:PORT_FLOW_REGION[hub],hint:'지점 창고가 도착 화물 일부를 분류·집하해 만든 환적연계 계약'};market.posted[hub]??=[];market.posted[hub].push(c);const w=warehouseEntry(co,hub);w.bookings.push({id:c.id,tons:c.tons,fee:0,reservedAt:tSec,holdUntil:c.holdUntil,from:c.from,to:c.to,cargo:c.cargo,source:'TRANS'});w.transshipGenerated=(w.transshipGenerated??0)+1;portOpsRecord(co,hub,{transshipTons:c.tons});return c;}
+function warehouseGenerateTransship(co,market,source,deliveredTons,tSec,reach=Infinity,portFilter=null){if(!source||source.transshipDepth>=1||source.cargo==='OIL')return null;const hub=source.to;if(!warehouseEnabled(co,hub))return null;const free=warehouseAvailableTons(co,hub);if(free<WAREHOUSE_RULES.transshipMin)return null;const ratio=PORT_OPS_CONTRACTS.WAREHOUSE.transshipRatio??0.28;let tons=Math.round(Math.min(WAREHOUSE_RULES.transshipMax,deliveredTons*ratio,free)/50)*50;if(tons<WAREHOUSE_RULES.transshipMin)return null;const preferred=PORT_IDS.filter(p=>p!==hub&&p!==source.from&&(!portFilter||portFilter(p))&&dist(hub,p)<=reach&&TRADE[p]?.consume?.includes(source.cargo));const fallback=PORT_IDS.filter(p=>p!==hub&&p!==source.from&&(!portFilter||portFilter(p))&&dist(hub,p)<=reach);const pool=(preferred.length?preferred:fallback).sort((a,b)=>(market.stock?.[a]?.[source.cargo]??1)-(market.stock?.[b]?.[source.cargo]??1)||dist(hub,a)-dist(hub,b)||a.localeCompare(b));const to=pool[0];if(!to)return null;const d=dist(hub,to),perTon=freightBase(d,source.cargo)*market.supplyFactor(hub,to,source.cargo)*WAREHOUSE_RULES.transshipPremium;const freight=Math.round(perTon*tons),rl=dischargeRate(hub,source.cargo,100,0,0),rd=dischargeRate(to,source.cargo,100,0,0),elapsed=((tons/rl)/16*24+(tons/rd)/16*24)*HOUR*(6/7);const c={id:`WH-${hub}-${to}-${Math.floor(tSec)}-${String(source.id).slice(-6)}`,from:hub,to,cargo:source.cargo,tons,d,perTon:freight/tons,freight,laycanStart:tSec+6*HOUR,laycanEnd:tSec+8*DAY,laytime:elapsed*1.22,slack:1.22,wibon:false,demurrage:freight*DEMURRAGE_RATE,despatch:freight*DEMURRAGE_RATE*.5,credit:88,posted:tSec,expires:tSec+9*DAY,originalExpires:tSec+9*DAY,transship:true,transshipDepth:(source.transshipDepth??0)+1,heldBy:'PLAYER',warehouseHold:true,warehousePrepared:false,warehousePort:hub,holdUntil:tSec+9*DAY,manifest:source.manifest??CARGO[source.cargo].name,packageType:source.packageType??BREAKBULK_PACK[source.cargo]?.pack??'재래화물',handlingFactor:contractHandlingMultiplier(source),flowRegion:PORT_FLOW_REGION[hub],hint:'지점 창고가 도착 화물 일부를 분류·집하해 만든 환적연계 계약'};market.posted[hub]??=[];market.posted[hub].push(c);const w=warehouseEntry(co,hub);w.bookings.push({id:c.id,tons:c.tons,fee:0,reservedAt:tSec,holdUntil:c.holdUntil,from:c.from,to:c.to,cargo:c.cargo,source:'TRANS'});w.transshipGenerated=(w.transshipGenerated??0)+1;portOpsRecord(co,hub,{transshipTons:c.tons});return c;}
 // ── end v3.4.7 ───────────────────────────────────────────────────────────────
 function setPortOpsPolicy(co,portId,key) {
 normalizeStrategy(co); const b=co?.strategy?.branches?.[portId]; if(!b||(b.level??0)<1)return {ok:false,reason:'대리점 이상 거점이 필요하다'};
@@ -5434,7 +5440,7 @@ const add=(c)=>{(out[c.from]??=[]).push(c);return c;};
 const workH=(p,cargo,tons)=>tons/Math.max(1,dischargeRate(p,cargo,100,0,0))/16*24;
 const mk=(tag,from,to,cargo,tons,opt={})=>{
 const d=dist(from,to);
-const base=FREIGHT_K*Math.pow(Math.max(40,d)/100,0.75)*CARGO[cargo].fr;
+const base=freightBase(Math.max(40,d),cargo);
 const eduMult=({2:1.72,3:1.50,4:1.58,5:1.72,6:1.52,7:1.58,8:2.22,9:1.50,10:1.72}[n]??1.55);
 const perTon=base*(opt.rate??1.05)*eduMult;
 const freight=Math.round(perTon*tons);
@@ -8968,7 +8974,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.8.0 · 국면 중심 화면 · 부두(적부·항차·하역) · 항해당직 · 월드맵 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.8.1 · 운임에 톤당 취급료 · 도선료 인하 · 예상 순익 정정 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -9616,7 +9622,7 @@ const LORAN_CHAINS = [
   { name:'서유럽 체인',     la0:35, la1:62, lo0:-15, lo1:15 },
 ];
 const LORAN_PRICE = 21000;
-const TUG_FEE = 750, PILOT_FEE = 900;
+const TUG_FEE = 320, PILOT_FEE = 380;
 
 function navState() {
   st.nav ??= {};
@@ -10331,10 +10337,10 @@ function uiBoot() {
 // 무거운 것을 아래로 내리면 하역이 느려지고, 양하 순서를 맞추면 용적이 남는다.
 // 고르는 것은 최적해가 아니라 무엇을 포기할까이다.
 const SLOTS = [
-  { id:'1L', no:1, deck:'LOWER', name:'1번 하창',     short:'1하', cap:700, rate:0.82, kg:0.34 },
-  { id:'1T', no:1, deck:'TWEEN', name:'1번 상갑판창', short:'1상', cap:560, rate:1.26, kg:0.68 },
-  { id:'2L', no:2, deck:'LOWER', name:'2번 하창',     short:'2하', cap:620, rate:0.82, kg:0.35 },
-  { id:'2T', no:2, deck:'TWEEN', name:'2번 상갑판창', short:'2상', cap:520, rate:1.26, kg:0.70 },
+  { id:'1L', no:1, deck:'LOWER', name:'1번 하창',     short:'1하', cap:700, rate:0.88, kg:0.34 },
+  { id:'1T', no:1, deck:'TWEEN', name:'1번 상갑판창', short:'1상', cap:560, rate:1.14, kg:0.68 },
+  { id:'2L', no:2, deck:'LOWER', name:'2번 하창',     short:'2하', cap:620, rate:0.88, kg:0.35 },
+  { id:'2T', no:2, deck:'TWEEN', name:'2번 상갑판창', short:'2상', cap:520, rate:1.14, kg:0.70 },
 ];
 const SLOT_BY_ID = Object.fromEntries(SLOTS.map(s => [s.id, s]));
 // 상갑판창 해치로는 들어가지 않는 화물 — 무겁고 덩어리가 크다
@@ -10352,7 +10358,10 @@ function slotOf(it) {
     if (LOWER_ONLY.has(it.c.cargo) && SLOT_BY_ID[it.slot].deck === 'TWEEN') return it.slot[0] + 'L';
     return it.slot;
   }
-  return (it.hold === 2 ? '2' : '1') + 'L';
+  // 정하지 않았으면 밀도에 맞는 칸에 놓는다 — 무거운 것은 아래, 가벼운 것은 위
+  const no = it.hold === 2 ? '2' : '1';
+  if (LOWER_ONLY.has(it.c.cargo)) return no + 'L';
+  return no + (CARGO[it.c.cargo].sf >= 1.35 ? 'T' : 'L');
 }
 function slotSet(it, id) {
   if (!SLOT_BY_ID[id]) return false;
