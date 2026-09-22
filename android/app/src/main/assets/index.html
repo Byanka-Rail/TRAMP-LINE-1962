@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.8.6</title>
+<title>TRAMP LINE 1962 · v3.9.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -221,6 +221,10 @@ display: flex; justify-content: space-between; align-items: center; gap: 10px;
 .sheetbox h2 { margin: 0; font-family: var(--face-title); font-size: var(--fs-lg);
 font-weight: 400; letter-spacing: .05em; }
 .sheetbox header button { flex: 0 0 auto; padding: 0 14px; }
+#optsheet { z-index: 210; background: rgba(23,31,33,.92); }                 /* 메인 메뉴(200) 위 */
+#optsheet header .btnrow { display:flex; gap:6px; }
+#os-host > section { padding: 10px 14px 16px; }
+#os-host #open-main-menu { display:none; }  /* 시트 머리에 같은 단추가 있다 */
 .stamp { font-family: var(--face-title); font-size: var(--fs-cap); color: var(--magenta);
 border: 1.5px solid var(--magenta); padding: 2px 8px; letter-spacing: .25em;
 transform: rotate(-4deg); flex: none; }
@@ -583,6 +587,28 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #wharf-show{position:absolute;right:8px;top:8px;z-index:5;min-height:30px;padding:0 10px;flex:0 0 auto;
   border:1px solid var(--rule);background:var(--paper)}
 #wharf-show[hidden]{display:none}
+/* ── 해도 위 항차 ── */
+#mapbar{position:absolute;left:8px;top:8px;z-index:6;display:flex;align-items:center;gap:4px;max-width:calc(100% - 16px);
+  background:var(--paper);border:1px solid var(--rule);padding:3px 4px 3px 9px;font-size:var(--fs-cap)}
+#mapbar[hidden]{display:none}
+#mapbar-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#mapbar-t b{font-family:var(--face-num)} #mapbar-t b.neg{color:var(--magenta)}
+#mapbar button{min-height:26px;padding:0 8px;flex:0 0 auto}
+#mapcard{position:absolute;left:8px;right:8px;bottom:8px;z-index:7;background:var(--paper);border:1px solid var(--ink);
+  box-shadow:0 8px 24px rgba(0,0,0,.28);padding:8px 10px 9px;max-height:min(62%,420px);overflow-y:auto;font-size:var(--fs-cap)}
+#mapcard[hidden]{display:none}
+#vs-body{padding:8px 12px 12px;font-size:var(--fs-cap)} #vs-body .btnrow{margin-top:8px} #vs-body button.good{border-color:var(--ink);border-width:2px}
+.mc-head{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.mc-head b{font-size:var(--fs-base)} .mc-head span{color:var(--ink2)}
+.mc-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(56px,auto);gap:8px;align-items:baseline;padding:3px 0;border-top:1px solid var(--line)}
+.mc-row b{font-family:var(--face-num);font-size:var(--fs-base)} .mc-row b.neg{color:var(--magenta)}
+.mc-row em{font-style:normal;font-family:var(--face-num);text-align:right} .mc-row em.up{color:#2a6b3c} .mc-row em.dn{color:var(--magenta)}
+.mc-row.dim{color:var(--ink2)} .mc-row.dim b{font-size:var(--fs-cap)}
+.mc-item{display:flex;align-items:center;gap:6px;padding:3px 0;border-top:1px solid var(--line)}
+.mc-item span{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-item em{font-style:normal;color:var(--ink2)} .mc-item button{min-height:24px;padding:0 8px}
+.mc-no{color:var(--magenta);padding:4px 0}
+#mapcard .btnrow{margin-top:7px} #mapcard button.good{border-color:var(--ink);border-width:2px}
 .wh-canvaswrap{flex:0 0 auto;padding:6px 8px 0;display:flex;justify-content:center}
 #wharf-cv{display:block}
 #wharf-cv[hidden]{display:none}
@@ -734,7 +760,7 @@ background:rgba(246,244,236,.72)}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.8.6</div>
+      <div class="mm-version">CONTENT v3.9.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -797,6 +823,8 @@ background:rgba(246,244,236,.72)}
       <div id="wharf-body" class="wh-body"></div>
     </section>
     <button id="wharf-show" hidden>부두 화면</button>
+    <div id="mapbar" hidden><span id="mapbar-t"></span><button id="mapbar-list">목록</button><button id="mapbar-x" aria-label="항차 닫기">×</button></div>
+    <div id="mapcard" hidden></div>
     <aside id="port-approach" aria-live="polite" aria-hidden="true">
       <div class="pa-head"><b id="pa-title">항만 접근</b><button id="pa-close" aria-label="항만 풍경 닫기">×</button></div>
       <canvas id="pa-canvas" width="200" height="112"></canvas>
@@ -968,7 +996,7 @@ background:rgba(246,244,236,.72)}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.6 · 옵션 화면 복구 · 앱 갱신 진단</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.9.0 · 해도 위 항차 계획 · 선을 눌러 상세</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1011,6 +1039,18 @@ background:rgba(246,244,236,.72)}
     <p id="co-b"></p>
     <div id="co-todo"></div>
     <div id="co-term"></div>
+  </div>
+</div>
+<div id="voysheet" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="vs-h">
+  <div class="sheetbox">
+    <header><h2 id="vs-h">항차 상세</h2><button id="vs-close">닫기</button></header>
+    <div id="vs-body"></div>
+  </div>
+</div>
+<div id="optsheet" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="os-h">
+  <div class="sheetbox">
+    <header><h2 id="os-h">옵션</h2><div class="btnrow"><button id="os-close">게임으로</button><button id="os-menu">메인 화면</button></div></header>
+    <div id="os-host"></div>
   </div>
 </div>
 <div id="market" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="mk-h">
@@ -1179,7 +1219,7 @@ background:rgba(246,244,236,.72)}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.8.6';
+const TRAMP_LINE_CONTENT_VERSION='3.9.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -5573,10 +5613,10 @@ hint:'거리는 더 멀지만 강재는 촘촘히 실린다. 운임과 비용을
 const STEPS = [
 {id:'OPEN',at:'start',title:'금하호, 부산',
 body:'1,600 재화중량톤 화물선 한 척. 선원 열넷. 현금 12만원.\n해운회사는 화물을 받아 나르고 운임을 받는다. 첫 항차에서는 그 가장 작은 한 바퀴만 익힌다.',
-todo:'화면 아래 「항차 계획」 단추를 누르십시오.',term:'DWT'},
+todo:'화면 아래 「항차를 짠다」를 누르면 해도에 실을 수 있는 계약이 선으로 뜬다. 선을 눌러 남는 돈을 보고 계획에 넣으십시오.',term:'DWT'},
 {id:'MARKET',at:'market',title:'1/10 · 선복과 첫 계약',
 body:'첫 항차는 계약 한 건이면 충분하다. 계약량보다 실제 적재 가능한 양, 항로거리, 예상 순익을 먼저 본다.\n지금은 복수계약이나 정치·금융을 고민하지 않아도 된다.',
-todo:'계약 하나를 계획에 올리고 「이 계획으로 계약」을 누르십시오.',term:'DWT'},
+todo:'계약 하나를 계획에 넣고 「이 계획으로 확정」을 누르십시오.',term:'DWT'},
 {id:'LOAD',at:'load',title:'화물을 싣는다',
 body:'금하호의 재화중량 1,600 DWT 전부가 화물은 아니다. 연료·청수·식량도 무게를 차지해 실화물 한계는 더 작다. 적재가 끝나면 그 무게를 안고 항해한다.',
 todo:'시간 배속을 올려 적재를 진행하십시오.',term:'DWT'},
@@ -6891,7 +6931,7 @@ fit(); drawSea(); drawGraticule();
 LON_OFF = 0; drawMarineWeather();
 for (const o of wraps()) {
 LON_OFF = o;
-drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); drawTrack(st);
+drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); drawTrack(st); drawPlanLines();
 }
 LON_OFF = 0;
 drawNight(); drawNightLights(); drawRose(); drawScaleBar();
@@ -7373,7 +7413,7 @@ if ($('market').classList.contains('on')) return '계약을 계획에 올리고 
 if ($('debrief').classList.contains('on')) return '복기를 읽고 닫으십시오';
 if (asking) return '판단이 필요합니다 — 고르십시오';
 if (!c) return auto.on ? '다음 계약을 수배하는 중입니다'
-: '「항차 계획」 단추를 눌러 다음 항차를 짜십시오';
+: '「항차를 짠다」를 눌러 다음 항차를 짜십시오';
 const stop=st.paused?'[정지] ':'';
 switch (st.phase) {
 case '적재 대기': case '양하 대기': {
@@ -7394,7 +7434,7 @@ case '항해': {
 const d = dist(...st.leg), left = Math.max(0, d - st.done);
 return `${stop}${PORTS[st.leg[1]].name}까지 ${left.toFixed(0)}해리 · 「기관 명령」으로 속력을 조절합니다`;
 }
-default: return st.paused ? '멈춰 있습니다 — 「시간 배속」에서 흐르는 속도를 고르십시오' : '「항차 계획」에서 다음 항차를 짜십시오';
+default: return st.paused ? '멈춰 있습니다 — 「시간 배속」에서 흐르는 속도를 고르십시오' : '「항차를 짠다」에서 다음 항차를 짜십시오';
 }
 }
 function currentWorkContext() {
@@ -7731,14 +7771,15 @@ const id=b.dataset.cid, c=Object.values(sim.market.posted??{}).flat().find(x=>x.
 };
 function openMarket() {
 if (st.contract) { say('항차 진행 중에는 새 항차를 짤 수 없다', 'm'); return; }
-draftPlan = [];
+if (st.plan?.active) draftPlan = [];
 renderDraftPlan();
 openMarketList(true);
 $('market').classList.add('on');
 resetScrollable($('market'),true); resetScrollable($('pages'));
 $('mk-close').focus();
 }
-const closeMarket = () => { $('market').classList.remove('on'); $('h-market').focus(); resetScrollable($('pages')); };
+const closeMarket = () => { $('market').classList.remove('on'); $('h-market').focus(); resetScrollable($('pages'));
+  if (mapPlanMode) { if (draftPlan.length && !mapSel) mapSel = { kind:'draft' }; mapPlanRefresh(); mapBarPaint(); } };
 function mark(kind, did, notDid, basis) {
 st.marks.push({ t: sim.t, kind, did, notDid, basis, then: null });
 }
@@ -9063,7 +9104,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.8.6 · 옵션 화면 복구 · 앱 갱신 진단 메시지 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.9.0 · 해도 위 항차 계획 · 옵션 전용 화면 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -9198,7 +9239,9 @@ function handleSlotClick(e){
   const del=e.target.closest('[data-slot-delete]');if(del){deleteSlot(+del.dataset.slotDelete);}
 }
 function openMainMenu(fromGame=true){
-  mainMenuReturnPaused=st.paused;st.paused=true;if(fromGame)mainMenuSessionActive=true;
+  if($('optsheet')?.classList.contains('on')){ $('optsheet').classList.remove('on'); const pg=$('options-page'); if(pg&&pg.parentNode!==$('rec-host')) $('rec-host').appendChild(pg); }
+  else mainMenuReturnPaused=st.paused;
+  st.paused=true;if(fromGame)mainMenuSessionActive=true;
   $('main-menu').classList.add('on');$('mm-return').hidden=!mainMenuSessionActive;renderSaveSlots();
 }
 function closeMainMenu(restorePause=true){$('main-menu').classList.remove('on');if(restorePause)st.paused=mainMenuReturnPaused;}
@@ -9238,7 +9281,22 @@ $('open-main-menu').onclick=()=>openMainMenu(mainMenuSessionActive);
 $('mm-new').onclick=startNewGame;
 $('mm-continue').onclick=v3610Continue;
 $('mm-load').onclick=()=>{$('mm-slots-wrap').classList.toggle('on');renderSaveSlots();};
-$('mm-options').onclick=()=>{mainMenuReturnPaused=true;closeMainMenu(false);st.paused=true;analysisSwitchPage('options');};
+function openOptionsSheet(){
+  const pg=$('options-page'); if(pg&&pg.parentNode!==$('os-host')) $('os-host').appendChild(pg);
+  $('os-close').hidden=!mainMenuSessionActive;
+  try{paintVisualOptions();paintAudioOptions();renderSaveSlots();}catch(_){}
+  $('optsheet').classList.add('on'); $('optsheet').scrollTop=0; $('coach').classList.remove('on');
+  $('os-menu').focus();
+}
+function closeOptionsSheet(toMenu){
+  if(toMenu||!mainMenuSessionActive){ openMainMenu(mainMenuSessionActive); return; }   // openMainMenu 가 시트를 거둔다
+  $('optsheet').classList.remove('on');
+  const pg=$('options-page'); if(pg&&pg.parentNode!==$('rec-host')){ $('rec-host').appendChild(pg); pg.classList.remove('subon'); }
+  st.paused=mainMenuReturnPaused;
+}
+$('mm-options').onclick=()=>{ closeMainMenu(false); st.paused=true; openOptionsSheet(); };
+$('os-menu').onclick=()=>closeOptionsSheet(true);
+$('os-close').onclick=()=>closeOptionsSheet(false);
 $('mm-return').onclick=()=>closeMainMenu(true);
 renderSaveSlots();
 function openLobby() {
@@ -9605,7 +9663,7 @@ const [p] = [...ptrs.values()];
 drag = { x: p.x, y: p.y, lat: view.lat, lon: view.lon };
 }
 if(tap&&!tap.moved&&e.type==='pointerup'){
-if(!v3610MapTap(e.clientX,e.clientY)&&visualPrefs.portScenes){const wp=nearestWorldPortAtClient(e.clientX,e.clientY,20);if(wp)showWorldPortPreview(wp);}
+if(!mapTapLine(e.clientX,e.clientY)&&!v3610MapTap(e.clientX,e.clientY)&&visualPrefs.portScenes){const wp=nearestWorldPortAtClient(e.clientX,e.clientY,20);if(wp)showWorldPortPreview(wp);}
 }
 if(tap)mapTap=null;
 };
@@ -10151,7 +10209,13 @@ function uiStat(k, v, cls) { return `<div class="nowstat ${cls ?? ''}"><span>${k
 function uiPrimary() {
   const S = sim.ship;
   if (asking) return { label: '판단이 필요합니다', run: null, hot: true };
-  if (!st.contract && !st.plan?.active) return { label: '항차 계획을 짠다', run: () => $('h-market').click(), hot: true };
+  if (!st.contract && !st.plan?.active) {
+    if (!mapPlanMode) return { label: '항차를 짠다', run: mapPlanOpen, hot: true };
+    if (!draftPlan.length) return { label: '해도의 선을 누른다 · 목록에서 고른다', run: () => $('h-market').click(), hot: true };
+    const E = lastPlanEval ?? planEvaluation();
+    if (E?.ok) { const net = Math.round(E.estNet); return { label: `이 계획으로 확정 · ${draftPlan.length}건 · ${net < 0 ? '−' : '+'}${won(Math.abs(net))}`, run: mapConfirm, hot: true }; }
+    return { label: '계획에 문제가 있다 · 상세를 본다', run: () => { mapSel = { kind:'draft' }; mapCardPaint(); }, hot: true };
+  }
   switch (st.phase) {
     case '적재 대기': case '양하 대기': {
       const h = Math.max(0, ((st.berthTrue ?? sim.t) - sim.t) / HOUR);
@@ -10335,6 +10399,7 @@ function uiSwitch(page) {
 }
 function uiRecView(key) {
   for (const b of $('rec-tabs').children) b.setAttribute('aria-pressed', String(b.dataset.rec === key));
+  if (key === 'options') { const pg = $('options-page'); if (pg && pg.parentNode !== $('rec-host')) $('rec-host').appendChild(pg); }
   for (const el of $('rec-host').children) el.classList.toggle('subon', el.dataset.rec === key);
   if (key === 'options') { try { paintVisualOptions(); paintAudioOptions(); renderSaveSlots(); } catch (_) {} }
   $('pages').scrollTop = 0;
@@ -10577,6 +10642,300 @@ function stowPayShifting(port) {
   sim.ship.cash -= cost; st.acc.night = (st.acc.night ?? 0) + cost;
   say(`【재취급】 ${PORTS[port].name} — 위에 얹힌 ${tons}t을 들어냈다가 다시 싣는다 · ` +
       `약 ${hours.toFixed(1)}시간 · ${won(cost)}원`, 'm');
+}
+
+// ── 해도 위 항차 ─────────────────────────────────────────────
+// 정박 중 첫 화면은 해도다. 「항차를 짠다」를 누르면 지금 항구에서 실을 수 있는
+// 계약이 목적항까지 가는 선으로 그려지고, 계획에 넣은 것은 굵은 선이 된다.
+// 선을 누르면 그 항차의 상세 — 넣으면 남는 돈이 얼마 움직이는가 — 가 뜬다.
+let mapPlanMode = false;          // 항차 모드
+let mapCands = [];                // [{c, maxT, gain, days, path}]
+let mapSel = null;                // {kind:'cand', c} | {kind:'draft'} | {kind:'plan'}
+let mapCandKey = '';
+
+// 지금 판에 더 실을 수 있는 최대량 — 위에서부터 내려오며 구조가 허락하는 첫 값
+function mapSuggestTons(c, items = draftPlan) {
+  const top = Math.min(loadableTons(c.cargo, c.tons), c.tons, SHIP.cargoMax);
+  for (let tons = Math.floor(top / PLAN_STEP_TONS) * PLAN_STEP_TONS; tons >= PLAN_MIN_TONS; tons -= PLAN_STEP_TONS)
+    for (let hold = 1; hold <= SHIP.holds.length; hold++) {
+      const S = structuralCargoState([...items, { c, tons, hold }], sim.ship.at, SHIP);
+      if (S.flow.ok && S.ok) return tons;
+    }
+  return 0;
+}
+// 후보를 지금 계획에 얹었을 때 — 톤수 · 남는 돈이 얼마 움직이는가
+function mapCandDelta(c) {
+  const now = draftPlan.length ? (lastPlanEval ?? planEvaluation()) : null;
+  const tons = mapSuggestTons(c);
+  if (tons < PLAN_MIN_TONS) return { tons:0, E:null, delta:null, net:null };
+  const hold = bestHoldFor(c, tons, draftPlan, sim.ship.at);
+  const E = planEvaluation([...draftPlan, { c, tons, hold }]);
+  return { tons, hold, E, net:Math.round(E.estNet), delta:Math.round(E.estNet - (now?.estNet ?? 0)) };
+}
+// 후보 목록 — 시장을 건드리는 함수라 매 프레임이 아니라 필요할 때만 다시 만든다
+function mapPlanRefresh() {
+  if (!mapPlanMode || st.plan?.active || st.contract) { mapCands = []; return; }
+  const E = draftPlan.length ? (lastPlanEval = planEvaluation()) : (lastPlanEval = null);
+  const origins = planEligibleOrigins(E);
+  const out = [];
+  for (const origin of origins) {
+    for (const c of marketContractsFor(origin)) {
+      if (c.expires <= sim.t) continue;
+      if (loadableTons(c.cargo, c.tons) < PLAN_MIN_TONS || !directCargoEligible(c.cargo)) continue;
+      let path = null; try { path = legPath(c.from, c.to); } catch (_) {}
+      if (!path?.pts?.length) continue;
+      let d = { tons:0, delta:null }; try { d = mapCandDelta(c); } catch (_) {}
+      out.push({ c, path, tons:d.tons, gain:d.delta, days:d.E?.days ?? null });
+    }
+  }
+  mapCands = out;
+  if (mapSel?.kind === 'cand' && !out.some(x => x.c.id === mapSel.c.id)) mapSel = null;
+  mapCardPaint();
+}
+function mapPlanOpen() {
+  if (st.contract || st.plan?.active) return;
+  mapPlanMode = true; wharfHidden = true; mapSel = null;
+  mapPlanRefresh(); wharfPaint(); mapBarPaint();
+  say('해도의 선이 지금 실을 수 있는 계약이다. 눌러서 남는 돈을 본다.', '');
+}
+function mapPlanClose() {
+  mapPlanMode = false; mapSel = null; mapCands = [];
+  mapCardPaint(); mapBarPaint();
+}
+function mapRouteLegs() {                 // 지금 그릴 항로 — 초안이거나 확정된 것
+  const P = st.plan;
+  if (P?.active) {
+    const seq = [P.origin, ...(P.route ?? [])];
+    return { seq, done: Math.max(0, (P.routeIdx ?? -1) + 1), kind:'plan' };
+  }
+  if (mapPlanMode && draftPlan.length && lastPlanEval?.route) return { seq:[sim.ship.at, ...lastPlanEval.route], done:0, kind:'draft' };
+  return null;
+}
+function mapPathPx(path) {               // 현재 LON_OFF 로 화면 좌표
+  return path.pts.map(q => px(q[0], q[1]));
+}
+function mapStroke(pts, color, alpha, width, dash) {
+  cx.strokeStyle = color; cx.globalAlpha = alpha; cx.lineWidth = width; cx.setLineDash(dash ?? []);
+  cx.beginPath(); pts.forEach(([x, y], i) => i ? cx.lineTo(x, y) : cx.moveTo(x, y)); cx.stroke(); cx.setLineDash([]);
+}
+function mapMid(path) {
+  const half = path.nm / 2;
+  for (let i = 1; i < path.pts.length; i++) if (path.cum[i] >= half) {
+    const a = path.pts[i - 1], b = path.pts[i], t = (half - path.cum[i - 1]) / Math.max(1e-6, path.cum[i] - path.cum[i - 1]);
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  }
+  return path.pts[path.pts.length - 1];
+}
+function mapTag(x, y, text, hot) {
+  cx.font = `${hot ? 'bold ' : ''}10px ${C('--face-num')}`;
+  const w = cx.measureText(text).width + 8;
+  cx.globalAlpha = .92; cx.fillStyle = C('--paper'); cx.strokeStyle = hot ? C('--magenta') : C('--rule'); cx.lineWidth = hot ? 1.4 : .8;
+  cx.beginPath(); cx.rect(x - w / 2, y - 8, w, 15); cx.fill(); cx.stroke();
+  cx.fillStyle = hot ? C('--magenta') : C('--ink'); cx.textAlign = 'center'; cx.fillText(text, x, y + 3.5); cx.textAlign = 'start';
+  cx.globalAlpha = 1;
+}
+function drawPlanLines() {
+  const legs = mapRouteLegs();
+  if (!mapPlanMode && !legs) return;
+  cx.save();
+  const inDraft = new Set(draftPlan.map(x => x.c.id));
+  if (mapPlanMode && !st.plan?.active) {
+    for (const k of mapCands) {
+      if (inDraft.has(k.c.id)) continue;
+      const hot = mapSel?.kind === 'cand' && mapSel.c.id === k.c.id;
+      const good = k.gain != null && k.gain >= 0;
+      mapStroke(mapPathPx(k.path), good ? C('--magenta') : C('--ink2'), hot ? 1 : .7, hot ? 3 : 1.8, hot ? [] : [7, 4]);
+    }
+  }
+  if (legs) {
+    const hot = mapSel?.kind === legs.kind;
+    for (let i = 1; i < legs.seq.length; i++) {
+      let path = null; try { path = legPath(legs.seq[i - 1], legs.seq[i]); } catch (_) {}
+      if (!path?.pts?.length) continue;
+      const done = i <= legs.done;
+      mapStroke(mapPathPx(path), C('--magenta'), done ? .35 : (hot ? 1 : .85), done ? 1.6 : (hot ? 3.6 : 2.8), []);
+    }
+    for (let i = 1; i < legs.seq.length; i++) {
+      const p = PORTS[legs.seq[i]]; if (!p) continue; const [x, y] = px(p.lat, p.lon);
+      cx.globalAlpha = 1; cx.fillStyle = C('--magenta'); cx.beginPath(); cx.arc(x, y, 4.6, 0, Math.PI * 2); cx.fill();
+      cx.fillStyle = C('--paper'); cx.font = `bold 8px ${C('--face-num')}`; cx.textAlign = 'center'; cx.fillText(String(i), x, y + 3); cx.textAlign = 'start';
+    }
+  }
+  // 이름표 — 후보는 남는 돈, 항로는 순서 · 겹치지 않게 뒤에 그린다
+  if (mapPlanMode && !st.plan?.active) {
+    const placed = [];
+    for (const k of mapCands) {
+      if (inDraft.has(k.c.id)) continue;
+      const hot = mapSel?.kind === 'cand' && mapSel.c.id === k.c.id;
+      const m = mapMid(k.path); let [mx, my] = px(m[0], m[1]);
+      const text = k.gain == null ? `${PORTS[k.c.to].name} 선복 없음` : `${PORTS[k.c.to].name} ${k.gain >= 0 ? '+' : '−'}${won(Math.abs(k.gain))}`;
+      cx.font = `10px ${C('--face-num')}`; const w = cx.measureText(text).width + 8;
+      for (let tries = 0; tries < 6; tries++) {                 // 겹치면 아래로 한 줄씩 민다
+        const clash = placed.some(r => Math.abs(r.x - mx) < (r.w + w) / 2 + 2 && Math.abs(r.y - my) < 16);
+        if (!clash) break; my += 17;
+      }
+      placed.push({ x:mx, y:my, w });
+      mapTag(mx, my, text, hot);
+    }
+  }
+  cx.restore();
+}
+// 탭 — 선까지의 거리 (px)
+function mapDistToPath(path, x, y) {
+  const pts = mapPathPx(path); let best = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
+    const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+    const t = L ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L)) : 0;
+    const d = Math.hypot(x - (ax + dx * t), y - (ay + dy * t));
+    if (d < best) best = d;
+  }
+  return best;
+}
+function mapTapLine(clientX, clientY) {
+  const legs = mapRouteLegs();
+  if (!mapPlanMode && !legs) return false;
+  const r = cv.getBoundingClientRect(), x = clientX - r.left, y = clientY - r.top;
+  let hit = null, best = 14;
+  const keep = LON_OFF;
+  for (const o of wraps()) {
+    LON_OFF = o;
+    if (legs) for (let i = 1; i < legs.seq.length; i++) {
+      let path = null; try { path = legPath(legs.seq[i - 1], legs.seq[i]); } catch (_) {}
+      if (!path?.pts?.length) continue;
+      const d = mapDistToPath(path, x, y); if (d < best) { best = d; hit = { kind: legs.kind }; }
+    }
+    if (mapPlanMode && !st.plan?.active) {
+      const inDraft = new Set(draftPlan.map(z => z.c.id));
+      for (const k of mapCands) {
+        if (inDraft.has(k.c.id)) continue;
+        const d = mapDistToPath(k.path, x, y); if (d < best) { best = d; hit = { kind:'cand', c:k.c }; }
+      }
+    }
+  }
+  LON_OFF = keep;
+  if (!hit) return false;
+  mapSel = hit; mapCardPaint(); return true;
+}
+// ── 상세 카드 ────────────────────────────────────────────────
+function mapCandCard(c) {
+  const lay = gameDate(c.laycanEnd), maxT = loadableTons(c.cargo, c.tons);
+  const head = `<b>${PORTS[c.from].name} → ${PORTS[c.to].name} · ${CARGO[c.cargo].name} 계약 ${c.tons.toLocaleString()}t</b>` +
+               `<span>적기 ~${lay.getUTCMonth() + 1}/${lay.getUTCDate()}${maxT < c.tons ? ` · 우리 배에는 ${maxT.toLocaleString()}t까지` : ''}</span>`;
+  // 넣으면 남는 돈이 어떻게 되는가
+  let body = '', act = '';
+  try {
+    const now = draftPlan.length ? (lastPlanEval ?? planEvaluation()) : null;
+    const d = mapCandDelta(c);
+    if (!d.E) body = `<div class="mc-no">지금 적부와 항로에는 이 화물을 실을 선복이 없다.</div>`;
+    else {
+      const money = (v) => `${v < 0 ? '−' : '+'}${won(Math.abs(v))}`;
+      body = `<div class="mc-row"><span>${d.tons}t 싣고 가면 남는 돈</span><b class="${d.net < 0 ? 'neg' : ''}">${money(d.net)}</b>` +
+             `<em class="${d.delta >= 0 ? 'up' : 'dn'}">${now ? `${d.delta >= 0 ? '▲' : '▼'} ${money(d.delta)}` : ''}</em></div>` +
+             `<div class="mc-row dim"><span>${d.E.days.toFixed(1)}일 · 하루</span><b>${money(Math.round(d.E.estNet / Math.max(.5, d.E.days)))}</b><em></em></div>` +
+             (d.E.errors?.length ? `<div class="mc-no">⛔ ${d.E.errors[0]}</div>` : '');
+      act = `<button data-mc="add" class="${d.delta >= 0 ? 'good' : ''}">계획에 넣는다 ${money(d.delta)}</button>`;
+    }
+  } catch (e) { body = `<div class="mc-no">${e.message}</div>`; }
+  return `<div class="mc-head">${head}</div>${body}<div class="btnrow">${act}<button data-mc="close">닫기</button></div>`;
+}
+function mapDraftCard() {
+  const E = lastPlanEval = planEvaluation();
+  const routeName = [sim.ship.at, ...E.route].map(p => PORTS[p].name).join(' → ');
+  const items = draftPlan.map((it, i) =>
+    `<div class="mc-item"><span>${PORTS[it.c.from].name}→${PORTS[it.c.to].name} · ${CARGO[it.c.cargo].name} <b>${it.tons}t</b><small>/${it.c.tons}t</small></span>` +
+    `<button data-mc="minus:${i}" aria-label="50톤 줄인다">−50</button><button data-mc="plus:${i}" aria-label="50톤 늘린다">+50</button>` +
+    `<button data-mc="rm:${i}" aria-label="계획에서 뺀다">×</button></div>`).join('');
+  const warn = [...E.errors.map(x => `⛔ ${x}`), ...E.warnings.map(x => `△ ${x}`)];
+  return `<div class="mc-head"><b>${routeName}</b><span>${E.days.toFixed(1)}일 · 계약 ${draftPlan.length}건</span></div>` +
+    items + planSpeedHTML() + planLedgerHTML(E, 'map') +
+    (warn.length ? `<div class="mc-no">${warn.join('<br>')}</div>` : '') +
+    `<div class="btnrow"><button data-mc="market">계약 목록</button><button data-mc="wharf">적부</button>` +
+    `<button data-mc="confirm" class="good" ${E.ok ? '' : 'disabled'}>확정 · ${draftPlan.length}건</button><button data-mc="close">닫기</button></div>`;
+}
+function mapPlanCard() {
+  const P = st.plan;
+  const routeName = [P.origin, ...(P.route ?? [])].map(p => PORTS[p]?.name ?? p).join(' → ');
+  const rows = (P.items ?? []).map(x =>
+    `<div class="mc-item"><span>${PORTS[x.c.from].name}→${PORTS[x.c.to].name} · ${CARGO[x.c.cargo].name} ${x.tons}t</span>` +
+    `<em>${x.delivered ? '양하 완료' : x.loaded ? '운송 중' : '적재 대기'}</em></div>`).join('');
+  const est = P.estimate ?? {};
+  return `<div class="mc-head"><b>항차 · ${routeName}</b><span>${est.days ? `${est.days.toFixed(1)}일 예정` : ''}</span></div>${rows}` +
+    (Number.isFinite(est.net) ? `<div class="mc-row"><span>예상 남는 돈</span><b class="${est.net < 0 ? 'neg' : ''}">${est.net < 0 ? '−' : '+'}${won(Math.abs(Math.round(est.net)))}</b><em></em></div>` : '') +
+    `<div class="btnrow">${st.leg ? '' : '<button data-mc="wharf">부두 화면</button>'}<button data-mc="close">닫기</button></div>`;
+}
+function mapCardPaint() {
+  const box = $('mapcard'), sheet = $('voysheet'); if (!box || !sheet) return;
+  const off = () => { box.hidden = true; sheet.classList.remove('on'); };
+  if (!mapSel || (mapSel.kind !== 'plan' && (st.plan?.active || st.contract))) { mapSel = null; off(); return; }
+  if (mapSel.kind === 'draft' && !draftPlan.length) { mapSel = null; off(); return; }
+  if (mapSel.kind === 'plan' && !st.plan?.active) { mapSel = null; off(); return; }
+  if (mapSel.kind === 'cand') { sheet.classList.remove('on'); box.hidden = false; box.innerHTML = mapCandCard(mapSel.c); return; }
+  // 항차 상세는 전체 시트 — 선을 눌렀을 때
+  box.hidden = true;
+  $('vs-h').textContent = mapSel.kind === 'draft' ? '항차 계획' : '항차 상세';
+  $('vs-body').innerHTML = mapSel.kind === 'draft' ? mapDraftCard() : mapPlanCard();
+  if (!sheet.classList.contains('on')) { sheet.classList.add('on'); sheet.scrollTop = 0; $('coach').classList.remove('on'); }
+}
+function mapBarPaint() {
+  const bar = $('mapbar'); if (!bar) return;
+  if (!mapPlanMode || st.plan?.active || st.contract) { bar.hidden = true; return; }
+  bar.hidden = false;
+  const E = draftPlan.length ? (lastPlanEval ?? planEvaluation()) : null;
+  const net = E ? Math.round(E.estNet) : null;
+  $('mapbar-t').innerHTML = E
+    ? `계획 ${draftPlan.length}건 · 남는 돈 <b class="${net < 0 ? 'neg' : ''}">${net < 0 ? '−' : '+'}${won(Math.abs(net))}</b>`
+    : `후보 ${mapCands.length}건 — 선을 누른다`;
+}
+function mapCardClick(e) {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  const sp = b.dataset.planSpeed;
+  if (sp) { draftSpeed = sp; mapPlanRefresh(); mapBarPaint(); return; }
+  const a = b.dataset.mc; if (!a) return;
+  if (a === 'close') { mapSel = null; mapCardPaint(); return; }
+  if (a === 'add' && mapSel?.kind === 'cand') {
+    const before = draftPlan.length; addToDraftQuiet(mapSel.c);
+    if (draftPlan.length > before) { mapSel = { kind:'draft' }; }
+    mapPlanRefresh(); mapBarPaint(); return;
+  }
+  if (a.startsWith('rm:')) { draftPlan.splice(+a.slice(3), 1); if (!draftPlan.length) mapSel = null; mapPlanRefresh(); mapBarPaint(); return; }
+  if (a.startsWith('minus:') || a.startsWith('plus:')) {
+    const it = draftPlan[+a.split(':')[1]]; if (!it) return;
+    if (a[0] === 'm') it.tons = Math.max(PLAN_MIN_TONS, it.tons - PLAN_STEP_TONS);
+    else it.tons = Math.min(it.c.tons, loadableTons(it.c.cargo, it.c.tons), it.tons + PLAN_STEP_TONS);
+    mapPlanRefresh(); mapBarPaint(); return;
+  }
+  if (a === 'market') { mapSel = null; mapCardPaint(); openMarket(); return; }
+  if (a === 'wharf') { wharfHidden = false; wharfView = st.plan?.active ? 'STOW' : 'STOW'; mapSel = null; mapCardPaint(); wharfPaint(); return; }
+  if (a === 'confirm') { mapConfirm(); return; }
+}
+function addToDraftQuiet(c) {           // addToDraft 와 같되 시장 목록을 다시 그리지 않는다
+  if (draftPlan.some(x => x.c.id === c.id)) return;
+  if (draftPlan.length >= PLAN_MAX_FIXTURES) { say(`한 항차에는 계약 ${PLAN_MAX_FIXTURES}건까지 묶는다`, 'm'); return; }
+  const tons = mapSuggestTons(c);
+  if (tons < PLAN_MIN_TONS) { say('지금 적부와 항로에는 이 화물을 실을 선복이 없다', 'm'); return; }
+  const hold = bestHoldFor(c, tons, draftPlan, sim.ship.at);
+  draftPlan.push({ c, tons, hold });
+}
+function mapConfirm() {
+  const E = planEvaluation(); if (!E?.ok) { mapSel = { kind:'draft' }; mapCardPaint(); return; }
+  acceptPlanned(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold, slot:slotOf(x) })), E); setEot(draftSpeed, true);
+  draftPlan = []; mapPlanClose(); wharfSel = -1; wharfPaint();
+}
+function mapPlanBoot() {
+  $('mapcard').onclick = mapCardClick; $('vs-body').onclick = mapCardClick;
+  $('vs-close').onclick = () => { mapSel = null; mapCardPaint(); };
+  $('mapbar-x').onclick = mapPlanClose;
+  $('mapbar-list').onclick = () => openMarket();
+}
+// 국면이 바뀌면 — 항차가 잡히거나 끝나면 — 모드와 카드를 정리한다
+let mapPhaseKey = '';
+function mapPlanTick() {
+  const key = [st.phase, !!st.plan?.active, !!st.contract].join('|');
+  if (key === mapPhaseKey) return;
+  mapPhaseKey = key;
+  if (st.plan?.active || st.contract) { if (mapPlanMode) mapPlanClose(); else { mapSel = null; mapCardPaint(); } }
+  mapBarPaint();
 }
 
 // ── 부두 화면 ─────────────────────────────────────────────────
@@ -10888,6 +11247,7 @@ function wharfGangBoard() {
 }
 function wharfPaint() {
   const box = $('wharf'); if (!box) return;
+  wharfAutoHide();
   const on = wharfActive();
   box.hidden = !on || wharfHidden;
   $('wharf-show').hidden = !(on && wharfHidden);
@@ -10902,7 +11262,12 @@ function wharfPaint() {
     `${PORTS[sim.ship.at]?.name ?? ''} · ${st.phase}` +
     (st.berthAt && st.phase.includes('대기') ? ` · 접안 ${clock(st.berthAt)}` : '');
 }
-let wharfHidden = false;
+let wharfHidden = true, wharfPhaseKey = '';
+function wharfAutoHide() {
+  const key = st.phase + '|' + (sim.ship.at ?? '');
+  if (key === wharfPhaseKey) return; wharfPhaseKey = key;
+  wharfHidden = !(st.phase === '적재' || st.phase === '양하');
+}
 function wharfBoot() {
   wharfCv = $('wharf-cv'); wharfCx = wharfCv.getContext('2d');
   wharfCv.addEventListener('pointerdown', (e) => { const i = wharfHit(e); wharfSel = (i === wharfSel ? -1 : i); wharfPaint(); });
@@ -11243,7 +11608,7 @@ $('practice-help').innerHTML=practiceHelpHTML();
 paintNavWatch();
 if (!st.leg && st.phase === '정박' && !asking) captainReports();
 uiPaintNow();
-wharfPaint();
+wharfPaint(); mapPlanTick();
 if (document.querySelector('#tabs [data-page="company"]')?.getAttribute('aria-selected') === 'true') uiPaintCompany();
 paintAnalysis();
 renderNightDecision();
@@ -11475,7 +11840,7 @@ DIP_ACTIONS, normalizeDiplomacy, syncDiplomacy, diplomacyStatus, diplomacyAction
 LOAN_PRODUCTS, INSURANCE_PLANS, CHARTER_OFFERS, normalizeFinance, financeSnapshot, financeRating, financeCreditLimit, loanTerms, takeLoan, repayLoan, charterIn, charterPrepareRedelivery, charterReturnEarly, charterEarlyReturnQuote, charterRedeliveryQuote, normalizeCorporateDeals, corporateDealsMonthlyTick, buyLiquidationAuction, acquireRivalCompany, setInsurancePlan, financeMonthlyTick, openFinance,
 PE_BANKS, PE_OFFICES, PE_ACTIONS, PE_RIVAL_PATRON, normalizePoliticalEconomy, peAgenda, peRefreshFinanceTerms, peSetMainBank, peInstitutionAction, peLegacyLobbyEffect, peMonthlyTick, peSnapshot, openPoliticalEconomy,
 MG_FACTIONS, MG_ROLES, EXECUTIVE_POOL, normalizeManagement, managementSnapshot, managementFactionSnapshot, availableExecutiveCandidates, promoteFleetChief, demoteFleetChief, hireExecutive, dismissExecutive, supportManagementFaction, managementMonthlyTick, openManagement,
-get asking() { return asking; }, get draftPlan(){ return draftPlan; },
+get asking() { return asking; }, get draftPlan(){ return draftPlan; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
 SLOTS, SLOT_BY_ID, slotOf, slotSet, stowSnapshot, stowStability, stowShifting, stowCharacter, wharfItems, wharfPaint,
 navState, navLegReset, navTick, navOpportunities, navDoFix, navProgressFactor, navPenalty, navNearestLand, navLoranChain, navSunAlt, paintNavWatch, navCycleBerthPolicy, navBuyLoran, BERTH_POLICY,
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
@@ -11486,6 +11851,7 @@ try{if(localStorage.getItem('TRAMP_LINE_1962_BOOT_NEW')==='1'){localStorage.remo
 renderSaveSlots();
 uiBoot();
 wharfBoot();
+mapPlanBoot();
 fit(); requestAnimationFrame(loop);
 </script>
 </body>
