@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.8.3</title>
+<title>TRAMP LINE 1962 · v3.8.5</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -533,6 +533,33 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .wh-verdict.warn{border-left:3px solid var(--ink2)}
 .wh-verdict.bad{border-left:3px solid var(--magenta)}
 .wh-verdict.bad b{color:var(--magenta)}
+.fixture{padding:7px 9px}
+.fx-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.fx-leg{font-family:var(--face-title);font-size:var(--fs-cap);min-width:0}
+.fx-leg small{color:var(--ink2);font-family:var(--face-num);font-size:var(--fs-micro);margin-left:5px}
+.fx-leg .tag{margin-left:5px;font-style:normal}
+.fx-leg .tag.warn{color:var(--magenta);border-color:var(--magenta)}
+.fx-net{font-family:var(--face-num);font-size:var(--fs-mid);font-weight:700;white-space:nowrap}
+.fx-net.neg{color:var(--magenta)}
+.fx-sub{display:flex;justify-content:space-between;gap:8px;margin-top:3px;font-family:var(--face-num);font-size:var(--fs-micro);color:var(--ink2)}
+.fixture.loss{opacity:.72}
+.plan-card .tons small{color:var(--ink2);font-size:var(--fs-micro);margin-left:3px}
+.ledger{border:1px solid var(--line);background:#f0eee5;margin:6px 0}
+.lg-row{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(64px,auto);gap:8px;align-items:baseline;
+  padding:4px 9px;border-top:1px dotted var(--line);font-family:var(--face-num);font-size:var(--fs-cap)}
+.lg-row:first-child{border-top:0}
+.lg-row span{font-family:var(--face-name);min-width:0}
+.lg-row span small{display:block;color:var(--ink2);font-size:var(--fs-micro);font-family:var(--face-num)}
+.lg-row b{font-weight:600;white-space:nowrap;text-align:right}
+.lg-row b.neg{color:var(--magenta)}
+.lg-row em{font-style:normal;font-size:var(--fs-micro);white-space:nowrap;text-align:right;color:var(--ink2)}
+.lg-row em.up{color:var(--ink);font-weight:700}
+.lg-row em.dn{color:var(--magenta);font-weight:700}
+.lg-row.dim{opacity:.62}
+.lg-row.total{border-top:1px solid var(--ink);background:#e9e6dc;padding:6px 9px}
+.lg-row.total b{font-size:var(--fs-mid)}
+.lg-speed{margin:6px 0 0}
+.lg-speed button{min-height:30px;font-size:var(--fs-micro)}
 #ak-btns.stack{flex-direction:column;gap:4px}
 #ak-btns.stack button{margin:0}
 .askopt{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;
@@ -705,7 +732,7 @@ background:rgba(246,244,236,.72)}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.8.3</div>
+      <div class="mm-version">CONTENT v3.8.5</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -935,7 +962,7 @@ background:rgba(246,244,236,.72)}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.3 · 선택지마다 값을 붙였다</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.5 · 겹치는 것을 걷어냈다</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -983,12 +1010,9 @@ background:rgba(246,244,236,.72)}
 <div id="market" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="mk-h">
   <div class="sheetbox">
     <header><h2 id="mk-h">항차 계획</h2><button id="mk-close">닫기</button></header>
-    <div class="planner-note">화주는 화물을 내놓고 선주는 선복을 판다. 연안·지역·권역간·대양 계약의 크기와 흐름이 다르며, 지점·대리점의 전보로 선적문의와 경쟁선복을 읽고 적기·화물창·다음 항차를 맞춘다.</div>
     <div id="mk-plan"></div>
     <div id="mk-guide"></div>
-    <div class="planner-market-head"><b>운임 · 선복정보</b><span>정확한 미래값이 아니라 현지 영업정보</span></div>
-    <div id="mk-intel"></div>
-    <div class="planner-market-head"><b>게시 계약</b><span>눌러 계획에 추가</span></div>
+    <div class="planner-market-head"><b>게시 계약</b></div>
     <div id="mk-list"></div>
   </div>
 </div>
@@ -1149,7 +1173,7 @@ background:rgba(246,244,236,.72)}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.8.3';
+const TRAMP_LINE_CONTENT_VERSION='3.8.5';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -2854,12 +2878,15 @@ for(const x of [...unloadItems,...loadItems]){const tf=terminalServiceFee(p,ship
 }
 if (ci < flow.legs.length) {
 const leg = flow.legs[ci];
-const nm = dist(leg.from, leg.to), h = nm / ship.serviceSpeed;
+const vPlan = (ship===SHIP && Number.isFinite(opts.speedKn)) ? opts.speedKn : ship.serviceSpeed;
+const nm = dist(leg.from, leg.to), h = nm / vPlan;
 const cargo = leg.onboard.map((i)=>items[i]);
 const tons = sum(cargo, x=>x.tons);
 if (tons <= 1e-6) emptyNm += nm;
 seaNm += nm; seaH += h;
-if(opts.bunkerMarket&&ship===SHIP){const bp=bunkerPlanningPrice(opts.company,leg.from,cursor,bunkerPrice);bunkerFuelEst+=h/24*(SHIP.propFuelAtService+SHIP.auxFuel)*bp;}
+if(opts.bunkerMarket&&ship===SHIP){const bp=bunkerPlanningPrice(opts.company,leg.from,cursor,bunkerPrice);
+  const prop=SHIP.propFuelAtService*Math.pow(vPlan/SHIP.serviceSpeed,3);   // 기름은 속력의 세제곱
+  bunkerFuelEst+=h/24*(prop+SHIP.auxFuel)*bp;}
 const at = cursor; cursor += h * HOUR;
 schedule.push({kind:'sea', from:leg.from, to:leg.to, at, end:cursor, nm, tons});
 }
@@ -2868,6 +2895,17 @@ const revenue = sum(items, (x)=>x.c.perTon * x.tons * boon);
 const seaCostDay = Number.isFinite(opts.seaDayCost) ? opts.seaDayCost : seaDay(bunkerPrice);
 const portCostDay = Number.isFinite(opts.portDayCost) ? opts.portDayCost : portDay(bunkerPrice);
 const pilotageEst = (ship===SHIP) ? (flow.calls.length + 1) * PILOTAGE_ALLOWANCE : 0;
+// 사장이 볼 더하기 빼기 표 — 줄마다 따로 센다
+const daysAll = (seaH + portElapsedH) / 24;
+const lines = (ship===SHIP) ? {
+  revenue,
+  fuel:   -Math.round(bunkerFuelEst + portElapsedH/24*SHIP.auxFuel*bunkerPlanningPrice(opts.company,from,t,bunkerPrice)),
+  crew:   -Math.round(daysAll * (COST.crewDay + COST.foodDay)),
+  port:   -Math.round(portFees),
+  pilot:  -Math.round(pilotageEst),
+  upkeep: -Math.round(daysAll * (COST.maintDay + COST.insDay)),
+  missed: -Math.round(sum(items, (x)=>Math.max(0, (x.c.tons ?? x.tons) - x.tons) * x.c.perTon * boon)),
+} : null;
 const estCost = pilotageEst + (opts.bunkerMarket&&ship===SHIP ? (seaH/24*(COST.crewDay+COST.foodDay+COST.maintDay+COST.insDay)+portElapsedH/24*(COST.crewDay+COST.foodDay+COST.maintDay+COST.insDay)+bunkerFuelEst+portElapsedH/24*SHIP.auxFuel*bunkerPlanningPrice(opts.company,from,t,bunkerPrice)+portFees) : (seaH / 24 * seaCostDay + portElapsedH / 24 * portCostDay + portFees));
 const estNet = revenue - estCost;
 const days = Math.max(0.01, (cursor - t) / DAY);
@@ -2882,7 +2920,7 @@ if (dests.length > 1) warnings.push(`${PORTS[snap.from].name} 출항 시 ${h.hol
 }
 return {
 ok: errors.length === 0,
-errors:[...new Set(errors)], warnings:[...new Set(warnings)], holds:peakHolds, peakHolds, laycan, laycans,
+errors:[...new Set(errors)], warnings:[...new Set(warnings)], holds:peakHolds, peakHolds, laycan, laycans, lines, speedKn:(ship===SHIP&&Number.isFinite(opts.speedKn))?opts.speedKn:ship.serviceSpeed,
 route:flow.route, calls:flow.calls, legs:flow.legs, schedule,
 totalTons, maxOnboardTons, draft: ship === SHIP ? draft(maxOnboardTons)
 : ship.draftEmpty + (ship.draftFull - ship.draftEmpty) * Math.max(0, Math.min(1, maxOnboardTons / Math.max(1, ship.cargoMax))),
@@ -7471,10 +7509,13 @@ function planWaitEstimate(at, when = sim.t) {
 const q=sim.queues[at],start=q.previewWindow(sim.t,0,when,portOpsPriority(sim.company,at)).start;
 return Math.max(0,(start-when)/HOUR);
 }
+let draftSpeed = 'SERVICE';   // 계획 화면에서 고르는 속력
+const draftSpeedKn = () => (EOT.find(([k]) => k === draftSpeed) ?? EOT[1])[1];
 function planEvaluation(items = draftPlan) {
 const at = sim.ship.at;
 return evaluatePlan(items, at, sim.t, sim.bunkerPrice, {
 company:sim.company,
+speedKn: draftSpeedKn(),
 origin: at,
 boon: freightBoon(sim.politics, sim.t),
 berthWaitH: planWaitEstimate(at),
@@ -7496,66 +7537,69 @@ if (x.kind === 'load') return `<div class="plan-time load"><span>${clock(x.at)}<
 if (x.kind === 'unload') return `<div class="plan-time unload"><span>${clock(x.at)}</span><b>${PORTS[x.port].name} 양하</b><em>${x.tons}t · ${x.items}건</em></div>`;
 return `<div class="plan-time wait"><span>${clock(x.at)}</span><b>${PORTS[x.port].name} 대기</b><em>${x.mode} ${x.hours.toFixed(0)}시간</em></div>`;
 }
+// 더하기 빼기 표. 바뀐 줄에 ▲▼ 를 붙이고 맨 아래 남는 돈이 얼마 움직였는지 보인다.
+let ledgerPrev = null;
+const LEDGER_ROWS = [
+  ['revenue','운임'], ['fuel','연료'], ['crew','선원·식량'], ['port','항만·수속'],
+  ['pilot','도선·예선'], ['upkeep','정비·보험'],
+];
+function planLedgerHTML(E, tag) {
+  const L = E.lines; if (!L) return '';
+  const prev = ledgerPrev && ledgerPrev.tag === tag ? ledgerPrev : null;
+  const d = (k) => prev ? (L[k] - (prev.L[k] ?? 0)) : 0;
+  const mark = (v) => Math.abs(v) < 50 ? '' : `<em class="${v > 0 ? 'up' : 'dn'}">${v > 0 ? '▲' : '▼'} ${v > 0 ? '+' : '−'}${won(Math.abs(v))}</em>`;
+  const money = (v) => `${v < 0 ? '−' : '+'}${won(Math.abs(v))}`;
+  const net = Math.round(E.estNet), dNet = prev ? net - prev.net : 0;
+  const sub = {
+    revenue: `${E.totalTons}t`, fuel: `${E.seaNm.toFixed(0)}해리 · ${draftSpeed}`,
+    crew: `${E.days.toFixed(1)}일`, port: `${(E.route?.length ?? 0) + 1}항`, pilot: '', upkeep: '',
+  };
+  const rows = LEDGER_ROWS.map(([k, name]) =>
+    `<div class="lg-row"><span>${name}<small>${sub[k] ?? ''}</small></span>` +
+    `<b class="${L[k] < 0 ? 'neg' : ''}">${money(L[k])}</b>${mark(d(k))}</div>`).join('');
+  const missed = L.missed ? `<div class="lg-row dim"><span>못 실어 놓친 운임<small>계약량 미달 · 벌칙 없음</small></span><b>${money(L.missed)}</b>${mark(d('missed'))}</div>` : '';
+  ledgerPrev = { tag, L: { ...L }, net };
+  return `<div class="ledger">${rows}${missed}` +
+    `<div class="lg-row total"><span>남는 돈<small>하루 ${won(net / Math.max(.5, E.days))}원</small></span>` +
+    `<b class="${net < 0 ? 'neg' : ''}">${money(net)}</b>${mark(dNet)}</div></div>`;
+}
+function planSpeedHTML() {
+  return `<div class="btnrow lg-speed">${EOT.map(([k, v]) =>
+    `<button data-plan-speed="${k}" aria-pressed="${draftSpeed === k}">${k} ${v.toFixed(1)}kn</button>`).join('')}</div>`;
+}
 function renderDraftPlan() {
 const box = $('mk-plan');
 if (!draftPlan.length) {
 lastPlanEval = null;
-box.innerHTML = `<div class="planner-empty"><b>아직 비어 있다.</b><br>계약을 눌러 계획에 추가하세요. 목적항이 생기면 그 항만의 후속 화물도 예약할 수 있습니다.</div>`;
+box.innerHTML = `<div class="planner-empty">아래 계약을 눌러 넣으십시오.</div>`;
 return;
 }
 const E = lastPlanEval = planEvaluation();
 const routeName = [sim.ship.at, ...E.route].map((p) => PORTS[p].name).join(' → ');
-const firstLay = E.laycan.ok ? `${clock(E.laycan.start)} ~ ${clock(E.laycan.end)}` : '없음/불일치';
 const cards = draftPlan.map((it, i) => {
-const c = it.c, chained = c.from !== sim.ship.at;
+const c = it.c, chained = c.from !== sim.ship.at, lay = gameDate(c.laycanEnd);
 return `<div class="plan-card" data-pi="${i}">
-<div class="top"><b>${PORTS[c.from].name}→${PORTS[c.to].name} · ${c.manifest??CARGO[c.cargo].name}</b><span class="meta">${chained?'후속 적재 · ':''}계약 ${c.tons}t</span></div>
-<div class="meta">${CARGO[c.cargo].name} · ${c.packageType??BREAKBULK_PACK[c.cargo]?.pack??'재래화물'} · 작업성 ×${contractHandlingMultiplier(c).toFixed(2)} · 적기 ${clock(c.laycanStart)}~${clock(c.laycanEnd)} · 적재계수 ${CARGO[c.cargo].sf.toFixed(2)}㎥/t${c.wibon ? ' · WIBON' : ''}</div>
+<div class="top"><b>${PORTS[c.from].name}→${PORTS[c.to].name} · ${CARGO[c.cargo].name}</b><span class="meta">${chained?'후속 · ':''}적기 ~${lay.getUTCMonth()+1}/${lay.getUTCDate()}</span></div>
 <div class="controls">
 <button data-plan="minus" aria-label="50톤 줄이기">−50</button>
 <button data-plan="plus" aria-label="50톤 늘리기">+50</button>
-<span class="tons">${it.tons}t</span>
-<button class="hold ${it.hold===1?'on':''}" data-plan="hold1">1번창</button>
-<button class="hold ${it.hold===2?'on':''}" data-plan="hold2">2번창</button>
+<span class="tons">${it.tons}t<small>/ ${c.tons}t</small></span>
 <button data-plan="remove" aria-label="계획에서 제거">×</button>
-<button data-plan="up" title="우선 양하 순서 앞으로">↑</button>
-<button class="route-down" data-plan="down" title="우선 양하 순서 뒤로">↓</button>
 </div>
-</div>`;
-}).join('');
-const holds = E.holds.map((h) => {
-const assigned = draftPlan.filter((it)=>it.hold===h.hold);
-const cargoList = assigned.length
-? assigned.map((it)=>`${CARGO[it.c.cargo].name} ${it.tons}t${it.c.to?`→${PORTS[it.c.to].name}`:''}`).join(' · ')
-: '비어 있음';
-return `<div class="plan-hold ${h.ok?'':'bad'}">
-<b>${h.hold}번창 최대</b> ${Math.round(h.used)} / ${h.cap}㎥${h.barrier?' · 격벽 구간':''}
-<div class="meter"><i style="width:${Math.min(100,h.pct)}%"></i></div>
-<div class="cargo-list">${cargoList}</div>
 </div>`;
 }).join('');
 const warnings = [...E.errors.map((x)=>`⛔ ${x}`), ...E.warnings.map((x)=>`△ ${x}`)];
-const timeline = E.schedule.slice(0, 18).map(planScheduleLine).join('');
-const chainedLoads = E.laycans.filter((x)=>x.port !== sim.ship.at).length;
 box.innerHTML = cards + `<div class="plan-summary">
-<div class="plan-route"><b>계획 항로</b> ${routeName}<br><b>첫 적재 적기</b> ${firstLay} · <b>중간항 재적재</b> ${chainedLoads}회</div>
-<div class="plan-holds">${holds}</div>
-<div class="plan-kpis">
-<div class="plan-kpi"><span>총 운송량</span><b>${E.totalTons}t</b></div>
-<div class="plan-kpi"><span>최대 동시적재</span><b>${E.maxOnboardTons} / ${SHIP.cargoMax}t</b></div>
-<div class="plan-kpi"><span>항해거리</span><b>${E.seaNm.toFixed(0)}해리</b></div>
-<div class="plan-kpi"><span>예상 순익</span><b>${E.estNet>=0?'+':'−'}${won(Math.abs(E.estNet))}</b></div>
-<div class="plan-kpi"><span>예상 기간</span><b>${E.days.toFixed(1)}일</b></div>
-<div class="plan-kpi"><span>공선거리</span><b>${E.emptyNm.toFixed(0)}해리</b></div>
-</div>
-<div class="plan-timeline"><div class="cap">시간축</div>${timeline}</div>
-${warnings.length ? `<div class="plan-warn">${warnings.join('<br>')}</div>` : `<div class="plan-ok">선복·화물창·흘수·각 적재항의 적기가 모두 맞는다. 예상값은 실제 선석·기상에 따라 흔들린다.</div>`}
+<div class="plan-route">${routeName}</div>
+${planSpeedHTML()}
+${planLedgerHTML(E, 'market')}
+${warnings.length ? `<div class="plan-warn">${warnings.join('<br>')}</div>` : ''}
 <button id="mk-confirm" class="plan-confirm" ${E.ok?'':'disabled'}>이 계획으로 계약 · ${draftPlan.length}건</button>
 </div>`;
 $('mk-confirm').onclick = () => {
 if (!lastPlanEval?.ok) return;
-const p = draftPlan.map((x) => ({ c:x.c, tons:x.tons, hold:x.hold }));
-acceptPlanned(p, lastPlanEval);
+const p = draftPlan.map((x) => ({ c:x.c, tons:x.tons, hold:x.hold, slot:slotOf(x) }));
+acceptPlanned(p, lastPlanEval); setEot(draftSpeed, true);
 closeMarket();
 };
 }
@@ -7584,6 +7628,8 @@ renderDraftPlan();
 openMarketList(false);
 }
 $('mk-plan').onclick = (e) => {
+const sp = e.target.closest('button[data-plan-speed]');
+if (sp) { draftSpeed = sp.dataset.planSpeed; renderDraftPlan(); return; }
 const b = e.target.closest('button[data-plan]'); if (!b) return;
 const card = b.closest('[data-pi]'); if (!card) return;
 editDraft(+card.dataset.pi, b.dataset.plan);
@@ -7634,7 +7680,7 @@ group.className = 'planner-port-head';
 group.innerHTML = `<b>${PORTS[origin].name}</b><span>${origin===at?'지금 싣는 화물':'후속 적재 예약'}</span>`;
 $('mk-list').appendChild(group);
 const list = marketContractsFor(origin);
-const fs=sim.market.flowSummary(origin,sim.t),si=shippingMarketIntel(sim.market,origin,sim.t,sim.company,sim.rivals),flow=document.createElement('div');flow.className='planner-flow';flow.innerHTML=`<b>${fs.region}</b> · 선적문의 ${si.inquiry} · 경쟁선복 ${si.tonnage} · 운임 ${si.rate}${si.confidence>=58?`<br>${si.source}: 14일 ${si.out14} · 45일 ${si.out45} · 신뢰 ${si.confidence}%`:''}<br><span>${worldRegionNote(origin)}</span>`;$('mk-list').appendChild(flow);if(origin===at)renderShippingIntel(origin);
+const si=shippingMarketIntel(sim.market,origin,sim.t,sim.company,sim.rivals);
 let shown = 0;
 for (const c of list) {
 const maxT = loadableTons(c.cargo, c.tons);
@@ -7642,29 +7688,24 @@ if (maxT < PLAN_MIN_TONS || !directCargoEligible(c.cargo)) continue;
 const seaH = c.d / SHIP.serviceSpeed;
 const portH=(maxT/(portDischargeRate(sim.company,c.from,c.cargo,100,0,0)*contractLoadMultiplier(c))+maxT/(portDischargeRate(sim.company,c.to,c.cargo,100,0,0)*contractHandlingMultiplier(c)))/16*24;
 const est = seaH / 24 * seaDay(sim.bunkerPrice) + portH / 24 * portDay(sim.bunkerPrice)
-+ portCallFees(sim.company,c.from).total + portCallFees(sim.company,c.to).total;
++ portCallFees(sim.company,c.from).total + portCallFees(sim.company,c.to).total + 2 * PILOTAGE_ALLOWANCE;
 const gain = c.perTon * maxT * boon - est;
 const quickDays=Math.max(.25,(seaH+portH+Math.max(0,(c.laycanStart-sim.t)/HOUR))/24), quickDaily=gain/quickDays;
 const chosen = draftPlan.some((x) => x.c.id === c.id);
 const whHeld=c.heldBy==='PLAYER'&&c.warehouseHold;
 const comp = whHeld?[]:competitionForContract(sim.rivals, c, sim.t).slice(0,2);
-const compText = comp.length ? `<br><span class="compete">경쟁 관심: ${comp.map(x=>x.name).join(' · ')}</span>` : '';
 const el = document.createElement('div');
-el.className = 'fixture' + (chosen ? ' in-plan' : ''); el.tabIndex = chosen ? -1 : 0; el.dataset.cid=c.id;
+el.className = 'fixture' + (chosen ? ' in-plan' : '') + (gain < 0 ? ' loss' : ''); el.tabIndex = chosen ? -1 : 0; el.dataset.cid=c.id;
+// 사장이 고를 때 보는 것: 어디로 · 무엇을 얼마나 · 남는 돈 · 적기 · 며칠
+const lay = gameDate(c.laycanEnd);
 el.innerHTML =
-`<div class="leg">${PORTS[c.from].name} <em>→</em> ${PORTS[c.to].name}` +
-(c.wibon ? '<span class="tag" data-term="WIBON">WIBON</span>' : '') +
-(whHeld ? '<span class="tag">지점 선확보</span>' : '') +
-(c.transship ? '<span class="tag">환적연계</span>' : '') +
-(c.serviceClassLabel ? `<span class="tag">${c.serviceClassLabel} 운송</span>` : '') +
-((c.specialty??contractSpecialty(c.cargo,c.tons))!=='GENERAL'?`<span class="tag">${specialtyLabel(c.specialty??contractSpecialty(c.cargo,c.tons))} 적합</span>`:'') +
-((c.flowDemand??1)>(c.flowSupply??1)*1.10?'<span class="tag flowhot">선복수요 강세</span>':(c.flowSupply??1)>(c.flowDemand??1)*1.15?'<span class="tag">선적문의 강세</span>':'') +
-`<span class="addtag">${chosen ? '계획에 있음' : whHeld ? '＋ 선확보 화물 적재' : origin===at ? '＋ 계획에 추가' : '＋ 연결 화물 예약'}</span></div>` +
-`<div class="terms"><b>${c.manifest??CARGO[c.cargo].name}</b> · ${CARGO[c.cargo].name} 계약 ${c.tons.toLocaleString()}t${maxT<c.tons?` · 본선 적재 ${maxT.toLocaleString()}t`:''} · ${c.d}해리 · 적기 ${clock(c.laycanStart)}~${clock(c.laycanEnd)}<br>` +
-`재래화물 ${c.packageType??BREAKBULK_PACK[c.cargo]?.pack??'일반'} · 작업성 ×${contractHandlingMultiplier(c).toFixed(2)} · 적재계수 ${CARGO[c.cargo].sf.toFixed(2)}㎥/t · 허용정박 ${(c.laytime / 3600).toFixed(0)}시간 · 체선 ${Math.round(c.demurrage).toLocaleString()}원/일${whHeld?` · 창고 선처리로 적재 ${(100*(warehouseLoadMultiplier(c)-1)).toFixed(0)}%↑`:''}${compText}</div>` +
-`<div class="rate">${Math.round(c.perTon * maxT * boon).toLocaleString()}원 <span class="terms">단독 예상 ${gain>=0?'순익':'손실'} ${Math.round(Math.abs(gain)).toLocaleString()} · 약 ${quickDays.toFixed(1)}일 · <span class="daily">일당 ${Math.round(quickDaily).toLocaleString()}</span></span></div>` +
-`<div class="terms hint"><b>판단 포인트</b> · ${contractDecisionHint(c,maxT,quickDays,si)}</div>` +
-(c.hint && !earlyContractTag(c) ? `<div class="terms hint">${c.hint}</div>` : '');
+`<div class="fx-top"><span class="fx-leg">${PORTS[c.from].name} → ${PORTS[c.to].name} · ${CARGO[c.cargo].name} ${maxT.toLocaleString()}t` +
+(maxT<c.tons?`<small>계약 ${c.tons.toLocaleString()}t</small>`:'') +
+(c.wibon ? '<i class="tag" data-term="WIBON">WIBON</i>' : '') +
+(comp.length ? `<i class="tag warn">경쟁 ${comp.length}</i>` : '') + `</span>` +
+`<b class="fx-net ${gain<0?'neg':''}">${gain>=0?'+':'−'}${won(Math.abs(gain))}</b></div>` +
+`<div class="fx-sub"><span>적기 ~${lay.getUTCMonth()+1}/${lay.getUTCDate()} · ${quickDays.toFixed(1)}일 · 일당 ${won(quickDaily)}</span>` +
+`<span class="addtag">${chosen ? '계획에 있음' : '＋ 추가'}</span></div>`;
 const take = () => { if (!chosen) addToDraft(c); };
 el.onclick = take;
 el.onkeydown = (e) => { if (!chosen && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); take(); } };
@@ -9016,7 +9057,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.8.3 · 선택지마다 얼마짜리인지 · 값이 작으면 묻지 않는다 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.8.5 · 시장 목록 두 줄 · 계획 카드는 톤수만 · 겹치는 게이지 제거 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -10158,8 +10199,6 @@ function uiPaintNow() {
       const row = document.createElement('div'); row.className = 'btnrow'; slot.appendChild(row); uiMount('h-night', row);
       uiMount('h-nightcalc', slot);
     } else {
-      slot.appendChild(uiLabel('항만'));
-      const pr = document.createElement('div'); pr.id = 'now-portrow'; pr.className = 'nowgrid'; slot.appendChild(pr);
       slot.appendChild(uiLabel('항만 업무'));
       const row = document.createElement('div'); row.className = 'btnrow'; slot.appendChild(row);
       uiMount('h-bunker', row); uiMount('h-repair', row); uiMount('h-lobby', row);
@@ -10799,9 +10838,7 @@ function wharfPlanBoard() {
     })();
     return `<div class="wh-axis">${ticks}</div>` +
       `<div class="wh-time"><div class="wh-row head"><span class="wh-rowk">항해</span><div class="wh-track">${legs}</div></div>${rows}</div>` +
-      `<div class="wh-verdict ${E.estNet < 0 ? 'bad' : E.estNet < 4000 ? 'warn' : ''}">` +
-      `<b>${E.estNet >= 0 ? `남는 돈 ${won(E.estNet)}원` : `손해 ${won(-E.estNet)}원`}</b>` +
-      `<span>${E.days.toFixed(1)}일 · ${E.totalTons}t · 하루 ${won(E.estNet / Math.max(.5, E.days))}원</span></div>` +
+      planSpeedHTML() + planLedgerHTML(E, 'wharf') +
       (warn.length ? `<div class="wh-warn">${warn.join('<br>')}</div>` : `<div class="wh-ok">용적·혼적·흘수·적기가 모두 맞는다.</div>`) +
       `<div class="btnrow"><button data-wh="market">계약 더 고른다</button>` +
       `<button data-wh="confirm" ${E.ok ? '' : 'disabled'} class="wh-confirm">이 계획으로 확정 · ${draftPlan.length}건</button></div>`;
@@ -10863,6 +10900,8 @@ function wharfBoot() {
     const a = b.dataset.wh;
     if (a.startsWith('gang:')) { st.gangs = a.slice(5); say(`하역반 — ${GANGS[st.gangs].name}`, 'b'); return wharfPaint(); }
     if (a === 'detail') { wharfDetail = !wharfDetail; return wharfPaint(); }
+    const sp = e.target.closest('button[data-plan-speed]');
+    if (sp) { draftSpeed = sp.dataset.planSpeed; renderDraftPlan(); return wharfPaint(); }
     if (a === 'night') { $('h-night').click(); return wharfPaint(); }
     if (a === 'split' || a === 'merge') {
       if (wharfSel < 0 || !wharfDrafting()) return;
@@ -10900,7 +10939,7 @@ function wharfBoot() {
     }
     if (a === 'market') return $('h-market').click();
     if (a === 'confirm') { const E = planEvaluation(); if (!E?.ok) return;
-      acceptPlanned(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold, slot:slotOf(x) })), E); wharfSel = -1; return wharfPaint(); }
+      acceptPlanned(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold, slot:slotOf(x) })), E); setEot(draftSpeed, true); wharfSel = -1; return wharfPaint(); }
     if (wharfSel < 0 || !wharfDrafting()) return;
     if (a === 'plus') {
       const it = draftPlan[wharfSel];
@@ -11180,10 +11219,8 @@ const q=M.q,bearing=Math.round(courseBearing(q.course)),to=PORTS[st.leg[1]]?.nam
 const currentText=`${M.along>=0?'순류':'역류'} ${Math.abs(M.along).toFixed(1)}kn`;
 const sys=M.nearest;
 const storm=sys&&sys.nm<600?`<span class="${sys.typhoon?'warn':''}">${sys.typhoon?'태풍':'저기압'} 중심 ${Math.round(sys.nm)}해리 · ${Math.round(sys.p)}hPa</span>`:'';
-box.innerHTML=`<b>항해 ${to}</b> · 침로 ${String(bearing).padStart(3,'0')}°<br>`+
-`대지 ${(st.curV??0).toFixed(1)}kn · 대수 ${(st.stw??0).toFixed(1)}kn · ${currentText}<br>`+
-`파고 ${w.hs.toFixed(1)}m · 풍 ${String(deg).padStart(3,'0')}° ${w.U.toFixed(0)}m/s · 시정 ${w.vis.toFixed(1)}km${w.fog?' 해무':''}`+
-`${storm?`<br>${storm}`:''}<br><span>항적: 매시 빗금 · 6시간마다 시각</span>`;
+box.innerHTML=`<b>${to}</b> · 침로 ${String(bearing).padStart(3,'0')}° · 대지 ${(st.curV??0).toFixed(1)}kn · ${currentText}`+
+`${storm?`<br>${storm}`:''}`;
 }else{
 box.innerHTML=`<b>${PORTS[S.at].name} ${st.phase}</b> · 풍 ${String(deg).padStart(3,'0')}° ${w.U.toFixed(0)}m/s · 파고 ${w.hs.toFixed(1)}m · 시정 ${w.vis.toFixed(1)}km${w.fog?' 해무':''}`;
 }
