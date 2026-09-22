@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.8.5</title>
+<title>TRAMP LINE 1962 · v3.8.6</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -682,7 +682,9 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .cocard small{display:block;font-size:var(--fs-micro);color:var(--ink2);margin-top:2px;line-height:1.35}
 #co-host .subpage{display:none}
 #co-host .subpage.subon{display:block}
-#rec-host .subpage{display:block}
+#rec-host .subpage{display:none}
+#rec-host .subpage.subon{display:block}
+#rec-tabs{margin-bottom:6px}
 .subpage{margin-bottom:10px}
 @media(max-width:430px){.cocards{grid-template-columns:repeat(2,minmax(0,1fr))}.nowhead{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:860px){#pages{height:auto;max-height:none;flex:1 1 auto;min-height:0}#pages .page{min-height:0}}
@@ -732,7 +734,7 @@ background:rgba(246,244,236,.72)}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.8.5</div>
+      <div class="mm-version">CONTENT v3.8.6</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -836,6 +838,10 @@ background:rgba(246,244,236,.72)}
         <div id="co-host" hidden></div>
       </section>
       <section data-page="record" class="page">
+        <div class="btnrow" id="rec-tabs">
+          <button data-rec="log" aria-pressed="true">일지</button>
+          <button data-rec="options" aria-pressed="false">옵션</button>
+        </div>
         <div id="rec-host"></div>
       </section>
       <section data-page="helm" class="page on">
@@ -962,7 +968,7 @@ background:rgba(246,244,236,.72)}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.5 · 겹치는 것을 걷어냈다</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.8.6 · 옵션 화면 복구 · 앱 갱신 진단</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1173,7 +1179,7 @@ background:rgba(246,244,236,.72)}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.8.5';
+const TRAMP_LINE_CONTENT_VERSION='3.8.6';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -9057,7 +9063,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.8.5 · 시장 목록 두 줄 · 계획 카드는 톤수만 · 겹치는 게이지 제거 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.8.6 · 옵션 화면 복구 · 앱 갱신 진단 메시지 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -10327,10 +10333,16 @@ function uiSwitch(page) {
   $('dock').classList.remove('folded'); $('dock-fold').textContent = '▾'; $('dock-fold').setAttribute('aria-expanded', 'true');
   if (page === 'company') uiPaintCompany();
 }
+function uiRecView(key) {
+  for (const b of $('rec-tabs').children) b.setAttribute('aria-pressed', String(b.dataset.rec === key));
+  for (const el of $('rec-host').children) el.classList.toggle('subon', el.dataset.rec === key);
+  if (key === 'options') { try { paintVisualOptions(); paintAudioOptions(); renderSaveSlots(); } catch (_) {} }
+  $('pages').scrollTop = 0;
+}
 // 분석 화면의 「~로 간다」 단추가 옛 탭 이름을 부른다 — 새 구조로 옮겨 준다
 function analysisSwitchPage(page) {
   if (page === 'helm' || page === 'instr') { uiSwitch('now'); if (page === 'instr') $('now-more-btn')?.click?.(); return; }
-  if (page === 'log' || page === 'options') { uiSwitch('record'); return; }
+  if (page === 'log' || page === 'options') { uiSwitch('record'); uiRecView(page); return; }
   if (page === 'analysis' || page === 'strategy' || page === 'rank') { uiSwitch('company'); uiOpenCoView(page); return; }
   uiSwitch('now');
 }
@@ -10357,10 +10369,12 @@ function uiBoot() {
     el.classList.remove('page', 'on'); el.classList.add('subpage'); el.dataset.sub = sub; host.appendChild(el);
   }
   const rec = $('rec-host');
-  for (const sel of ['section[data-page="log"]', '#options-page']) {
+  for (const [sel, key] of [['section[data-page="log"]', 'log'], ['#options-page', 'options']]) {
     const el = document.querySelector(sel); if (!el) continue;
-    el.classList.remove('page', 'on'); el.classList.add('subpage', 'subon'); rec.appendChild(el);
+    el.classList.remove('page', 'on'); el.classList.add('subpage'); el.dataset.rec = key; rec.appendChild(el);
   }
+  $('rec-tabs').onclick = (e) => { const b = e.target.closest('button[data-rec]'); if (b) uiRecView(b.dataset.rec); };
+  uiRecView('log');
   $('tabs').onclick = (e) => { const b = e.target.closest('button[role="tab"]'); if (b) uiSwitch(b.dataset.page); };
   $('co-cards').onclick = (e) => { const b = e.target.closest('button[data-co]'); if (b) uiOpenCoView(b.dataset.co); };
   $('co-back').onclick = uiCloseCoView;
