@@ -91,7 +91,15 @@ public class MainActivity extends Activity {
     }
 
     private void ensureBaseContent() {
-        if (activeIndex.exists() && activeIndex.length() > 0) return;
+        // 처음이면 내장본을 깐다. 이미 있어도 APK 를 새로 깔아 내장본이 더 새거면 그걸로 바꾼다.
+        // (전에는 한 번 깔린 파일을 영영 안 건드려서 APK 업그레이드가 콘텐츠를 못 실었다.)
+        if (activeIndex.exists() && activeIndex.length() > 0) {
+            String bundled = readAssetVersion();
+            String active = readVersion(activeIndex);
+            if (compareVersions(bundled, active) <= 0) return;
+            if (backupIndex.exists()) backupIndex.delete();
+            activeIndex.renameTo(backupIndex);
+        }
         try (InputStream in = getAssets().open("index.html");
              FileOutputStream out = new FileOutputStream(activeIndex)) {
             byte[] buf = new byte[8192];
@@ -100,6 +108,20 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             throw new RuntimeException("기본 게임 파일을 설치하지 못했습니다.", e);
         }
+    }
+
+    private String readAssetVersion() {
+        try (InputStream in = getAssets().open("index.html")) {
+            byte[] buf = new byte[65536];
+            int n = in.read(buf);
+            if (n <= 0) return "0";
+            Matcher mt = CONTENT_VERSION.matcher(new String(buf, 0, n, "UTF-8"));
+            return mt.find() ? mt.group(1) : "0";
+        } catch (Exception e) { return "0"; }
+    }
+
+    private void toast(final String msg) {
+        main.post(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show());
     }
 
     private void loadGame() {
@@ -149,15 +171,15 @@ public class MainActivity extends Activity {
             conn.setConnectTimeout(8000);
             conn.setReadTimeout(10000);
             conn.setRequestProperty("Accept", "application/vnd.github+json");
-            conn.setRequestProperty("User-Agent", "TRAMP-LINE-1962-Android/2.2.0");
+            conn.setRequestProperty("User-Agent", "TRAMP-LINE-1962-Android/2.3.0");
 
-            if (conn.getResponseCode() != 200) return;
+            if (conn.getResponseCode() != 200) { toast("갱신 확인 실패 · GitHub 응답 " + conn.getResponseCode()); return; }
             String json = readAll(conn.getInputStream(), 2 * 1024 * 1024);
             JSONObject release = new JSONObject(json);
 
             String latest = normalizeVersion(release.optString("tag_name", "0"));
             String current = readVersion(activeIndex);
-            if (compareVersions(latest, current) <= 0) return;
+            if (compareVersions(latest, current) <= 0) { toast("콘텐츠 " + current + " · 최신입니다"); return; }
 
             JSONArray assets = release.optJSONArray("assets");
             if (assets == null) return;
@@ -175,7 +197,7 @@ public class MainActivity extends Activity {
                     break;
                 }
             }
-            if (assetUrl == null) return;
+            if (assetUrl == null) { toast("릴리스 " + latest + " 에 " + wantedPrefix + "*.zip 이 없습니다"); return; }
 
             File zip = new File(getCacheDir(), "tramp_update.zip");
             download(assetUrl, zip);
@@ -184,6 +206,7 @@ public class MainActivity extends Activity {
             if (!extractIndex(zip, candidate)) {
                 zip.delete();
                 candidate.delete();
+                toast("갱신 실패 · zip 안에 index.html 이 없습니다");
                 return;
             }
 
@@ -191,6 +214,7 @@ public class MainActivity extends Activity {
             if (compareVersions(candidateVersion, latest) < 0) {
                 candidate.delete();
                 zip.delete();
+                toast("갱신 실패 · zip 의 판본 " + candidateVersion + " 이 태그 " + latest + " 보다 낮습니다");
                 return;
             }
 
@@ -218,8 +242,9 @@ public class MainActivity extends Activity {
                 ).show();
                 loadGame();
             });
-        } catch (Exception ignored) {
-            // Network/update failure must never block normal gameplay.
+        } catch (Exception e) {
+            // 갱신 실패가 게임을 막아서는 안 된다. 다만 이유는 말해 준다.
+            toast("갱신 확인 실패 · " + e.getClass().getSimpleName());
         } finally {
             if (conn != null) conn.disconnect();
         }
@@ -230,7 +255,7 @@ public class MainActivity extends Activity {
         c.setConnectTimeout(10000);
         c.setReadTimeout(20000);
         c.setInstanceFollowRedirects(true);
-        c.setRequestProperty("User-Agent", "TRAMP-LINE-1962-Android/2.2.0");
+        c.setRequestProperty("User-Agent", "TRAMP-LINE-1962-Android/2.3.0");
         int code = c.getResponseCode();
         if (code < 200 || code >= 300) throw new Exception("HTTP " + code);
 
