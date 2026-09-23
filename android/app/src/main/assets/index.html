@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.9.0</title>
+<title>TRAMP LINE 1962 · v3.10.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -257,6 +257,8 @@ border: 1px solid var(--magenta); color: var(--magenta); padding: 1px 5px; margi
 .plan-card .controls { display:grid; grid-template-columns:auto auto 1fr auto auto auto; gap:3px; align-items:center; }
 .plan-card .controls button { min-height:32px; padding:0 8px; font-size:var(--fs-micro); }
 .plan-card .tons { font-family:var(--face-num); text-align:center; }
+.plan-card .controls.ts-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; align-items:start; }
+.plan-card .controls.ts-row > button { margin-top:6px; }
 .plan-card .hold.on { border-color:var(--magenta); color:var(--magenta); font-weight:700; }
 .plan-summary { padding:10px 14px; display:grid; gap:7px; background:#f0eee5; }
 .plan-holds { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
@@ -750,6 +752,144 @@ background:rgba(246,244,236,.72)}
 .menu-note{margin-top:10px;color:var(--ink2);font-size:var(--fs-micro);line-height:1.5}
 @media(max-width:560px){.mm-panel{padding:13px}.mm-actions{grid-template-columns:1fr}.mm-actions #mm-return{grid-column:auto}.save-slot{grid-template-columns:44px minmax(0,1fr)}.save-slot .slot-actions{grid-column:1/-1}.save-slot .slot-actions button{flex:1}.mm-title h1{font-size:34px}}
 
+/* ── 선교 계기 ── */
+:root{ --bake:#1b2325; --face:#fbfaf5; --up:#2a6b3c;
+  --ease-detent:cubic-bezier(.34,1.56,.64,1); --ease-needle:cubic-bezier(.25,1.35,.45,1); }
+.plate{font:9px var(--face-num);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2)}
+/* 표시등 */
+.lamp{display:inline-block;width:9px;height:9px;border-radius:50%;background:#d8d3c2;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);flex:0 0 auto;transition:background .12s,box-shadow .12s;vertical-align:middle}
+.lamp.on{background:var(--magenta);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2),0 0 0 3px rgba(168,18,95,.14)}
+.lamp.go{background:var(--up);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2),0 0 0 3px rgba(42,107,60,.14)}
+.lamp.blink{animation:lampblink .9s steps(2,jump-none) infinite}
+@keyframes lampblink{50%{background:#d8d3c2;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}}
+
+/* 기관전령기 */
+.eotd{position:relative;background:var(--face);border:1px solid var(--rule);box-shadow:inset 0 0 0 3px var(--face),inset 0 0 0 4px var(--line);
+  padding:6px 8px 7px;margin:6px 0;user-select:none;-webkit-user-select:none;touch-action:none}
+.eotd svg{display:block;width:100%;max-width:300px;height:auto;margin:0 auto;cursor:grab}
+.eotd.dragging svg{cursor:grabbing}
+.eotd .sector{fill:none;stroke:var(--line);stroke-width:34;transition:stroke .15s}
+.eotd .tick{stroke:var(--ink2);stroke-width:1} .eotd .tick.major{stroke:var(--ink);stroke-width:1.6}
+.eotd .lbl{font:600 11px var(--face-num);letter-spacing:.08em;fill:var(--ink2);text-anchor:middle;pointer-events:none}
+.eotd .kn{font:9px var(--face-num);fill:var(--ink2);text-anchor:middle;pointer-events:none}
+.eotd[data-i="0"] .sector.s0,.eotd[data-i="1"] .sector.s1,.eotd[data-i="2"] .sector.s2{stroke:var(--bake)}
+.eotd[data-i="0"] .lbl.s0,.eotd[data-i="1"] .lbl.s1,.eotd[data-i="2"] .lbl.s2{fill:var(--paper)}
+.eotd[data-i="0"] .kn.s0,.eotd[data-i="1"] .kn.s1,.eotd[data-i="2"] .kn.s2{fill:#b9bcb4}
+.eotd .eot-lever{transform-origin:150px 160px;transition:transform .32s var(--ease-detent);fill:var(--bake)}
+.eotd .eot-lever line{stroke:var(--paper);stroke-width:1.5}
+.eotd .eot-reply{transform-origin:150px 160px;transition:transform .5s var(--ease-needle);fill:var(--magenta)}
+.eotd .hub{fill:var(--bake)} .eotd .pin{fill:var(--paper)}
+.eotd-read{display:flex;align-items:baseline;gap:6px;margin-top:2px;font:11px var(--face-num);color:var(--ink2)}
+.eotd-read b{font:600 15px var(--face-num);color:var(--ink);letter-spacing:.02em}
+.eotd-read .ack{margin-left:auto;display:flex;align-items:center;gap:5px;font-style:normal;font-family:var(--face-name)}
+.eotd-read .note{margin-left:auto}
+#h-eot{display:block}
+#mk-plan .eotd svg,#vs-body .eotd svg,#wharf-body .eotd svg{max-width:250px}
+
+/* 드럼 계수기 */
+.drum{display:inline-flex;align-items:center;gap:1px;padding:3px 4px;background:var(--bake);border-radius:2px;vertical-align:middle;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 0 0 1px var(--rule)}
+.drum .d{position:relative;display:inline-block;width:.72em;height:1.2em;overflow:hidden;background:#232c2e;color:#f3efe2;
+  font:600 16px/1.2em var(--face-num);text-align:center;border-radius:1px}
+.drum .d::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(#000a,transparent 28%,transparent 72%,#000a)}
+.drum .d .s{position:absolute;left:0;right:0;top:0;transition:transform .55s cubic-bezier(.2,.8,.25,1)}
+.drum .d .s i{display:block;height:1.2em;font-style:normal}
+.drum .sep{color:#8d918a;font:600 14px/1 var(--face-num);width:.5em;text-align:center}
+.drum.neg .d{color:#f1a9c9}
+.drum.sm{padding:1px 2px;gap:0}
+.drum.sm .d{font-size:12px} .drum.sm .sep{font-size:11px}
+#f-cash{display:inline-flex;align-items:center;gap:3px}
+#f-cash.warn .drum{box-shadow:0 0 0 1px var(--magenta)}
+
+/* 원형 계기 */
+.nowhead.dials{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;background:none;border:0;margin:2px 0 6px}
+.dial{background:var(--face);border:1px solid var(--rule);box-shadow:inset 0 0 0 2px var(--face),inset 0 0 0 3px var(--line);padding:4px 4px 5px;text-align:center;min-width:0}
+.dial svg{width:100%;height:auto;display:block}
+.dial .needle{transition:transform .9s var(--ease-needle);transform-origin:60px 62px}
+.dial .gv{font:600 12px var(--face-num);margin-top:-2px;white-space:nowrap}
+.dial .gv small{font-weight:400;color:var(--ink2);margin-left:2px}
+.dial .plate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.06em}
+.dial.warn .gv b{color:var(--magenta)}
+@media(max-width:430px){.nowhead.dials{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* 누름단추 */
+#act-row{padding:7px 8px 9px;gap:9px;background:var(--paper)}
+#todo-act{border-radius:3px;box-shadow:0 0 0 1px var(--rule),0 3px 0 1px #0c1112;transition:transform .06s,box-shadow .06s;position:relative;overflow:hidden}
+#todo-act.hot{box-shadow:0 0 0 1px var(--rule),0 3px 0 1px #6d0c3e}
+#todo-act:active:not(:disabled),#todo-act.holding{transform:translateY(3px);box-shadow:0 0 0 1px var(--rule),0 0 0 1px #0c1112}
+#act-row #h-skip{border-radius:3px;border:0;box-shadow:0 0 0 1px var(--rule),0 3px 0 1px #000;transition:transform .06s,box-shadow .06s}
+#act-row #h-skip:active{transform:translateY(3px);box-shadow:0 0 0 1px var(--rule)}
+button[data-hold]{position:relative;overflow:hidden;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+button[data-hold]::after{content:'';position:absolute;inset:0;background:currentColor;opacity:.18;transform:scaleX(0);transform-origin:left;pointer-events:none}
+button[data-hold].holding::after{transform:scaleX(1);transition:transform .7s linear}
+button[data-hold] .holdhint{font:10px var(--face-num);opacity:.72;margin-left:8px;letter-spacing:.06em}
+button[data-hold].nudge{animation:nudge .32s}
+@keyframes nudge{20%{transform:translateX(-3px)}50%{transform:translateX(3px)}80%{transform:translateX(-1px)}}
+#mk-confirm,[data-wh="confirm"],[data-mc="confirm"]{border-radius:3px;box-shadow:0 2px 0 var(--rule);transition:transform .06s,box-shadow .06s}
+#mk-confirm.holding,[data-wh="confirm"].holding,[data-mc="confirm"].holding{transform:translateY(2px);box-shadow:none}
+
+/* 로터리 선택기 */
+.rotary{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;align-items:center;margin:4px 0 8px}
+.rotary .knobbtn{all:unset;display:block;width:104px;height:104px;cursor:pointer}
+.rotary .knobbtn svg{width:104px;height:104px;display:block}
+.rotary .rim{fill:var(--face);stroke:var(--rule)} .rotary .rim2{fill:none;stroke:var(--line)}
+.rotary .pos{stroke:var(--ink);stroke-width:2}
+.rotary .knob{transform-origin:64px 64px;transition:transform .35s var(--ease-detent)}
+.rotary .body{fill:var(--bake)} .rotary .grip{stroke:#2f393b;stroke-width:2} .rotary .cap{fill:#232c2e} .rotary .mark{fill:var(--paper)}
+.rot-opts{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rot-opts button{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;align-items:center;text-align:left;
+  padding:7px 9px;border:1px solid var(--line);background:var(--face);color:var(--ink);min-height:44px}
+.rot-opts button .lamp{grid-row:1/3}
+.rot-opts button b{font:600 12px var(--face-name)}
+.rot-opts button em{grid-column:2;font:normal 10px var(--face-num);color:var(--ink2)}
+.rot-opts button[aria-pressed="true"]{background:var(--face);color:var(--ink);border-color:var(--rule);box-shadow:inset 3px 0 0 var(--ink)}
+
+/* 톤수 미끄럼 레버 */
+.tslide{position:relative;height:40px;margin:4px 10px 0;user-select:none;-webkit-user-select:none;touch-action:none;cursor:pointer}
+.ts-track{position:absolute;left:0;right:0;top:12px;height:8px;background:#e7e2d2;border:1px solid var(--rule);border-radius:1px}
+.ts-over{position:absolute;top:12px;height:8px;right:0;background:repeating-linear-gradient(45deg,rgba(168,18,95,.35) 0 3px,transparent 3px 6px);border:1px solid var(--magenta);border-left:0}
+.ts-ticks{position:absolute;left:0;right:0;top:24px;height:10px;pointer-events:none}
+.ts-ticks i{position:absolute;top:0;width:1px;height:4px;background:var(--ink2)} .ts-ticks i.M{height:8px;background:var(--ink)}
+.ts-thumb{position:absolute;top:0;width:20px;height:32px;margin-left:-10px;background:var(--bake);border-radius:2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 0 1px var(--rule),0 2px 0 #000;transition:left .14s ease-out}
+.ts-thumb::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--magenta)}
+.tslide.dragging .ts-thumb{transition:none}
+.ts-read{display:flex;align-items:baseline;gap:5px;margin:0 2px 4px;font:11px var(--face-num);color:var(--ink2)}
+.ts-read b{font:600 14px var(--face-num);color:var(--ink)}
+.ts-read em{margin-left:auto;font-style:normal;display:flex;align-items:center;gap:5px;font-family:var(--face-name)}
+.plan-card .ts-wrap,.mc-slide{padding:2px 0 0}
+
+/* 로커 스위치 — 켜고 끄는 것은 모두 이것 */
+.optbtn,.swbtn{position:relative;padding-left:38px !important;background:var(--face);text-align:left}
+.optbtn[aria-pressed],.swbtn[aria-pressed]{background:var(--face);color:var(--ink)}
+.optbtn[aria-pressed="true"] small{color:var(--ink2)}
+.optbtn::before,.swbtn::before{content:'';position:absolute;left:10px;top:50%;width:18px;height:28px;margin-top:-14px;background:#dcd6c4;border:1px solid var(--rule);border-radius:2px}
+.optbtn::after,.swbtn::after{content:'';position:absolute;left:12px;top:50%;width:14px;height:12px;margin-top:0;background:var(--bake);border-radius:1px;
+  box-shadow:0 1px 0 #000;transition:margin-top .14s var(--ease-detent)}
+.optbtn[aria-pressed="true"]::after,.swbtn[aria-pressed="true"]::after{margin-top:-12px;box-shadow:0 -1px 0 #000}
+.optbtn b::after{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#d8d3c2;margin-left:6px;vertical-align:1px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.optbtn[aria-pressed="true"] b::after{background:var(--magenta);box-shadow:0 0 0 2px rgba(168,18,95,.14)}
+.swbtn{font-family:var(--face-name);font-weight:600}
+
+/* 선장 보고 */
+#ask .sheetbox header{background:var(--bake);color:#f3efe2;border-bottom:0}
+#ask .sheetbox header h2{display:flex;align-items:center;gap:8px}
+#ask .stamp{color:#f1a9c9;border-color:#f1a9c9}
+#ak-btns.stack{padding:4px 0 2px;gap:8px}
+.askopt{grid-template-columns:auto minmax(0,1fr) auto !important;column-gap:10px;background:var(--paper);border:1px solid var(--line);
+  box-shadow:0 2px 0 var(--line);transition:transform .06s,box-shadow .06s;padding:9px 10px !important;border-radius:2px}
+.askopt .lamp{grid-column:1;grid-row:1/3}
+.askopt b{grid-column:2 !important} .askopt small{grid-column:2 !important}
+.askopt em{grid-column:3 !important}
+.askopt:active{transform:translateY(2px);box-shadow:none}
+.askopt.best{border:1px solid var(--rule) !important;box-shadow:0 2px 0 var(--rule)}
+.askopt.best b::before{content:none !important}
+#ak-btns.stack button{flex:0 0 auto}
+.askopt em{border:0 !important;box-shadow:none !important;text-decoration:none !important;background:none !important}
+.askopt b{line-height:1.25} .askopt small{line-height:1.3}
+
+.mc-item button{flex:0 0 auto;min-width:36px}
+#h-eot .eotd svg{max-width:270px}
 </style>
 </head>
 <body>
@@ -760,7 +900,7 @@ background:rgba(246,244,236,.72)}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.9.0</div>
+      <div class="mm-version">CONTENT v3.10.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -888,7 +1028,7 @@ background:rgba(246,244,236,.72)}
         <div class="btnrow" id="h-view"></div>
         <div class="lbl">항만 · 운항</div>
         <div class="btnrow">
-          <button id="h-night" aria-pressed="false" data-term="야간작업">야간작업</button>
+          <button id="h-night" class="swbtn" aria-pressed="false" data-term="야간작업">야간작업</button>
           <button id="h-lobby">항로 인가</button>
           <button id="h-repair">정비</button>
           <button id="h-bunker">급유</button>
@@ -996,7 +1136,7 @@ background:rgba(246,244,236,.72)}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.9.0 · 해도 위 항차 계획 · 선을 눌러 상세</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.10.0 · 선교 계기 — 전령기 · 드럼 · 계기 · 레버</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1211,7 +1351,7 @@ background:rgba(246,244,236,.72)}
 </div>
 <div id="ask" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="ak-h">
   <div class="sheetbox">
-    <header><h2 id="ak-h">판단이 필요합니다</h2><span class="stamp" id="ak-tag">개입</span></header>
+    <header><h2><i class="lamp on blink"></i><span id="ak-h">판단이 필요합니다</span></h2><span class="stamp" id="ak-tag">개입</span></header>
     <div class="note" id="ak-b"></div>
     <div class="evfoot"><div class="btnrow" id="ak-btns"></div></div>
   </div>
@@ -1219,7 +1359,7 @@ background:rgba(246,244,236,.72)}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.9.0';
+const TRAMP_LINE_CONTENT_VERSION='3.10.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -6334,6 +6474,8 @@ if(!ensure()||!audioPrefs.ui)return;
 if(kind==='tab'){tone(690,.035,.019,'sine');tone(910,.028,.012,'sine',.014);}
 else if(kind==='telegraph'){tone(620,.055,.022,'triangle');tone(430,.07,.025,'triangle',.045);burst(.04,.012,650,.015);}
 else if(kind==='toggle'){tone(480,.04,.018,'sine');tone(620,.035,.012,'sine',.026);}
+else if(kind==='detent'){burst(.014,.016,2600,0);}
+else if(kind==='bell'){tone(1318,1.1,.030,'sine');tone(2640,.7,.009,'sine');tone(3950,.45,.004,'sine');}
 else {tone(560,.033,.016,'sine');burst(.025,.007,1400,.003);}
 }
 function alert(kind='warn'){
@@ -6376,7 +6518,7 @@ return {ensure,applyPrefs,ui,alert,update,onLog,portApproach,debug};
 document.addEventListener('pointerdown',()=>soundscape.ensure(),{passive:true});
 document.addEventListener('click',(e)=>{
 const b=e.target.closest('button,[role="tab"]');if(!b)return;
-if(b.closest('#h-eot'))return;
+if(b.closest('#h-eot,.eotd,.tslide,[data-hold]'))return;
 if(b.matches('[role="tab"]')||b.dataset.page)soundscape.ui('tab');
 else if(b.getAttribute('aria-pressed')!=null)soundscape.ui('toggle');
 else soundscape.ui('click');
@@ -7067,7 +7209,7 @@ for (const ch of choices) {
 const b = document.createElement('button');
 if (Number.isFinite(ch.cost)) {
   b.className = 'askopt' + (ch === best ? ' best' : '');
-  b.innerHTML = `<b>${ch.label}</b>` + (ch.sub ? `<small>${ch.sub}</small>` : '') +
+  b.innerHTML = `<i class="lamp ${ch === best ? 'go' : ''}"></i><b>${ch.label}</b>` + (ch.sub ? `<small>${ch.sub}</small>` : '') +
     `<em class="${Math.abs(ch.cost) < 50 ? '' : 'neg'}">${costTxt(ch.cost)}</em>`;
 } else if (ch.sub) b.innerHTML = `<b>${ch.label}</b><small>${ch.sub}</small>`;
 else b.textContent = ch.label;
@@ -7584,34 +7726,39 @@ if (x.kind === 'unload') return `<div class="plan-time unload"><span>${clock(x.a
 return `<div class="plan-time wait"><span>${clock(x.at)}</span><b>${PORTS[x.port].name} 대기</b><em>${x.mode} ${x.hours.toFixed(0)}시간</em></div>`;
 }
 // 더하기 빼기 표. 바뀐 줄에 ▲▼ 를 붙이고 맨 아래 남는 돈이 얼마 움직였는지 보인다.
-let ledgerPrev = null;
+const ledgerState = Object.create(null);
 const LEDGER_ROWS = [
   ['revenue','운임'], ['fuel','연료'], ['crew','선원·식량'], ['port','항만·수속'],
   ['pilot','도선·예선'], ['upkeep','정비·보험'],
 ];
 function planLedgerHTML(E, tag) {
   const L = E.lines; if (!L) return '';
-  const prev = ledgerPrev && ledgerPrev.tag === tag ? ledgerPrev : null;
-  const d = (k) => prev ? (L[k] - (prev.L[k] ?? 0)) : 0;
-  const mark = (v) => Math.abs(v) < 50 ? '' : `<em class="${v > 0 ? 'up' : 'dn'}">${v > 0 ? '▲' : '▼'} ${v > 0 ? '+' : '−'}${won(Math.abs(v))}</em>`;
+  const net = Math.round(E.estNet);
+  const sig = LEDGER_ROWS.map(([k]) => Math.round(L[k] ?? 0)).join(',') + '|' + Math.round(L.missed ?? 0) + '|' + net;
+  let S = ledgerState[tag];
+  if (!S) S = ledgerState[tag] = { sig, L:{ ...L }, net, d:{} };
+  else if (S.sig !== sig) {
+    const d = {};
+    for (const [k] of LEDGER_ROWS) d[k] = (L[k] ?? 0) - (S.L[k] ?? 0);
+    d.missed = (L.missed ?? 0) - (S.L.missed ?? 0); d.net = net - S.net;
+    Object.assign(S, { sig, L:{ ...L }, net, d });
+  }
+  const mark = (v) => !v || Math.abs(v) < 50 ? '' : `<em class="${v > 0 ? 'up' : 'dn'}">${v > 0 ? '▲' : '▼'} ${v > 0 ? '+' : '−'}${won(Math.abs(v))}</em>`;
   const money = (v) => `${v < 0 ? '−' : '+'}${won(Math.abs(v))}`;
-  const net = Math.round(E.estNet), dNet = prev ? net - prev.net : 0;
   const sub = {
     revenue: `${E.totalTons}t`, fuel: `${E.seaNm.toFixed(0)}해리 · ${draftSpeed}`,
     crew: `${E.days.toFixed(1)}일`, port: `${(E.route?.length ?? 0) + 1}항`, pilot: '', upkeep: '',
   };
   const rows = LEDGER_ROWS.map(([k, name]) =>
     `<div class="lg-row"><span>${name}<small>${sub[k] ?? ''}</small></span>` +
-    `<b class="${L[k] < 0 ? 'neg' : ''}">${money(L[k])}</b>${mark(d(k))}</div>`).join('');
-  const missed = L.missed ? `<div class="lg-row dim"><span>못 실어 놓친 운임<small>계약량 미달 · 벌칙 없음</small></span><b>${money(L.missed)}</b>${mark(d('missed'))}</div>` : '';
-  ledgerPrev = { tag, L: { ...L }, net };
+    `<b class="${L[k] < 0 ? 'neg' : ''}">${money(L[k])}</b>${mark(S.d[k])}</div>`).join('');
+  const missed = L.missed ? `<div class="lg-row dim"><span>못 실어 놓친 운임<small>계약량 미달 · 벌칙 없음</small></span><b>${money(L.missed)}</b>${mark(S.d.missed)}</div>` : '';
   return `<div class="ledger">${rows}${missed}` +
     `<div class="lg-row total"><span>남는 돈<small>하루 ${won(net / Math.max(.5, E.days))}원</small></span>` +
-    `<b class="${net < 0 ? 'neg' : ''}">${money(net)}</b>${mark(dNet)}</div></div>`;
+    `<b>${drumHTML('lg:' + tag, net)}</b>${mark(S.d.net)}</div></div>`;
 }
-function planSpeedHTML() {
-  return `<div class="btnrow lg-speed">${EOT.map(([k, v]) =>
-    `<button data-plan-speed="${k}" aria-pressed="${draftSpeed === k}">${k} ${v.toFixed(1)}kn</button>`).join('')}</div>`;
+function planSpeedHTML(ctx = 'market') {
+  return eotDialHTML('plan-' + ctx, draftSpeed);
 }
 function renderDraftPlan() {
 const box = $('mk-plan');
@@ -7626,10 +7773,7 @@ const cards = draftPlan.map((it, i) => {
 const c = it.c, chained = c.from !== sim.ship.at, lay = gameDate(c.laycanEnd);
 return `<div class="plan-card" data-pi="${i}">
 <div class="top"><b>${PORTS[c.from].name}→${PORTS[c.to].name} · ${CARGO[c.cargo].name}</b><span class="meta">${chained?'후속 · ':''}적기 ~${lay.getUTCMonth()+1}/${lay.getUTCDate()}</span></div>
-<div class="controls">
-<button data-plan="minus" aria-label="50톤 줄이기">−50</button>
-<button data-plan="plus" aria-label="50톤 늘리기">+50</button>
-<span class="tons">${it.tons}t<small>/ ${c.tons}t</small></span>
+<div class="controls ts-row"><div class="ts-wrap">${tonsSlideHTML('market', i, it)}</div>
 <button data-plan="remove" aria-label="계획에서 제거">×</button>
 </div>
 </div>`;
@@ -7637,10 +7781,10 @@ return `<div class="plan-card" data-pi="${i}">
 const warnings = [...E.errors.map((x)=>`⛔ ${x}`), ...E.warnings.map((x)=>`△ ${x}`)];
 box.innerHTML = cards + `<div class="plan-summary">
 <div class="plan-route">${routeName}</div>
-${planSpeedHTML()}
+${planSpeedHTML('market')}
 ${planLedgerHTML(E, 'market')}
 ${warnings.length ? `<div class="plan-warn">${warnings.join('<br>')}</div>` : ''}
-<button id="mk-confirm" class="plan-confirm" ${E.ok?'':'disabled'}>이 계획으로 계약 · ${draftPlan.length}건</button>
+<button id="mk-confirm" class="plan-confirm" data-hold ${E.ok?'':'disabled'}>이 계획으로 확정 · ${draftPlan.length}건<span class="holdhint">길게 눌러</span></button>
 </div>`;
 $('mk-confirm').onclick = () => {
 if (!lastPlanEval?.ok) return;
@@ -9104,7 +9248,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.9.0 · 해도 위 항차 계획 · 옵션 전용 화면 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.10.0 · 선교 계기 · 해도 위 항차 계획 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -9167,7 +9311,7 @@ _logN = $('log').children.length;
 traffic = newTraffic(sim.rivals, sim.rng.cosmetic, sim.t); lastTraffic = sim.t;
 [...$('h-auto').children].forEach((x) => x.classList.toggle('on', auto.on ? x.dataset.a === auto.preset : x.dataset.a === 'off'));
 [...$('h-speed').children].forEach((x) => x.setAttribute('aria-pressed', String(+x.dataset.v === st.speedTier)));
-[...$('h-eot').children].forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.k === st.eot)));
+try { eotSeaSync(st.eot, true); } catch (_) {}
 $('h-night').setAttribute('aria-pressed', String(!!st.night));
 fit(); paint(); render(st);
 say('캠페인 복원 완료', 'b');
@@ -9557,12 +9701,11 @@ st.speedTier = +b.dataset.v; st.paused = st.speedTier === 0;
 };
 const tierLabel = (s) => (TIERS.find((t) => t.s === s) ?? TIERS[0]).label;
 const EOT = [['ECO', SHIP.ecoSpeed], ['SERVICE', SHIP.serviceSpeed], ['FULL', SHIP.fullSpeed]];
-$('h-eot').innerHTML = EOT.map(([k, v]) =>
-`<button data-k="${k}" aria-pressed="${k === 'SERVICE'}">${k} ${v.toFixed(1)}kn</button>`).join('');
+// 기관 명령 전령기는 선교 계기 모듈에서 끼운다
 function setEot(k, byAuto = false) {
 st.eot = k;
 if(!byAuto) soundscape.ui('telegraph');
-[...$('h-eot').children].forEach((x) => x.setAttribute('aria-pressed', x.dataset.k === k));
+try { eotSeaSync(k); } catch (_) {}
 say(`기관 명령 ${k}` + (byAuto ? ' (위임)' : ''));
 }
 $('h-eot').onclick = (e) => {
@@ -10213,7 +10356,7 @@ function uiPrimary() {
     if (!mapPlanMode) return { label: '항차를 짠다', run: mapPlanOpen, hot: true };
     if (!draftPlan.length) return { label: '해도의 선을 누른다 · 목록에서 고른다', run: () => $('h-market').click(), hot: true };
     const E = lastPlanEval ?? planEvaluation();
-    if (E?.ok) { const net = Math.round(E.estNet); return { label: `이 계획으로 확정 · ${draftPlan.length}건 · ${net < 0 ? '−' : '+'}${won(Math.abs(net))}`, run: mapConfirm, hot: true }; }
+    if (E?.ok) { const net = Math.round(E.estNet); return { label: `이 계획으로 확정 · ${draftPlan.length}건 · ${net < 0 ? '−' : '+'}${won(Math.abs(net))}`, run: mapConfirm, hot: true, hold: true }; }
     return { label: '계획에 문제가 있다 · 상세를 본다', run: () => { mapSel = { kind:'draft' }; mapCardPaint(); }, hot: true };
   }
   switch (st.phase) {
@@ -10298,13 +10441,20 @@ function uiPaintNow() {
   // 살아 있는 값들
   const head = $('now-head');
   if (head) {
+    if (!head._g) {
+      head.className = 'nowhead dials'; head.innerHTML = '<div></div><div></div><div></div><div></div>';
+      const c = head.children;
+      head._g = [
+        gaugeBuild(c[0], { label:'연료', max:SHIP.bunkerMax, red:[0, .2], unit:'t' }),
+        gaugeBuild(c[1], { label:'주기관', max:100, red:[0, .6] }),
+        gaugeBuild(c[2], { label:'선원 피로', max:100, red:[.75, 1], unit:'%' }),
+        gaugeBuild(c[3], { label:'파고', max:8, red:[.5, 1], unit:'m', dec:1 }),
+      ];
+    }
     const bad = Object.entries(S.state).sort((a, b) => a[1] - b[1])[0];
     const M = marineState();
-    head.innerHTML =
-      uiStat('현금', won(S.cash) + '원', S.cash < 12000 ? 'warn' : '') +
-      uiStat('연료', S.bunker.toFixed(1) + 't', S.bunker < SHIP.bunkerMax * 0.2 ? 'warn' : '') +
-      uiStat(PART[bad[0]] ?? bad[0], bad[1].toFixed(0), bad[1] < 60 ? 'warn' : '') +
-      uiStat('파고 · 시정', `${M.w.hs.toFixed(1)}m · ${M.w.vis.toFixed(0)}km`, M.w.hs >= 4 ? 'warn' : '');
+    let fat = 0; try { fat = playerCrew()?.fatigue ?? 0; } catch (_) {}
+    head._g[0](S.bunker); head._g[1](bad[1], PART[bad[0]] ?? bad[0]); head._g[2](fat); head._g[3](M.w.hs);
   }
   const wb = $('now-workbar');
   if (wb) {
@@ -10337,7 +10487,9 @@ function uiPaintNow() {
 
 function uiPaintTodo() {
   const a = uiPrimary(), btn = $('todo-act'), skip = $('h-skip');
-  if (btn.textContent !== a.label) btn.textContent = a.label;
+  const lab = a.hold ? `${a.label}<span class="holdhint">길게 눌러</span>` : a.label;
+  if (btn._lab !== lab) { btn._lab = lab; btn.innerHTML = lab; }
+  btn.toggleAttribute('data-hold', !!a.hold);
   btn.disabled = !a.run; btn.classList.toggle('hot', !!a.hot);
   if (skip) skip.hidden = !!a.isSkip || !st.contract;
   const sit = uiSituation(); if ($('todo-t').textContent !== sit) $('todo-t').textContent = sit;
@@ -10644,6 +10796,311 @@ function stowPayShifting(port) {
       `약 ${hours.toFixed(1)}시간 · ${won(cost)}원`, 'm');
 }
 
+// ── 선교 계기 ─────────────────────────────────────────────────
+// 면과 배치는 평평하게 두고, 손에 잡히는 조작부만 선교의 계기로 만든다.
+// 재료는 셋 — 베이클라이트 검정, 문자판, 표시등. 움직임도 셋 — 멈쇠, 감쇠 바늘, 드럼.
+// 화면 대부분이 innerHTML 로 다시 그려지므로, 계기는 「이전 값」을 기억해 두었다가
+// 새로 끼워질 때 이전 값에서 새 값으로 움직인다 (data-from → style).
+const instrLast = Object.create(null);
+let instrDragging = false;
+function instrFrom(key, to) { const f = instrLast[key]; instrLast[key] = to; return f ?? to; }
+function instrFromAttr(key, to) { const f = instrFrom(key, to); return f !== to ? ` data-from="${f}"` : ''; }
+function instrSettle(root) {
+  const list = [];
+  if (root.hasAttribute?.('data-from')) list.push(root);
+  if (root.querySelectorAll) list.push(...root.querySelectorAll('[data-from]'));
+  for (const el of list) {
+    const fin = el.getAttribute('style') ?? '', from = el.getAttribute('data-from');
+    el.removeAttribute('data-from');
+    if (!from || from === fin) continue;
+    el.setAttribute('style', from + ';transition:none');
+    void el.getBoundingClientRect();
+    el.setAttribute('style', fin);
+  }
+}
+new MutationObserver((ms) => {
+  for (const m of ms) for (const n of m.addedNodes)
+    if (n.nodeType === 1 && (n.hasAttribute('data-from') || n.querySelector('[data-from]'))) instrSettle(n);
+}).observe(document.documentElement, { childList:true, subtree:true });
+// 같은 그림이면 다시 끼우지 않는다 — 누르는 도중 단추가 바뀌지 않게, 움직임이 끊기지 않게
+function instrSetHTML(el, html) {
+  const key = html.replace(/ data-from="[^"]*"/g, '');
+  if (el._instrKey === key) return false;
+  el._instrKey = key; el.innerHTML = html; return true;
+}
+const instrBuzz = (ms = 6) => { try { navigator.vibrate?.(ms); } catch (_) {} };
+
+// ── 드럼 계수기 ──────────────────────────────────────────────
+const DRUM_STRIP = '0123456789'.split('').map(n => `<i>${n}</i>`).join('');
+const drumCell = (ch, from) => /\d/.test(ch)
+  ? `<span class="d"><span class="s" style="transform:translateY(${-ch * 1.2}em)"` +
+    (from != null && /\d/.test(from) && from !== ch ? ` data-from="transform:translateY(${-from * 1.2}em)"` : '') +
+    `>${DRUM_STRIP}</span></span>`
+  : `<span class="sep">${ch}</span>`;
+function drumText(v, sign) { return (v < 0 ? '−' : sign ? '+' : '') + Math.round(Math.abs(v)).toLocaleString(); }
+function drumHTML(key, v, cls = '') {
+  const s = drumText(v, true), prev = instrFrom('drum:' + key, s);
+  const same = prev.length === s.length;
+  return `<span class="drum ${v < 0 ? 'neg' : ''} ${cls}">${[...s].map((ch, i) => drumCell(ch, same ? prev[i] : null)).join('')}</span>`;
+}
+function drumLive(el, { sign = false, suffix = '', cls = 'sm' } = {}) {
+  let shown = null;
+  return (v) => {
+    const s = drumText(v, sign);
+    if (s === shown) return;
+    if (!shown || s.length !== shown.length)
+      el.innerHTML = `<span class="drum ${cls}">${[...s].map(ch => drumCell(ch, null)).join('')}</span>${suffix}`;
+    const d = el.firstChild; d.classList.toggle('neg', v < 0);
+    [...s].forEach((ch, i) => {
+      const c = d.children[i]; if (!c) return;
+      if (/\d/.test(ch)) { if (c.firstChild) c.firstChild.style.transform = `translateY(${-ch * 1.2}em)`; }
+      else c.textContent = ch;
+    });
+    shown = s;
+  };
+}
+
+// ── 원형 계기 ───────────────────────────────────────────────
+const GA0 = -200, GA1 = 20;
+function gaugeBuild(el, { label, max, red = [0.8, 1], unit = '', dec = 0 }) {
+  const cx = 60, cy = 62, R = 48;
+  const pt = (a, r) => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
+  const ang = (f) => GA0 + (GA1 - GA0) * Math.max(0, Math.min(1, f));
+  const arc = (fa, ta, r) => { const [x0, y0] = pt(fa, r), [x1, y1] = pt(ta, r); return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r} ${r} 0 ${ta - fa > 180 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+  let h = `<path d="${arc(ang(red[0]), ang(red[1]), R - 3)}" stroke="#a8125f" stroke-width="5" fill="none" opacity=".72"/>`;
+  for (let i = 0; i <= 10; i++) {
+    const a = GA0 + (GA1 - GA0) * i / 10, [x0, y0] = pt(a, R), [x1, y1] = pt(a, R - (i % 5 ? 5 : 9));
+    h += `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="${i % 5 ? '#4d5a5e' : '#171f21'}" stroke-width="${i % 5 ? 1 : 1.6}"/>`;
+  }
+  h += `<g class="needle" style="transform:rotate(${ang(0) + 90}deg)"><line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - R + 8}" stroke="#171f21" stroke-width="2.2"/></g><circle cx="${cx}" cy="${cy}" r="5" fill="#1b2325"/>`;
+  el.classList.add('dial');
+  el.innerHTML = `<svg viewBox="0 0 120 70" aria-hidden="true">${h}</svg><div class="gv"><b>—</b><small>${unit}</small></div><div class="plate">${label}</div>`;
+  const n = el.querySelector('.needle'), vb = el.querySelector('.gv b'), pl = el.querySelector('.plate');
+  let last = null;
+  return (val, lab) => {
+    if (lab && pl.textContent !== lab) pl.textContent = lab;
+    if (!Number.isFinite(val)) return;
+    const t = val.toFixed(dec); if (t === last) return; last = t;
+    vb.textContent = t;
+    const f = val / max;
+    n.style.transform = `rotate(${ang(f) + 90}deg)`;
+    el.classList.toggle('warn', f >= red[0] && f <= red[1]);
+  };
+}
+
+// ── 기관전령기 ──────────────────────────────────────────────
+const EOT_POS = [-140, -90, -40];
+const eotP = (a, r) => [150 + r * Math.cos(a * Math.PI / 180), 160 + r * Math.sin(a * Math.PI / 180)];
+let EOT_FACE = null;
+function eotFace() {
+  if (EOT_FACE) return EOT_FACE;
+  let sec = '', tk = '', lb = '';
+  EOT_POS.forEach((a, i) => {
+    const [x0, y0] = eotP(a - 22, 121), [x1, y1] = eotP(a + 22, 121);
+    sec += `<path class="sector s${i}" d="M${x0.toFixed(1)} ${y0.toFixed(1)}A121 121 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}"/>`;
+    const [lx, ly] = eotP(a, 128), [kx, ky] = eotP(a, 113);
+    lb += `<text class="lbl s${i}" x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}">${EOT[i][0]}</text>` +
+          `<text class="kn s${i}" x="${kx.toFixed(1)}" y="${(ky + 3).toFixed(1)}">${EOT[i][1].toFixed(1)}</text>`;
+  });
+  for (let a = -165; a <= -15; a += 5) {
+    const M = EOT_POS.some(p => Math.abs(p - a) < 1), [x0, y0] = eotP(a, 139), [x1, y1] = eotP(a, M ? 151 : 145);
+    tk += `<line class="tick${M ? ' major' : ''}" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"/>`;
+  }
+  return (EOT_FACE = sec + tk + lb);
+}
+const eotRot = (a) => `transform:rotate(${a + 90}deg)`;
+function eotDialHTML(key, cur, { reply = false, note = '' } = {}) {
+  const i = Math.max(0, EOT.findIndex(([k]) => k === cur));
+  const to = eotRot(EOT_POS[i]);
+  return `<div class="eotd${reply ? ' sea' : ''}" data-eot="${key}" data-i="${i}">` +
+    `<svg viewBox="0 4 300 168" role="slider" aria-label="기관 명령" aria-valuetext="${EOT[i][0]}">${eotFace()}` +
+    (reply ? `<g class="eot-reply" style="${to}"><polygon points="150,56 143,68 157,68"/></g>` : '') +
+    `<g class="eot-lever" style="${to}"${instrFromAttr('eot:' + key, to)}><rect x="144" y="82" width="12" height="80" rx="2"/>` +
+    `<rect x="138" y="70" width="24" height="20" rx="3"/><line x1="150" y1="74" x2="150" y2="86"/></g>` +
+    `<circle class="hub" cx="150" cy="160" r="11"/><circle class="pin" cx="150" cy="160" r="3"/></svg>` +
+    `<div class="eotd-read"><b>${EOT[i][0]}</b><span>${EOT[i][1].toFixed(1)} kn</span>${note}` +
+    (reply ? `<em class="ack"><i class="lamp go"></i><span>기관실 응답</span></em>` : '') + `</div></div>`;
+}
+let eotDrag = null;
+function eotAngle(svg, e) {
+  const r = svg.getBoundingClientRect(), s = r.width / 300;
+  const x = (e.clientX - r.left) / s - 150, y = (e.clientY - r.top) / s + 4 - 160;
+  return Math.max(-155, Math.min(-25, Math.atan2(y, x) * 180 / Math.PI));
+}
+const eotNearest = (a) => EOT_POS.reduce((b, p, i) => Math.abs(p - a) < Math.abs(EOT_POS[b] - a) ? i : b, 0);
+function eotMove(e) {
+  const d = eotDrag; if (!d) return;
+  d.ang = eotAngle(d.svg, e);
+  d.lever.style.transition = 'none'; d.lever.style.transform = `rotate(${d.ang + 90}deg)`;
+  const n = eotNearest(d.ang);
+  if (n !== d.near) { d.near = n; soundscape.ui('detent'); instrBuzz(4); }
+}
+function eotEnd() {
+  const d = eotDrag; if (!d) return; eotDrag = null;
+  d.box.classList.remove('dragging');
+  const k = eotNearest(d.ang ?? EOT_POS[+d.box.dataset.i]);
+  d.lever.style.transition = ''; d.lever.style.transform = `rotate(${EOT_POS[k] + 90}deg)`;
+  instrLast['eot:' + d.key] = `transform:rotate(${(d.ang ?? EOT_POS[k]) + 90}deg)`;
+  instrDragging = false;
+  instrBuzz(8);
+  if (k === +d.box.dataset.i) { instrLast['eot:' + d.key] = eotRot(EOT_POS[k]); soundscape.ui('detent'); return; }
+  if (d.key === 'sea') setEot(EOT[k][0]);           // setEot 가 전령 소리를 낸다
+  else { soundscape.ui('telegraph'); eotPlanSet(EOT[k][0]); }
+}
+function eotPlanSet(k) {
+  draftSpeed = k;
+  if ($('market').classList.contains('on') || draftPlan.length) renderDraftPlan();
+  if (mapPlanMode) { mapPlanRefresh(); mapBarPaint(); }
+  wharfPaint();
+}
+// 항해 중 — 레버는 그대로 두고 값만 바꾼다. 응답 바늘이 늦게 따라오고 벨이 한 번.
+let eotAckT = 0;
+function eotSeaSync(k, quiet = false) {
+  const box = $('h-eot')?.querySelector('.eotd'); if (!box) return;
+  const i = Math.max(0, EOT.findIndex(([x]) => x === k));
+  if (+box.dataset.i === i && !quiet) return;
+  box.dataset.i = i;
+  const lever = box.querySelector('.eot-lever'), reply = box.querySelector('.eot-reply');
+  lever.style.transform = `rotate(${EOT_POS[i] + 90}deg)`;
+  instrLast['eot:sea'] = eotRot(EOT_POS[i]);
+  box.querySelector('.eotd-read b').textContent = EOT[i][0];
+  box.querySelector('.eotd-read span').textContent = EOT[i][1].toFixed(1) + ' kn';
+  box.querySelector('svg').setAttribute('aria-valuetext', EOT[i][0]);
+  const lamp = box.querySelector('.ack .lamp'), at = box.querySelector('.ack span');
+  clearTimeout(eotAckT);
+  if (quiet) { reply.style.transform = `rotate(${EOT_POS[i] + 90}deg)`; lamp.className = 'lamp go'; at.textContent = '기관실 응답'; return; }
+  lamp.className = 'lamp on blink'; at.textContent = '응답 대기';
+  eotAckT = setTimeout(() => {
+    reply.style.transform = `rotate(${EOT_POS[i] + 90}deg)`;
+    setTimeout(() => { lamp.className = 'lamp go'; at.textContent = '기관실 응답'; soundscape.ui('bell'); }, 520);
+  }, 380);
+}
+
+// ── 로터리 선택기 ───────────────────────────────────────────
+function knobHTML(key, angles, idx) {
+  const to = `transform:rotate(${angles[idx]}deg)`;
+  let h = '<circle cx="64" cy="64" r="60" class="rim"/><circle cx="64" cy="64" r="56" class="rim2"/>';
+  for (const a of angles) { const r = (a - 90) * Math.PI / 180;
+    h += `<line x1="${(64 + 50 * Math.cos(r)).toFixed(1)}" y1="${(64 + 50 * Math.sin(r)).toFixed(1)}" x2="${(64 + 57 * Math.cos(r)).toFixed(1)}" y2="${(64 + 57 * Math.sin(r)).toFixed(1)}" class="pos"/>`; }
+  h += `<g class="knob" style="${to}"${instrFromAttr('knob:' + key, to)}><circle cx="64" cy="64" r="40" class="body"/>`;
+  for (let i = 0; i < 24; i++) { const r = i * 15 * Math.PI / 180;
+    h += `<line x1="${(64 + 36 * Math.cos(r)).toFixed(1)}" y1="${(64 + 36 * Math.sin(r)).toFixed(1)}" x2="${(64 + 40 * Math.cos(r)).toFixed(1)}" y2="${(64 + 40 * Math.sin(r)).toFixed(1)}" class="grip"/>`; }
+  h += '<circle cx="64" cy="64" r="30" class="cap"/><rect x="61" y="28" width="6" height="22" rx="1" class="mark"/></g>';
+  return `<svg viewBox="0 0 128 128" aria-hidden="true">${h}</svg>`;
+}
+
+// ── 톤수 미끄럼 레버 ─────────────────────────────────────────
+function tonsCap(i, items = draftPlan) {
+  const it = items[i]; if (!it) return 0;
+  const top = Math.min(it.c.tons, loadableTons(it.c.cargo, it.c.tons));
+  for (let t = Math.floor(top / PLAN_STEP_TONS) * PLAN_STEP_TONS; t >= PLAN_MIN_TONS; t -= PLAN_STEP_TONS) {
+    const trial = items.map((x, j) => j === i ? { ...x, tons:t } : x);
+    try { const S = structuralCargoState(trial, sim.ship.at, SHIP); if (S.flow.ok && S.ok) return t; } catch (_) { return it.tons; }
+  }
+  return PLAN_MIN_TONS;
+}
+function tonsSlideHTML(ctx, i, it) {
+  const min = PLAN_MIN_TONS, max = Math.max(it.c.tons, it.tons), span = Math.max(PLAN_STEP_TONS, max - min);
+  const cap = tonsCap(i);
+  const pct = (v) => ((v - min) / span * 100).toFixed(2);
+  const minor = span / PLAN_STEP_TONS > 60 ? PLAN_STEP_TONS * 2 : PLAN_STEP_TONS, major = span > 1500 ? 500 : 250;
+  let tk = '';
+  for (let v = Math.ceil(min / minor) * minor; v <= max; v += minor) tk += `<i class="${v % major === 0 ? 'M' : ''}" style="left:${pct(v)}%"></i>`;
+  const to = `left:${pct(it.tons)}%`;
+  return `<div class="tslide" data-ctx="${ctx}" data-i="${i}" data-min="${min}" data-max="${max}" data-cap="${cap}" data-v="${it.tons}" role="slider" aria-label="적재량" aria-valuenow="${it.tons}">` +
+    `<div class="ts-track"></div>` + (cap < max ? `<div class="ts-over" style="left:${pct(cap)}%"></div>` : '') +
+    `<div class="ts-ticks">${tk}</div><div class="ts-thumb" style="${to}"${instrFromAttr(`ts:${ctx}:${it.c.id}`, to)}></div></div>` +
+    `<div class="ts-read"><b>${it.tons.toLocaleString()}t</b><small>/ 계약 ${it.c.tons.toLocaleString()}t</small>` +
+    `<em><i class="lamp ${it.tons > cap ? 'on' : ''}"></i>${it.tons > cap ? `선복 초과 ${it.tons - cap}t` : cap < it.c.tons ? `선복 ${cap.toLocaleString()}t까지` : '선복 안'}</em></div>`;
+}
+let tsDrag = null;
+function tsValue(box, e) {
+  const r = box.getBoundingClientRect(), min = +box.dataset.min, max = +box.dataset.max;
+  const lim = Math.max(+box.dataset.cap, Math.min(+box.dataset.v, max));
+  const raw = min + (e.clientX - r.left) / r.width * (max - min);
+  return Math.max(min, Math.min(lim, Math.round(raw / PLAN_STEP_TONS) * PLAN_STEP_TONS));
+}
+function tsPaint(box, v) {
+  const min = +box.dataset.min, max = +box.dataset.max;
+  const th = box.querySelector('.ts-thumb'); th.style.left = ((v - min) / Math.max(1, max - min) * 100).toFixed(2) + '%';
+  const rd = box.nextElementSibling?.querySelector('b'); if (rd) rd.textContent = v.toLocaleString() + 't';
+}
+function tsEnd() {
+  const d = tsDrag; if (!d) return; tsDrag = null; instrDragging = false;
+  d.box.classList.remove('dragging');
+  const it = draftPlan[+d.box.dataset.i]; if (!it) return;
+  const th = d.box.querySelector('.ts-thumb');
+  instrLast[`ts:${d.box.dataset.ctx}:${it.c.id}`] = `left:${th.style.left}`;
+  if (d.v === it.tons) return;
+  it.tons = d.v; soundscape.ui('toggle');
+  if (d.box.dataset.ctx === 'map') { mapPlanRefresh(); mapBarPaint(); }
+  else { renderDraftPlan(); openMarketList(false); }
+  wharfPaint();
+}
+
+// ── 길게 눌러 확정 ───────────────────────────────────────────
+let holdT = 0, holdEl = null;
+function holdStop() { clearTimeout(holdT); holdEl?.classList.remove('holding'); holdEl = null; }
+
+// ── 입력 배선 — 문서 하나에서 모두 받는다 ───────────────────────
+document.addEventListener('pointerdown', (e) => {
+  const svg = e.target.closest?.('.eotd svg');
+  if (svg) {
+    const box = svg.closest('.eotd'); e.preventDefault();
+    eotDrag = { box, svg, key:box.dataset.eot, lever:svg.querySelector('.eot-lever'), near:+box.dataset.i, ang:null, id:e.pointerId };
+    try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+    instrDragging = true; box.classList.add('dragging'); eotMove(e); return;
+  }
+  const ts = e.target.closest?.('.tslide');
+  if (ts) {
+    e.preventDefault();
+    tsDrag = { box:ts, id:e.pointerId, v:+ts.dataset.v };
+    try { ts.setPointerCapture(e.pointerId); } catch (_) {}
+    instrDragging = true; ts.classList.add('dragging');
+    const v = tsValue(ts, e); if (v !== tsDrag.v) { tsDrag.v = v; soundscape.ui('detent'); } tsPaint(ts, v); return;
+  }
+  const hb = e.target.closest?.('button[data-hold]');
+  if (hb && !hb.disabled) {
+    holdStop(); holdEl = hb; hb.classList.add('holding'); soundscape.ui('click');
+    holdT = setTimeout(() => {
+      if (holdEl !== hb) return;
+      hb.classList.remove('holding'); holdEl = null;
+      hb._held = true; hb._heldAt = performance.now();
+      soundscape.ui('bell'); instrBuzz(14);
+      hb.click();
+    }, 700);
+  }
+}, true);
+document.addEventListener('pointermove', (e) => {
+  if (eotDrag && e.pointerId === eotDrag.id) { eotMove(e); return; }
+  if (tsDrag && e.pointerId === tsDrag.id) {
+    const v = tsValue(tsDrag.box, e);
+    if (v !== tsDrag.v) { tsDrag.v = v; soundscape.ui('detent'); instrBuzz(3); tsPaint(tsDrag.box, v); }
+  }
+}, true);
+for (const k of ['pointerup', 'pointercancel']) document.addEventListener(k, (e) => {
+  if (eotDrag && e.pointerId === eotDrag.id) eotEnd();
+  if (tsDrag && e.pointerId === tsDrag.id) tsEnd();
+  holdStop();
+}, true);
+document.addEventListener('pointerout', (e) => {
+  if (holdEl && e.target === holdEl && !holdEl.contains(e.relatedTarget)) holdStop();
+}, true);
+document.addEventListener('click', (e) => {
+  const b = e.target.closest?.('button[data-hold]'); if (!b) return;
+  if (b._held) { b._held = false; return; }
+  if (b._heldAt && performance.now() - b._heldAt < 900) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+  if (e.detail > 0) {                   // 짧게 눌렀다 — 넘어가지 않는다
+    e.preventDefault(); e.stopImmediatePropagation();
+    b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
+  }
+}, true);
+document.addEventListener('contextmenu', (e) => { if (e.target.closest?.('button[data-hold], .eotd, .tslide')) e.preventDefault(); });
+
+// 항해 중 기관 명령 — 버튼 셋 대신 전령기
+$('h-eot').classList.remove('btnrow');
+$('h-eot').innerHTML = eotDialHTML('sea', st.eot ?? 'SERVICE', { reply:true });
+
 // ── 해도 위 항차 ─────────────────────────────────────────────
 // 정박 중 첫 화면은 해도다. 「항차를 짠다」를 누르면 지금 항구에서 실을 수 있는
 // 계약이 목적항까지 가는 선으로 그려지고, 계획에 넣은 것은 굵은 선이 된다.
@@ -10843,15 +11300,14 @@ function mapDraftCard() {
   const E = lastPlanEval = planEvaluation();
   const routeName = [sim.ship.at, ...E.route].map(p => PORTS[p].name).join(' → ');
   const items = draftPlan.map((it, i) =>
-    `<div class="mc-item"><span>${PORTS[it.c.from].name}→${PORTS[it.c.to].name} · ${CARGO[it.c.cargo].name} <b>${it.tons}t</b><small>/${it.c.tons}t</small></span>` +
-    `<button data-mc="minus:${i}" aria-label="50톤 줄인다">−50</button><button data-mc="plus:${i}" aria-label="50톤 늘린다">+50</button>` +
-    `<button data-mc="rm:${i}" aria-label="계획에서 뺀다">×</button></div>`).join('');
+    `<div class="mc-item"><span>${PORTS[it.c.from].name}→${PORTS[it.c.to].name} · ${CARGO[it.c.cargo].name}</span>` +
+    `<button data-mc="rm:${i}" aria-label="계획에서 뺀다">×</button></div><div class="mc-slide">${tonsSlideHTML('map', i, it)}</div>`).join('');
   const warn = [...E.errors.map(x => `⛔ ${x}`), ...E.warnings.map(x => `△ ${x}`)];
   return `<div class="mc-head"><b>${routeName}</b><span>${E.days.toFixed(1)}일 · 계약 ${draftPlan.length}건</span></div>` +
-    items + planSpeedHTML() + planLedgerHTML(E, 'map') +
+    items + planSpeedHTML('map') + planLedgerHTML(E, 'map') +
     (warn.length ? `<div class="mc-no">${warn.join('<br>')}</div>` : '') +
     `<div class="btnrow"><button data-mc="market">계약 목록</button><button data-mc="wharf">적부</button>` +
-    `<button data-mc="confirm" class="good" ${E.ok ? '' : 'disabled'}>확정 · ${draftPlan.length}건</button><button data-mc="close">닫기</button></div>`;
+    `<button data-mc="confirm" class="good" data-hold ${E.ok ? '' : 'disabled'}>확정 · ${draftPlan.length}건<span class="holdhint">길게</span></button><button data-mc="close">닫기</button></div>`;
 }
 function mapPlanCard() {
   const P = st.plan;
@@ -11211,10 +11667,10 @@ function wharfPlanBoard() {
     })();
     return `<div class="wh-axis">${ticks}</div>` +
       `<div class="wh-time"><div class="wh-row head"><span class="wh-rowk">항해</span><div class="wh-track">${legs}</div></div>${rows}</div>` +
-      planSpeedHTML() + planLedgerHTML(E, 'wharf') +
+      planSpeedHTML('wharf') + planLedgerHTML(E, 'wharf') +
       (warn.length ? `<div class="wh-warn">${warn.join('<br>')}</div>` : `<div class="wh-ok">용적·혼적·흘수·적기가 모두 맞는다.</div>`) +
       `<div class="btnrow"><button data-wh="market">계약 더 고른다</button>` +
-      `<button data-wh="confirm" ${E.ok ? '' : 'disabled'} class="wh-confirm">이 계획으로 확정 · ${draftPlan.length}건</button></div>`;
+      `<button data-wh="confirm" data-hold ${E.ok ? '' : 'disabled'} class="wh-confirm">이 계획으로 확정 · ${draftPlan.length}건<span class="holdhint">길게</span></button></div>`;
   }
   const P = st.plan;
   if (!P?.active) return `<div class="wh-empty">아직 항차가 없다. <b>항차 계획</b>에서 계약을 고르면 여기에 시간표가 그려진다.</div>`;
@@ -11227,12 +11683,16 @@ function wharfGangBoard() {
   const working = st.phase === '적재' || st.phase === '양하';
   const two = wharfTwoHoldsBusy();
   const cur = st.gangs ?? 'FOCUS';
-  const cards = Object.values(GANGS).map(g => {
-    const off = g.key === 'SPLIT' && !two;
-    return `<button class="wh-gang" data-wh="gang:${g.key}" aria-pressed="${cur === g.key}" ${off ? 'disabled' : ''}>` +
-      `<b>${g.name}</b><span>하역속도 ×${g.mult.toFixed(2)}${g.cost ? ` · 시간당 ${won(g.cost)}원` : ' · 추가비 없음'}</span>` +
-      `<small>${off ? '두 선창에 화물이 있어야 나눌 수 있다' : g.desc}</small></button>`;
-  }).join('');
+  const gs = Object.values(GANGS), idx = Math.max(0, gs.findIndex(g => g.key === cur));
+  const usable = gs.filter(g => !(g.key === 'SPLIT' && !two));
+  const next = usable[(usable.findIndex(g => g.key === cur) + 1) % usable.length] ?? gs[0];
+  const cards = `<div class="rotary"><button class="knobbtn" data-wh="gang:${next.key}" aria-label="다음 배치">` +
+    knobHTML('gang', gs.length === 2 ? [-45, 45] : [-60, 0, 60], idx) + `</button><div class="rot-opts">` +
+    gs.map(g => {
+      const off = g.key === 'SPLIT' && !two, on = cur === g.key;
+      return `<button data-wh="gang:${g.key}" aria-pressed="${on}" ${off ? 'disabled' : ''}><i class="lamp ${on ? 'on' : ''}"></i>` +
+        `<b>${g.name}</b><em>${off ? '두 선창에 화물이 있어야' : `×${g.mult.toFixed(2)} · ${g.cost ? `시간 ${won(g.cost)}원` : '추가비 없음'}`}</em></button>`;
+    }).join('') + `</div></div>`;
   const rate = working ? (() => { try {
       const x = st.plan?.active ? planCurrentWork() : null, c = x?.c ?? st.contract;
       if (!c) return null;
@@ -11243,7 +11703,7 @@ function wharfGangBoard() {
       ? `현재 하역률 약 ${rate ? rate.toFixed(0) : '—'}t/시간 · 허용정박 ${(st.laytimeLeft / HOUR).toFixed(0)}시간` +
         `${st.night ? ' · 야간작업 중' : ''}<br>분산은 사람값이 들지만 체선이 붙기 시작하면 대개 싸게 먹힌다.`
       : '하역이 시작되면 이 배치가 실제 작업속도에 적용된다.'}</div>` +
-    `<div class="btnrow"><button data-wh="night" aria-pressed="${!!st.night}">야간작업 ${st.night ? '중지' : '시작'}</button></div>`;
+    `<div class="btnrow"><button data-wh="night" class="swbtn" aria-pressed="${!!st.night}">야간작업</button></div>`;
 }
 function wharfPaint() {
   const box = $('wharf'); if (!box) return;
@@ -11254,9 +11714,9 @@ function wharfPaint() {
   if (box.hidden) return;
   for (const b of $('wharf-tabs').children) b.setAttribute('aria-pressed', String(b.dataset.whv === wharfView));
   const body = $('wharf-body');
-  if (wharfView === 'STOW') { $('wharf-cv').hidden = false; body.innerHTML = wharfStowStrip(); }
-  else if (wharfView === 'PLAN') { $('wharf-cv').hidden = true; body.innerHTML = wharfPlanBoard(); }
-  else { $('wharf-cv').hidden = false; body.innerHTML = wharfGangBoard(); }
+  if (wharfView === 'STOW') { $('wharf-cv').hidden = false; if (!instrDragging) instrSetHTML(body, wharfStowStrip()); }
+  else if (wharfView === 'PLAN') { $('wharf-cv').hidden = true; if (!instrDragging) instrSetHTML(body, wharfPlanBoard()); }
+  else { $('wharf-cv').hidden = false; if (!instrDragging) instrSetHTML(body, wharfGangBoard()); }
   if (!$('wharf-cv').hidden) wharfDraw();
   $('wharf-title').textContent =
     `${PORTS[sim.ship.at]?.name ?? ''} · ${st.phase}` +
@@ -11651,7 +12111,8 @@ paintStrategy();
 const rows = ranking(sim.rivals, companyDwt(sim.company));
 const me = rows.find((r) => r.me);
 $('f-rank').textContent = me ? `${me.rank}위 / ${rows.length}` : '';
-$('f-cash').textContent = Math.round(sim.ship.cash).toLocaleString() + '원';
+try { (window.__fcd ??= drumLive($('f-cash'), { suffix:'<span class="cur">원</span>' }))(sim.ship.cash); }
+catch (_) { $('f-cash').textContent = Math.round(sim.ship.cash).toLocaleString() + '원'; }
 $('f-cash').className = 'fcash' + (sim.ship.cash < 20000 ? ' warn' : '');
 $('f-dwt').textContent = companyDwt(sim.company).toLocaleString() + ' DWT · ' + sim.ship.voyages + '항차';
 }
@@ -11840,7 +12301,7 @@ DIP_ACTIONS, normalizeDiplomacy, syncDiplomacy, diplomacyStatus, diplomacyAction
 LOAN_PRODUCTS, INSURANCE_PLANS, CHARTER_OFFERS, normalizeFinance, financeSnapshot, financeRating, financeCreditLimit, loanTerms, takeLoan, repayLoan, charterIn, charterPrepareRedelivery, charterReturnEarly, charterEarlyReturnQuote, charterRedeliveryQuote, normalizeCorporateDeals, corporateDealsMonthlyTick, buyLiquidationAuction, acquireRivalCompany, setInsurancePlan, financeMonthlyTick, openFinance,
 PE_BANKS, PE_OFFICES, PE_ACTIONS, PE_RIVAL_PATRON, normalizePoliticalEconomy, peAgenda, peRefreshFinanceTerms, peSetMainBank, peInstitutionAction, peLegacyLobbyEffect, peMonthlyTick, peSnapshot, openPoliticalEconomy,
 MG_FACTIONS, MG_ROLES, EXECUTIVE_POOL, normalizeManagement, managementSnapshot, managementFactionSnapshot, availableExecutiveCandidates, promoteFleetChief, demoteFleetChief, hireExecutive, dismissExecutive, supportManagementFaction, managementMonthlyTick, openManagement,
-get asking() { return asking; }, get draftPlan(){ return draftPlan; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
+get asking() { return asking; }, get draftPlan(){ return draftPlan; }, eotSeaSync, eotPlanSet, tonsCap, instrLast, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
 SLOTS, SLOT_BY_ID, slotOf, slotSet, stowSnapshot, stowStability, stowShifting, stowCharacter, wharfItems, wharfPaint,
 navState, navLegReset, navTick, navOpportunities, navDoFix, navProgressFactor, navPenalty, navNearestLand, navLoranChain, navSunAlt, paintNavWatch, navCycleBerthPolicy, navBuyLoran, BERTH_POLICY,
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
