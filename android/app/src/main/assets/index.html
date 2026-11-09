@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.13.1</title>
+<title>TRAMP LINE 1962 · v3.13.2</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -47,7 +47,7 @@ background: var(--paper);
 #firm { display: grid; grid-template-columns: auto auto; gap: 0 10px;
 align-items: baseline; justify-content: start; }
 #firm .fname { font-family: var(--face-title); font-size: var(--fs-mid); letter-spacing: .04em; }
-#firm .frank { font-family: var(--face-num); font-size: var(--fs-micro); color: var(--magenta); }
+#firm .frank { font-family: var(--face-num); font-size: var(--fs-micro); color: var(--ink2); }
 #firm .fcash { font-family: var(--face-num); font-size: var(--fs-cap);
 font-variant-numeric: tabular-nums; }
 #firm .fdwt  { font-family: var(--face-num); font-size: var(--fs-micro); color: var(--ink2); }
@@ -494,7 +494,10 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 
 /* v3.6.2 운항분석 · 브리핑 */
 #helm-brief{margin-top:6px;border:1px solid var(--line);background:#f0eee5;padding:6px 7px;font-size:var(--fs-micro);line-height:1.5}
-#helm-brief .briefline{display:grid;grid-template-columns:42px minmax(0,1fr);gap:6px;padding:2px 0;border-top:1px dotted var(--line)}
+#helm-brief[hidden],.lbl[hidden],.nw-detail[hidden]{display:none!important}
+.nw-top small{font-weight:400;color:var(--ink2);margin-left:4px}
+#helm-brief .briefline{display:grid;grid-template-columns:34px minmax(0,1fr) 12px;gap:6px;padding:4px 0;border:0;border-top:1px dotted var(--line);background:none;width:100%;text-align:left;font:inherit;color:inherit;align-items:center}
+#helm-brief .briefline b{display:block;font-weight:600}#helm-brief .briefline small{display:block;color:var(--ink2)}#helm-brief .briefline em{font-style:normal;color:var(--ink2)}
 #helm-brief .briefline:first-child{border-top:0}.brieftag{font-family:var(--face-num);color:var(--ink2)}.brieftag.warn,.analysis-sev.warn{color:var(--magenta);font-weight:700}.brieftag.good{font-weight:700}
 .analysis-head{border:1px solid var(--rule);padding:8px;background:#eeece3;margin-bottom:8px}.analysis-head .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.analysis-head b{font-family:var(--face-title);font-weight:400}.analysis-head .meta{margin-top:4px;color:var(--ink2);font-size:var(--fs-micro);line-height:1.5}
 .analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.analysis-kpi{border:1px solid var(--line);padding:6px;min-width:0}.analysis-kpi span{display:block;color:var(--ink2);font-size:var(--fs-micro)}.analysis-kpi b{display:block;font-family:var(--face-num);font-size:var(--fs-cap);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -802,6 +805,9 @@ background:rgba(246,244,236,.72)}
 #f-cash.warn .drum{box-shadow:0 0 0 1px var(--magenta)}
 
 /* 원형 계기 */
+.nowhead[hidden]{display:none!important}
+.askhint{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink2);padding:2px 2px 4px}.askhint .lamp{display:inline-block;vertical-align:middle;margin-right:3px}
+button.warnbtn{color:var(--magenta)!important;border-color:var(--magenta)!important;font-weight:600}
 .nowhead.dials{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;background:none;border:0;margin:2px 0 6px}
 .dial{background:var(--face);border:1px solid var(--rule);box-shadow:inset 0 0 0 2px var(--face),inset 0 0 0 3px var(--line);padding:4px 4px 5px;text-align:center;min-width:0}
 .dial svg{width:100%;height:auto;display:block}
@@ -960,7 +966,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.13.1</div>
+      <div class="mm-version">CONTENT v3.13.2</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1199,7 +1205,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.13.1 · 숫자 통일 · 「지금」 줄이 할 일을 말한다</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.13.2 · 화면 정리 — 할 일과 돈만</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1441,7 +1447,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.13.1';
+const TRAMP_LINE_CONTENT_VERSION='3.13.2';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -5839,7 +5845,7 @@ hint:'거리는 더 멀지만 강재는 촘촘히 실린다. 운임과 비용을
 }
 const STEPS = [
 {id:'OPEN',at:'start',title:'금하호, 부산',
-body:'1,600 재화중량톤 화물선 한 척. 선원 열넷. 현금 4만원.\n배값 11만원은 산업은행 빚이다 — 매달 갚아야 하고, 두 달 밀리면 배를 잃는다. 위 띠의 「상환 D-」를 보라.',
+body:'1,600 재화중량톤 화물선 한 척. 선원 열넷. 현금 4만원.\n배값 11만원은 산업은행 빚이다 — 매달 갚아야 하고, 두 달 밀리면 배를 잃는다. 위 띠의 「○일 뒤 ○원 갚음」을 보라.',
 todo:'화면 아래 「항차를 짠다」를 누르면 해도에 실을 수 있는 계약이 선으로 뜬다. 선을 눌러 남는 돈을 보고 계획에 넣으십시오.',term:'DWT'},
 {id:'MARKET',at:'market',title:'1/10 · 선복과 첫 계약',
 body:'첫 항차는 계약 한 건이면 충분하다. 계약량보다 실제 적재 가능한 양, 항로거리, 예상 순익을 먼저 본다.\n지금은 복수계약이나 정치·금융을 고민하지 않아도 된다.',
@@ -6302,7 +6308,7 @@ function goalText() {
   const co = sim.company, S = chapterState(co), ch = CHAPTERS[S.idx];
   if (!ch) return '모든 장을 넘겼다 · 자유 항해';
   const no = `${S.idx + 1}장`;
-  if (ch.kind === 'debt') { const L = co.finance?.loans?.find(l => l.starter); return `${no} · 금하호 빚 남은 ${won((L?.balance ?? 0) + (L?.arrears ?? 0))}원`; }
+  if (ch.kind === 'debt') { const L = co.finance?.loans?.find(l => l.starter); return `목표 · 금하호 빚 ${won((L?.balance ?? 0) + (L?.arrears ?? 0))}원 다 갚기`; }
   if (S.coa) return `${no} · ${ch.title} ${won(S.coa.done)}/${won(S.coa.tons)}t · D-${Math.max(0, Math.ceil((S.coa.deadline - sim.t) / DAY))}`;
   if (S.tender) return `${no} · ${ch.title} 입찰 공고 — 응찰 D-${Math.max(0, Math.ceil((S.tender.until - sim.t) / DAY))}`;
   const at = Math.max(chapterOpenAt(ch), S.retryAt ?? 0);
@@ -7605,7 +7611,7 @@ laytimeLeft: 0, lastTick: -1, stw:0, currentAlong:0, current:null, voyageEstimat
 const clock = (t) => {
 const d = Math.floor(t / 86400), h = Math.floor((t % 86400) / 3600), m = Math.floor((t % 3600) / 60);
 const dt = new Date(Date.UTC(1962, 6, 1 + d));
-return `${dt.getUTCMonth() + 1}월 ${dt.getUTCDate()}일 ${String(h).padStart(2, '0')}${String(m).padStart(2, '0')}`;
+return `${dt.getUTCMonth() + 1}월 ${dt.getUTCDate()}일 ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 };
 function say(msg, cls = '') {
 _logN++;
@@ -7722,6 +7728,8 @@ $('ak-btns').innerHTML = '';
 const priced = choices.filter(c => Number.isFinite(c.cost));
 const best = priced.length ? priced.reduce((a, b) => (b.cost < a.cost ? b : a)) : null;
 $('ak-btns').classList.toggle('stack', priced.length > 0);
+if (priced.length) { const h = document.createElement('div'); h.className = 'askhint';
+  h.innerHTML = '<span>고르면 드는 돈 (예상)</span><span><i class="lamp go"></i> 제일 적게 드는 쪽</span>'; $('ak-btns').appendChild(h); }
 for (const ch of choices) {
 const b = document.createElement('button');
 if (Number.isFinite(ch.cost)) {
@@ -7734,7 +7742,7 @@ b.onclick = () => { $('ask').classList.remove('on'); asking = null; ch.run(); };
 $('ak-btns').appendChild(b);
 }
 $('ask').classList.add('on');
-($('ak-btns').querySelector('.askopt.best') ?? $('ak-btns').firstChild).focus();
+($('ak-btns').querySelector('.askopt.best') ?? $('ak-btns').querySelector('button'))?.focus();
 st.paused = true;
 }
 function candidates() {
@@ -8014,25 +8022,25 @@ function analysisSnapshot(force=false){
  const baseNet=voyagePlanBaseNet(),ctx=currentWorkContext(),work=ctx?estimatePortWork(!!st.night):null,proj=work?projectedNetWithWork(work):baseNet,currentCost=analysisCurrentCost();
  const advice=[];
  if(st.phase==='항해'&&st.nav){const nv=st.nav;
-  if(nv.err>=6.5)advice.push(analysisMakeAdvice(nv.err>=11?'urgent':'warn','추측선위 오차가 벌어졌다',`±${nv.err.toFixed(1)}해리 · 이 항차 관측 ${nv.legFixes}회 · 항정 손실 약 ${(navPenalty()*100).toFixed(1)}%`,'관측 기회가 오면 선위를 잡는다. 오차가 큰 채로 연안에 붙는 것이 가장 위험하다.','helm','항해 당직'));
+  if(nv.err>=6.5)advice.push(analysisMakeAdvice(nv.err>=11?'urgent':'warn',`배 위치가 ±${nv.err.toFixed(0)}해리 불확실하다 — 관측할 때다`,`±${nv.err.toFixed(1)}해리 · 이 항차 관측 ${nv.legFixes}회 · 항정 손실 약 ${(navPenalty()*100).toFixed(1)}%`,'관측 기회가 오면 선위를 잡는다. 오차가 큰 채로 연안에 붙는 것이 가장 위험하다.','helm','항해 당직'));
   else if(nv.legFixes>=2&&!nv.setKnown)advice.push(analysisMakeAdvice('info','편류를 아직 안 냈다',`선위 ${nv.legFixes}회 확보 · 편류 미보정`,'두 선위의 차이로 해류를 산출해 침로에 실으면 항정이 곧아진다.','helm','편류 수정'));}
- if(fuelNeed!=null&&S.bunker<fuelNeed*1.02)advice.push(analysisMakeAdvice('urgent','연료 예비가 빠듯하다',`선내 ${S.bunker.toFixed(1)}t · 현재 구간 안전필요 약 ${fuelNeed.toFixed(1)}t`,`속력을 올리기보다 현재 구간 완주와 다음 급유항 확보를 우선해서 본다.`,'helm','조타 확인'));
- else if(!st.leg&&S.bunker<SHIP.bunkerMax*.30)advice.push(analysisMakeAdvice('warn','다음 출항 전 급유를 검토',`선내 ${S.bunker.toFixed(1)} / ${SHIP.bunkerMax}t · ${PORTS[port].name} ${won(bq.price)}원/t (${bq.band})`,`장거리 계약을 잡기 전에 연료가 항로를 제한하지 않는지 확인한다.`,'bunker','급유 검토'));
+ if(fuelNeed!=null&&S.bunker<fuelNeed*1.02)advice.push(analysisMakeAdvice('urgent','이 구간 끝까지 기름이 빠듯하다',`선내 ${S.bunker.toFixed(1)}t · 현재 구간 안전필요 약 ${fuelNeed.toFixed(1)}t`,`속력을 올리기보다 현재 구간 완주와 다음 급유항 확보를 우선해서 본다.`,'helm','조타 확인'));
+ else if(!st.leg&&S.bunker<SHIP.bunkerMax*.30)advice.push(analysisMakeAdvice('warn','출항 전에 기름을 넣어야 한다',`선내 ${S.bunker.toFixed(1)} / ${SHIP.bunkerMax}t · ${PORTS[port].name} ${won(bq.price)}원/t (${bq.band})`,`장거리 계약을 잡기 전에 연료가 항로를 제한하지 않는지 확인한다.`,'bunker','급유 검토'));
  else if(!st.leg&&bq.band==='저가'&&S.bunker<SHIP.bunkerMax*.82)advice.push(analysisMakeAdvice('good','현재 항은 벙커 조달에 유리',`${PORTS[port].name} ${won(bq.price)}원/t · ${bq.band} · 선내 ${S.bunker.toFixed(1)}t`,`다음 항차가 길다면 싼 항에서 여유 연료를 싣는 선택이 가능하다.`,'bunker','급유 비교'));
  if(badVal<45)advice.push(analysisMakeAdvice('urgent',`${PART[badPart]??badPart} 상태가 위험권`,`${badVal.toFixed(0)} / 100 · 정비견적 ${!st.leg&&S.at?won(repairQuote(badPart).cost)+'원':'다음 항만에서 확인'}`,`장거리 대양항차 전에 고장 노출을 줄이는 편이 안전하다.`,'repair','정비 검토'));
  else if(badVal<62)advice.push(analysisMakeAdvice('warn',`${PART[badPart]??badPart} 정비시기 접근`,`${badVal.toFixed(0)} / 100`,`지금 항차를 더 돌릴 수는 있지만 다음 장거리 항차와 정비기회를 함께 비교한다.`,'repair','정비 검토'));
- if(work&&work.futureDemurrage>0)advice.push(analysisMakeAdvice('urgent','체선료 발생 가능',`예상 추가 체선 ${won(Math.round(work.futureDemurrage))}원 · 완료 ${clock(work.complete)}`,`야간작업 비용과 체선료를 비교해야 한다. 싼 쪽이 항상 야간작업인 것은 아니다.`,'night','야간작업 비교'));
- if(proj!=null&&proj<0)advice.push(analysisMakeAdvice('urgent','현재 판단 반영 예상손익이 적자',`계획 ${baseNet==null?'—':won(Math.round(baseNet))+'원'} · 현재판단 ${won(Math.round(proj))}원 · 누적비용 ${won(Math.round(currentCost))}원`,`이미 지출한 비용과 앞으로 피할 수 있는 비용을 나눠서 본다. 무리한 속력·야간작업·우회가 손실을 더 키우는지 확인한다.`,'finance','재무표'));
- else if(proj!=null&&baseNet!=null&&proj<baseNet*.72)advice.push(analysisMakeAdvice('warn','항차 마진이 계획보다 약해졌다',`계획 ${won(Math.round(baseNet))}원 → 현재판단 ${won(Math.round(proj))}원`,`선석·기상·체선·추가비용 중 어느 항목이 마진을 깎았는지 재무표와 복기에서 확인한다.`,'finance','재무표'));
+ if(work&&work.futureDemurrage>0)advice.push(analysisMakeAdvice('urgent','하역이 늦어 체선료(벌금)가 붙을 수 있다',`예상 추가 체선 ${won(Math.round(work.futureDemurrage))}원 · 완료 ${clock(work.complete)}`,`야간작업 비용과 체선료를 비교해야 한다. 싼 쪽이 항상 야간작업인 것은 아니다.`,'night','야간작업 비교'));
+ if(proj!=null&&proj<0)advice.push(analysisMakeAdvice('urgent','이대로면 이번 항차는 적자다',`계획 ${baseNet==null?'—':won(Math.round(baseNet))+'원'} · 현재판단 ${won(Math.round(proj))}원 · 누적비용 ${won(Math.round(currentCost))}원`,`이미 지출한 비용과 앞으로 피할 수 있는 비용을 나눠서 본다. 무리한 속력·야간작업·우회가 손실을 더 키우는지 확인한다.`,'finance','재무표'));
+ else if(proj!=null&&baseNet!=null&&proj<baseNet*.72)advice.push(analysisMakeAdvice('warn','이번 항차 이익이 계획보다 줄었다',`계획 ${won(Math.round(baseNet))}원 → 현재판단 ${won(Math.round(proj))}원`,`선석·기상·체선·추가비용 중 어느 항목이 마진을 깎았는지 재무표와 복기에서 확인한다.`,'finance','재무표'));
  if(runway<2)advice.push(analysisMakeAdvice('urgent','현금 버팀기간이 짧다',`현금 ${won(Math.round(S.cash))}원 · 월 고정부담 ${won(Math.round(fixed))}원 · 약 ${runway.toFixed(1)}개월`,`신규 고정비를 늘리기 전에 현재 선대의 현금창출 항차를 우선한다.`,'finance','재무표'));
- else if(runway<4)advice.push(analysisMakeAdvice('warn','고정비 대비 현금여유가 크지 않다',`약 ${runway.toFixed(1)}개월 · 월 ${won(Math.round(fixed))}원`,`용선·지점·장기계약을 추가하기 전에 월 고정유출을 확인한다.`,'finance','재무표'));
+ else if(runway<4)advice.push(analysisMakeAdvice('warn',`현금이 고정비 ${runway.toFixed(1)}개월치뿐이다`,`매달 ${won(Math.round(fixed))}원이 나간다`,`용선·지점·장기계약을 추가하기 전에 월 고정유출을 확인한다.`,'finance','재무표'));
  const dealNow=normalizeCorporateDeals(co,sim.t),openAuc=dealNow.auctions.filter(x=>x.status==='OPEN'),openTake=dealNow.takeovers.filter(x=>x.status==='OPEN');if(openTake.length)advice.push(analysisMakeAdvice('good','부실 경쟁사 인수협상이 열렸다',`${openTake.length}건 · ${openTake.slice(0,2).map(x=>x.rivalName+' '+Math.round(x.dwt/1000)+'k DWT').join(' · ')}`,`인수가는 선복뿐 아니라 현지 영업망을 함께 사는 값이다. 인수 뒤 본사 관리부하와 선장 공백까지 같이 본다.`,'financeops','경매·인수'));else if(openAuc.length)advice.push(analysisMakeAdvice('good','도산선 청산경매가 열렸다',`${openAuc.length}척 · 최저 ${won(Math.min(...openAuc.map(x=>x.price)))}원`,`중고시장보다 싸더라도 노후·상태와 인수항 위치를 확인한다.`,'financeops','경매·인수'));
- if(orgL>orgC)advice.push(analysisMakeAdvice('warn','본사 관리부하 초과',`관리 ${orgL.toFixed(1)} / ${orgC} · 위임선 효율 ${Math.round(orgEff*100)}%`,`금하호 직접항차에는 영향이 없지만 보조선 수익성이 새고 있다. 본사 확장·경영진·선대편성을 비교한다.`,'organization','조직 보기'));
+ if(orgL>orgC)advice.push(analysisMakeAdvice('warn','본사 일손이 모자라 위임선 수익이 샌다',`관리 ${orgL.toFixed(1)} / ${orgC} · 위임선 효율 ${Math.round(orgEff*100)}%`,`금하호 직접항차에는 영향이 없지만 보조선 수익성이 새고 있다. 본사 확장·경영진·선대편성을 비교한다.`,'organization','조직 보기'));
  const localSpecial=(sim.market?.posted?.[port]??[]).filter(c=>c.expires>sim.t&&(c.specialty??contractSpecialty(c.cargo,c.tons))!=='GENERAL');if(localSpecial.length){const by={};for(const c of localSpecial){const k=c.specialty??contractSpecialty(c.cargo,c.tons);by[k]=(by[k]??0)+c.tons}const top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];if(top&&!companyHasFleetKind(co,top[0]))advice.push(analysisMakeAdvice('good',`${specialtyLabel(top[0])} 시장이 보이지만 자사 선형이 없다`,`${PORTS[port].name} 게시 약 ${Math.round(top[1]).toLocaleString()}t · 현재 ${specialtyLabel(top[0])} 선복 0 DWT`,`금하호가 억지로 싣는 화물이 아니다. 중고선·기간용선에서 전문선 진입비용과 시장 지속성을 비교한다.`,'fleetmarket','전문선 시장'));}
  const ecoNow=shippingEconomyNormalize(sim.market),ownOrders=(co.newbuildOrders??[]).filter(x=>x.status==='BUILDING');if(ecoNow.global>=1.17)advice.push(analysisMakeAdvice('good','세계 선복경기가 강하다',`종합지수 ${ecoNow.global.toFixed(2)} · ${shippingEconomySummary(sim.market).slice(0,2).map(x=>`${x.name} ${x.index.toFixed(2)}`).join(' · ')}`,`높은 운임은 증선을 유혹하지만 발주선 인도 전 경쟁선복이 늘어날 수 있다. 중고선·용선·신조선의 시간차를 비교한다.`,'shipyard','신조선·선령'));else if(ecoNow.global<=.88)advice.push(analysisMakeAdvice('warn','세계 선복이 과잉권이다',`종합지수 ${ecoNow.global.toFixed(2)} · 운임압력 약세`,`낮은 선가는 기회일 수 있지만 고정비가 큰 신조선 발주는 회복까지 버틸 현금이 있어야 한다.`,'shipyard','선대 생애주기'));if(ownOrders.length)advice.push(analysisMakeAdvice('good','건조 중 선박이 미래 선복으로 들어온다',`${ownOrders.length}척 · 최근 인도 ${clock(Math.min(...ownOrders.map(x=>x.deliverAt)))}`,`현재 운임이 아니라 인도 시점의 시장을 감당할 현금과 배선계획을 확인한다.`,'shipyard','발주장부'));
  if(!st.contract&&!st.leg){
    if(intel.marketIndex>1.10&&['매우 많음','많음'].includes(intel.inquiry))advice.push(analysisMakeAdvice('good','현지에서 화물을 먼저 볼 가치가 있다',`${PORTS[port].name} · 문의 ${intel.inquiry} · 운임 ${intel.rate} · 경쟁선복 ${intel.tonnage} · 신뢰 ${intel.confidence}%`,`좋은 시장이어도 적기·거리·공선귀항까지 맞아야 이익이다. 게시계약을 항차계획에서 비교한다.`,'market','항차 계획'));
-   else if(intel.marketIndex<.90&&['많음','과잉'].includes(intel.tonnage))advice.push(analysisMakeAdvice('warn','현지 선복경쟁이 불리하다',`${PORTS[port].name} · 문의 ${intel.inquiry} · 경쟁선복 ${intel.tonnage} · 운임 ${intel.rate}`,`빈배로 멀리 쫓아가기 전에 인접항의 선복정보와 공선거리를 함께 비교한다.`,'analysis','재배치 후보'));
+   else if(intel.marketIndex<.90&&['많음','과잉'].includes(intel.tonnage))advice.push(analysisMakeAdvice('warn',`${PORTS[port].name}엔 배가 넘쳐 운임이 싸다`,`화주 문의 ${intel.inquiry} · 경쟁 배 ${intel.tonnage} · 운임 ${intel.rate}`,`빈배로 멀리 쫓아가기 전에 인접항의 선복정보와 공선거리를 함께 비교한다.`,'analysis','재배치 후보'));
    else advice.push(analysisMakeAdvice('good','다음 항차를 비교할 시점',`${PORTS[port].name} · 문의 ${intel.inquiry} · 운임 ${intel.rate} · 14일 ${intel.out14}`,`운임 총액보다 항해일수·선석대기·공선거리·다음 화물까지 한 항차로 본다.`,'market','항차 계획'));
  }
  if(!advice.length)advice.push(analysisMakeAdvice('good','현재 즉시 손볼 위험요소가 크지 않다',`선박 최저상태 ${badVal.toFixed(0)} · 현금버팀 ${runway>20?'20+':runway.toFixed(1)}개월 · 조직 ${orgL.toFixed(1)}/${orgC}`,`다음 항차의 공선거리와 선복수요를 비교하면서 운항을 이어간다.`,'market','항차 계획'));
@@ -8047,7 +8055,12 @@ function analysisRepositionCandidates(force=false){
  analysisCache.candKey=key;analysisCache.candidates=arr;return arr;
 }
 function analysisCardHTML(a){const sev=a.level==='urgent'?'긴급':a.level==='warn'?'주의':'검토';const act=a.go?`<div class="act"><button data-analysis-go="${a.go}">${a.button||'확인'}</button></div>`:'';return `<div class="analysis-card ${a.level}"><div class="top"><b>${a.title}</b><span class="analysis-sev ${a.level}">${sev}</span></div><div class="evidence">${a.evidence}</div><div class="why">${a.why}</div>${act}</div>`}
-function paintHelmBrief(force=false){const box=$('helm-brief');if(!box)return;const s=analysisSnapshot(force),top=s.advice.slice(0,3);box.innerHTML=top.map(a=>`<div class="briefline"><span class="brieftag ${a.level==='urgent'||a.level==='warn'?'warn':a.level==='good'?'good':''}">${a.level==='urgent'?'긴급':a.level==='warn'?'주의':'판단'}</span><span>${a.title} · ${a.evidence}</span></div>`).join('')}
+function paintHelmBrief(force=false){const box=$('helm-brief');if(!box)return;const s=analysisSnapshot(force),top=s.advice.filter(a=>a.level==='urgent'||a.level==='warn').slice(0,2);
+ // 손댈 게 없으면 칸째 감춘다. 있으면 한 줄 제목 + 근거, 누르면 그 화면으로 간다.
+ const lbl=box.previousElementSibling?.classList?.contains('lbl')?box.previousElementSibling:null;box.hidden=!top.length;if(lbl)lbl.hidden=!top.length;
+ const html=top.map(a=>`<button class="briefline" data-analysis-go="${a.go}"><span class="brieftag warn">${a.level==='urgent'?'긴급':'주의'}</span><span><b>${a.title}</b><small>${a.evidence}</small></span>${a.go?'<em>›</em>':''}</button>`).join('');
+ if(box._h!==html){box._h=html;box.innerHTML=html;}
+ if(!box._wired){box._wired=1;box.addEventListener('click',e=>{const b=e.target.closest('[data-analysis-go]');if(b&&b.dataset.analysisGo)analysisAction(b.dataset.analysisGo)})}}
 function analysisPageOn(){return !!document.querySelector('.page[data-page="analysis"].on')}
 function paintAnalysis(force=false){
  paintHelmBrief(force);if(!analysisPageOn()&&!force)return;const s=analysisSnapshot(force),S=sim.ship,co=sim.company;
@@ -9762,7 +9775,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.13.1 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.13.2 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -10824,10 +10837,13 @@ function paintNavWatch() {
   const since = n.lastFixT > -1e8
     ? `${((sim.t - n.lastFixT) / HOUR).toFixed(1)}시간 전 ${n.lastKind === 'PORT' ? '출항 선위' : (NAV_FIX[n.lastKind]?.name ?? '관측')}`
     : '아직 없음';
+  // 당직은 선장 일이다. 사장에게는 「괜찮은가 · 돈이 새는가」 한 줄만.
+  const grade = n.err > 6 ? '위치가 흐려졌다' : n.err > 3 ? '조금 흐리다' : '정확하다';
   box.innerHTML =
-    `<div class="nw-top"><b>추측선위 ±${n.err.toFixed(1)}해리</b><span>${cap} · 갑판 ${deck.toFixed(0)}</span></div>` +
+    `<div class="nw-top"><b>배 위치 ${grade} <small>±${n.err.toFixed(1)}해리</small></b><span>${cap} 당직</span></div>` +
     `<div class="nw-bar ${n.err > 6 ? 'warn' : ''}"><i style="width:${pct.toFixed(0)}%"></i></div>` +
-    `<div class="nw-meta">마지막 선위 ${since} · 이 항차 관측 ${n.legFixes}회<br>` +
+    (pen >= 1 ? `<div class="nw-meta">돌아가는 길 때문에 항해가 약 ${pen.toFixed(1)}% 길어진다</div>` : '') +
+    `<div class="nw-meta nw-detail" hidden>마지막 선위 ${since} · 이 항차 관측 ${n.legFixes}회<br>` +
     `편류 ${n.setKnown ? '보정됨' : '미보정'} · ${lost}<br>` +
     `선내시 ${navShipTime(M.q.lon, sim.t)} · 시정 ${M.w.vis.toFixed(1)}km` +
     `${sim.ship.loran && navLoranChain(M.q) ? ' · 로란 체인 안' : ''}</div>`;
@@ -10936,7 +10952,7 @@ function uiPaintNow() {
     if (sailing) {
       slot.appendChild(uiLabel('기관 명령'));      uiMount('h-eot', slot);
       slot.appendChild(uiLabel('항해'));           uiMount('nav-live', slot);
-      slot.appendChild(uiLabel('당직 · 선위'));    uiMount('nav-watch', slot); uiMount('nav-actions', slot);
+      slot.appendChild(uiLabel('당직'));           uiMount('nav-watch', slot);
       slot.appendChild(uiLabel('지금 판단'));      uiMount('helm-brief', slot);
     } else if (ph === '적재' || ph === '양하' || ph.includes('대기')) {
       slot.appendChild(uiLabel(ph.includes('대기') ? '선석 대기' : ph));
@@ -10961,6 +10977,7 @@ function uiPaintNow() {
       uiMount('h-bunker', row2); uiMount('h-repair', row2); uiMount('h-lobby', row2); uiMount('h-terms', row2);
       const mrow2 = document.createElement('div'); mrow2.className = 'btnrow'; more.appendChild(mrow2);
       uiMount('h-market', mrow2);
+      if (sailing) { more.appendChild(uiLabel('당직 방침 · 장비')); uiMount('nav-actions', more); }
     } else {
       const row2 = document.createElement('div'); row2.className = 'btnrow'; more.appendChild(row2);
       uiMount('h-market', row2); uiMount('h-terms', row2);
@@ -10988,6 +11005,18 @@ function uiPaintNow() {
     const M = marineState();
     let fat = 0; try { fat = playerCrew()?.fatigue ?? 0; } catch (_) {}
     head._g[0](S.bunker); head._g[1](bad[1], PART[bad[0]] ?? bad[0]); head._g[2](fat); head._g[3](M.w.hs);
+    // 계기는 바다 위에서만. 항구에서는 판단에 걸리는 값만 단추에 붙인다.
+    head.hidden = !sailing;
+    if (!sailing) {
+      const fuelLow = S.bunker < SHIP.bunkerMax * .35, worn = bad[1] < 78;
+      const bk = $('h-bunker'), rp = $('h-repair');
+      const bl = fuelLow ? `급유 필요 · ${Math.round(S.bunker)}t` : `급유 · ${Math.round(S.bunker)}t 있음`;
+      const rl = worn ? `정비 필요 · ${PART[bad[0]] ?? bad[0]} ${bad[1].toFixed(0)}` : `정비 · 상태 ${bad[1].toFixed(0)}`;
+      if (bk && bk._l !== bl) { bk._l = bl; bk.textContent = bl; bk.classList.toggle('warnbtn', fuelLow); }
+      if (rp && rp._l !== rl) { rp._l = rl; rp.textContent = rl; rp.classList.toggle('warnbtn', worn); }
+    } else {
+      for (const [id, t] of [['h-bunker', '급유'], ['h-repair', '정비']]) { const e = $(id); if (e && e._l) { e._l = null; e.textContent = t; e.classList.remove('warnbtn'); } }
+    }
   }
   const wb = $('now-workbar');
   if (wb) {
@@ -11739,7 +11768,8 @@ function debtChipPaint() {
   const D = debtDue(sim.company, sim.t);
   if (D.due > 0) {
     const short = sim.ship.cash < D.due;
-    const txt = `상환 D-${Math.max(0, Math.ceil(D.days))} · ${won(D.due)}원`;
+    const dd = Math.max(0, Math.ceil(D.days));
+    const txt = `${dd ? dd + '일 뒤' : '오늘'} ${won(D.due)}원 갚음${short ? ' · 모자람' : ''}`;
     if (el.textContent !== txt) el.textContent = txt;
     el.classList.toggle('due', true); el.classList.toggle('short', short);
   } else {
@@ -12820,7 +12850,7 @@ paintStrategy();
 {
 const rows = ranking(sim.rivals, companyDwt(sim.company));
 const me = rows.find((r) => r.me);
-$('f-rank').textContent = me ? `${me.rank}위 / ${rows.length}` : '';
+$('f-rank').textContent = me ? `업계 ${me.rank}위` : '';
 try { (window.__fcd ??= drumLive($('f-cash'), { suffix:'<span class="cur">원</span>' }))(sim.ship.cash); }
 catch (_) { $('f-cash').textContent = Math.round(sim.ship.cash).toLocaleString() + '원'; }
 $('f-cash').className = 'fcash' + (sim.ship.cash < 20000 ? ' warn' : '');
