@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.13.2</title>
+<title>TRAMP LINE 1962 · v3.13.3</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -966,7 +966,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.13.2</div>
+      <div class="mm-version">CONTENT v3.13.3</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1205,7 +1205,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.13.2 · 화면 정리 — 할 일과 돈만</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.13.3 · 계획표가 일요일 휴무를 센다</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1447,7 +1447,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.13.2';
+const TRAMP_LINE_CONTENT_VERSION='3.13.3';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -2137,7 +2137,7 @@ const FREIGHT_HANDLING = 20;
 const freightBase = (d, cargo) => (FREIGHT_HANDLING + FREIGHT_K * Math.pow(Math.max(1, d) / 100, .75)) * CARGO[cargo].fr;
 const DEMURRAGE_RATE = 0.08;
 // 입출항 1회당 도선·예선 표준 비용. 계획 화면이 이만큼은 미리 잡아 둔다.
-const PILOTAGE_ALLOWANCE = 700;
+const PILOTAGE_ALLOWANCE = 550;   // 입항·출항 한 번당 평균 (도선 380 + 가끔 예선 320)
 const WEAR = {
 ENGINE:  { sea:0.35, port:0.02, loadExp:2.5 },
 COOLING: { sea:0.30, port:0.02, loadExp:1.8 },
@@ -3083,6 +3083,17 @@ if (typeof opts.waitByPort === 'function') return Math.max(0, Number(opts.waitBy
 if (port === opts.origin && Number.isFinite(opts.berthWaitH)) return Math.max(0, opts.berthWaitH);
 const base=Math.max(0,(PORTS[port]?.occ??0.4)*10);return opts.company?base*(1-portOpsPriority(opts.company,port)):base;
 }
+// 주간 작업량 workH(시간)를 t0부터 실제 작업 달력(06~22시, 일요일 휴무)대로 소화하는 데 걸리는 시간.
+// 실제 진행(workEfficiency)과 같은 규칙. 날씨·고장은 예측하지 않는다.
+function calendarElapsedH(t0, workH) {
+  let t = t0, left = workH, n = 0; const STEP = 900, sh = STEP / HOUR;
+  while (left > 1e-6 && n++ < 4 * 24 * 40) {
+    const e = workEfficiency(t, false);
+    if (e > 0) { if (left <= e * sh) { t += left / e * HOUR; left = 0; break; } left -= e * sh; }
+    t += STEP;
+  }
+  return (t - t0) / HOUR;
+}
 function evaluatePlan(items, from, t, bunkerPrice, opts = {}) {
 const ship = opts.ship ?? SHIP;
 const errors = [], warnings = [];
@@ -3125,7 +3136,8 @@ if (waitH > 0.1) schedule.push({kind:'wait', port:p, at:cursor, end:cursor+waitH
 cursor += waitH * HOUR; portElapsedH += waitH;
 const at = cursor;
 const workH = sum(unloadItems, (x)=>x.tons / Math.max(1, (opts.company?portDischargeRate(opts.company,p,x.c.cargo,100,0,0,ship):dischargeRate(p,x.c.cargo,100,0,0))*contractHandlingMultiplier(x.c)*shipWorkMultiplier(ship,x.c.cargo,x.c)*(ship===SHIP&&opts.company?crewWorkFactor((opts.company.ships??[]).find(z=>z.role==='PLAYER')?.crewOps,'cargo'):1)));
-const elapsedH = workH / 16 * 24;
+const elapsedH = opts.calendar ? calendarElapsedH(at, workH) : workH / 16 * 24;
+if (opts.calendar && elapsedH > workH / 16 * 24 + 6) warnings.push(`${PORTS[p].name} 양하에 일요일이 끼어 약 ${(elapsedH - workH / 16 * 24).toFixed(0)}시간 늦어진다`);
 cursor += elapsedH * HOUR; portElapsedH += elapsedH;
 schedule.push({kind:'unload', port:p, at, end:cursor, tons:sum(unloadItems,x=>x.tons), items:unloadItems.length});
 }
@@ -3146,7 +3158,8 @@ const at = cursor;
 if (L.ok && at > L.end) errors.push(`${PORTS[p].name} 예상 적재 시작이 적기 종료보다 ${((at-L.end)/HOUR).toFixed(0)}시간 늦다`);
 else if (L.ok && L.end-at < 8*HOUR) warnings.push(`${PORTS[p].name} 적기 여유가 8시간 미만이다`);
 const workH = sum(loadItems, (x)=>x.tons / Math.max(1, (opts.company?portDischargeRate(opts.company,p,x.c.cargo,100,0,0,ship):dischargeRate(p,x.c.cargo,100,0,0))*contractLoadMultiplier(x.c)*shipWorkMultiplier(ship,x.c.cargo,x.c)*(ship===SHIP&&opts.company?crewWorkFactor((opts.company.ships??[]).find(z=>z.role==='PLAYER')?.crewOps,'cargo'):1)));
-const elapsedH = workH / 16 * 24;
+const elapsedH = opts.calendar ? calendarElapsedH(at, workH) : workH / 16 * 24;
+if (opts.calendar && elapsedH > workH / 16 * 24 + 6) warnings.push(`${PORTS[p].name} 적재에 일요일이 끼어 약 ${(elapsedH - workH / 16 * 24).toFixed(0)}시간 늦어진다`);
 cursor += elapsedH * HOUR; portElapsedH += elapsedH;
 schedule.push({kind:'load', port:p, at, end:cursor, tons:sum(loadItems,x=>x.tons), items:loadItems.length});
 }
@@ -3172,7 +3185,7 @@ schedule.push({kind:'sea', from:leg.from, to:leg.to, at, end:cursor, nm, tons});
 const revenue = sum(items, (x)=>x.c.perTon * x.tons * boon);
 const seaCostDay = Number.isFinite(opts.seaDayCost) ? opts.seaDayCost : seaDay(bunkerPrice);
 const portCostDay = Number.isFinite(opts.portDayCost) ? opts.portDayCost : portDay(bunkerPrice);
-const pilotageEst = (ship===SHIP) ? (flow.calls.length + 1) * PILOTAGE_ALLOWANCE : 0;
+const pilotageEst = (ship===SHIP) ? 2 * schedule.filter((x) => x.kind === 'sea').length * PILOTAGE_ALLOWANCE : 0;
 // 사장이 볼 더하기 빼기 표 — 줄마다 따로 센다
 const daysAll = (seaH + portElapsedH) / 24;
 const lines = (ship===SHIP) ? {
@@ -8233,7 +8246,7 @@ const draftSpeedKn = () => (EOT.find(([k]) => k === draftSpeed) ?? EOT[1])[1];
 function planEvaluation(items = draftPlan) {
 const at = sim.ship.at;
 return evaluatePlan(items, at, sim.t, sim.bunkerPrice, {
-company:sim.company,
+company:sim.company, calendar:true,
 speedKn: draftSpeedKn(),
 origin: at,
 boon: freightBoon(sim.politics, sim.t),
@@ -8475,7 +8488,7 @@ st.marks = []; st.acc = { fuel:0, op:0, fee:0, agency:0, pilot:0, night:0, dem:0
 st.engineAtStart = sim.ship.state.ENGINE;
 st.stateAtStart = { ...sim.ship.state };
 st.voyageStart = sim.t;
-try { const h=bestHoldFor(c,tons,[],c.from); st.voyageEstimate=evaluatePlan([{c,tons,hold:h}],c.from,sim.t,sim.bunkerPrice,{origin:c.from,boon:st.boon,berthWaitH:0,company:sim.company,bunkerMarket:true}).estNet; }
+try { const h=bestHoldFor(c,tons,[],c.from); st.voyageEstimate=evaluatePlan([{c,tons,hold:h}],c.from,sim.t,sim.bunkerPrice,{origin:c.from,boon:st.boon,berthWaitH:0,company:sim.company,bunkerMarket:true,calendar:true}).estNet; }
 catch { st.voyageEstimate=null; }
 const alt = (sim.market.posted[c.from] ?? []).filter((x) => x !== c).slice(0, 2)
 .map((x) => `${PORTS[x.to].name}행 ${CARGO[x.cargo].name}`).join(' / ') || '없음';
@@ -9775,7 +9788,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.13.2 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.13.3 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
