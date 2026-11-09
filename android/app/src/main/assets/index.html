@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.10.0</title>
+<title>TRAMP LINE 1962 · v3.11.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -890,6 +890,33 @@ button[data-hold].nudge{animation:nudge .32s}
 
 .mc-item button{flex:0 0 auto;min-width:36px}
 #h-eot .eotd svg{max-width:270px}
+/* ── 전보 ── */
+#wire-btn{position:absolute;right:8px;top:46px;z-index:6;min-height:30px;padding:0 10px;flex:0 0 auto;display:flex;align-items:center;gap:6px;
+  border:1px solid var(--rule);background:var(--paper);font-family:var(--face-title);letter-spacing:.08em}
+#wire-btn[hidden]{display:none}
+#wire-btn b{font:600 10px var(--face-num);min-width:16px;height:16px;border-radius:8px;background:transparent;color:var(--paper);display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+#wire-btn.unread b{background:var(--magenta)}
+#wire-btn.unread{box-shadow:0 0 0 3px rgba(168,18,95,.12)}
+#wire-toast{position:absolute;left:8px;right:8px;top:46px;z-index:8;cursor:pointer}
+#wire-toast[hidden]{display:none}
+#wire-toast.in .wire{animation:wirein .38s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes wirein{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+.wire{background:#f3ecd2;border:1px solid #b7a874;box-shadow:0 6px 18px rgba(0,0,0,.18);padding:6px 10px 8px;position:relative;
+  background-image:repeating-linear-gradient(90deg,transparent 0 6px,rgba(0,0,0,.025) 6px 7px)}
+.wire::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ink2)}
+.wire.up::before{background:var(--magenta)} .wire.bad::before{background:var(--magenta)} .wire.good::before{background:var(--up)} .wire.dim::before{background:#b7b2a2}
+.wire .wh{display:flex;justify-content:space-between;font:9px var(--face-num);letter-spacing:.14em;color:#7a6c43;margin-bottom:2px}
+.wire b{display:block;font:600 12px var(--face-num);letter-spacing:.04em;color:var(--ink)}
+.wire p{margin:2px 0 0;font:12px/1.45 var(--face-num);color:var(--ink)}
+.wire.bad b{color:var(--magenta)}
+.wire .wgo{margin-top:6px;min-height:30px;padding:0 10px;font-size:var(--fs-micro);flex:0 0 auto}
+#ws-body{padding:10px 12px 14px;display:flex;flex-direction:column;gap:8px}
+#ws-body .wire{box-shadow:none}
+/* ── 빚 ── */
+#f-dwt.due{color:var(--ink);font-weight:600}
+#f-dwt.short{color:var(--magenta)}
+#gameover .note{font-size:var(--fs-mid);line-height:1.6}
+
 </style>
 </head>
 <body>
@@ -900,7 +927,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.10.0</div>
+      <div class="mm-version">CONTENT v3.11.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -963,6 +990,8 @@ button[data-hold].nudge{animation:nudge .32s}
       <div id="wharf-body" class="wh-body"></div>
     </section>
     <button id="wharf-show" hidden>부두 화면</button>
+    <button id="wire-btn" hidden>전보 <b id="wire-n"></b></button>
+    <div id="wire-toast" hidden></div>
     <div id="mapbar" hidden><span id="mapbar-t"></span><button id="mapbar-list">목록</button><button id="mapbar-x" aria-label="항차 닫기">×</button></div>
     <div id="mapcard" hidden></div>
     <aside id="port-approach" aria-live="polite" aria-hidden="true">
@@ -1136,7 +1165,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.10.0 · 선교 계기 — 전령기 · 드럼 · 계기 · 레버</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.11.0 · 전보와 빚 — 시장은 소문으로 먼저 온다</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1185,6 +1214,19 @@ button[data-hold].nudge{animation:nudge .32s}
   <div class="sheetbox">
     <header><h2 id="vs-h">항차 상세</h2><button id="vs-close">닫기</button></header>
     <div id="vs-body"></div>
+  </div>
+</div>
+<div id="wiresheet" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="ws-h">
+  <div class="sheetbox">
+    <header><h2 id="ws-h">전보</h2><button id="ws-close">닫기</button></header>
+    <div id="ws-body"></div>
+  </div>
+</div>
+<div id="gameover" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="go-h">
+  <div class="sheetbox">
+    <header><h2 id="go-h">파산</h2><span class="stamp">압류</span></header>
+    <div class="note" id="go-b"></div>
+    <div class="evfoot"><div class="btnrow"><button id="go-load">저장본 불러오기</button><button id="go-new">새로 시작</button></div></div>
   </div>
 </div>
 <div id="optsheet" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="os-h">
@@ -1359,7 +1401,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.10.0';
+const TRAMP_LINE_CONTENT_VERSION='3.11.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -2669,8 +2711,11 @@ this.cycle = Number.isFinite(o.cycle) ? o.cycle : 1.0;
 this.flow=JSON.parse(JSON.stringify(o.flow??{lastMonth:-1,events:[]}));if(!Array.isArray(this.flow.events))this.flow.events=[];if(!Number.isFinite(this.flow.lastMonth))this.flow.lastMonth=-1;
 this.tonnage=JSON.parse(JSON.stringify(o.tonnage??{lastMonth:-1,global:Number.isFinite(o.cycle)?o.cycle:1,indices:{GENERAL:1,BULK:1,TANKER:1,REEFER:1,TIMBER:1,HEAVY:1},baseDemand:{},baseSupply:{},history:[]}));shippingEconomyNormalize(this);
 }
-flowEvents(t){return(this.flow?.events??[]).filter(e=>e.until>t)}
-rollFlowMonth(t){const mon=Math.floor(t/MONTH);this.flow??={lastMonth:-1,events:[]};this.flow.events=this.flowEvents(t);if(this.flow.lastMonth===mon)return[];this.flow.lastMonth=mon;const r=this.rng.market,out=[],keys=Object.keys(FLOW_REGIONS),n=1+(r.chance(.55)?1:0)+(r.chance(.14)?1:0);for(let i=0;i<n;i++){const region=r.pick(keys),R=FLOW_REGIONS[region],side=r.chance(.5)?'SUPPLY':'DEMAND',cargoPool=[...new Set(R.ports.flatMap(p=>side==='SUPPLY'?TRADE[p].produce:TRADE[p].consume))];if(!cargoPool.length)continue;const cargo=r.pick(cargoPool),soft=r.chance(.28),factor=soft?r.range(.74,.90):r.range(1.12,1.38),until=t+r.range(24,55)*DAY,word=side==='SUPPLY'?(factor>1?'산지 출하 강세':'산지 출하 차질'):(factor>1?'수입 주문 강세':'수요 둔화'),e={id:`F${mon}-${i}-${region}-${cargo}`,region,cargo,side,factor,until,label:`${R.name} ${CARGO[cargo].name} ${word}`};this.flow.events.push(e);out.push(e)}return out}
+flowEvents(t){return(this.flow?.events??[]).filter(e=>!e.fake&&(e.start??0)<=t&&e.until>t)}
+flowRumors(t){return(this.flow?.events??[]).filter(e=>(e.start??0)>t)}
+rollFlowMonth(t){const mon=Math.floor(t/MONTH);this.flow??={lastMonth:-1,events:[]};this.flow.events=(this.flow.events??[]).filter(e=>e.until>t);if(this.flow.lastMonth===mon)return[];this.flow.lastMonth=mon;const r=this.rng.market,out=[],keys=Object.keys(FLOW_REGIONS),n=1+(r.chance(.55)?1:0)+(r.chance(.14)?1:0);for(let i=0;i<n;i++){const region=r.pick(keys),R=FLOW_REGIONS[region],side=r.chance(.5)?'SUPPLY':'DEMAND',cargoPool=[...new Set(R.ports.flatMap(p=>side==='SUPPLY'?TRADE[p].produce:TRADE[p].consume))];if(!cargoPool.length)continue;const cargo=r.pick(cargoPool),soft=r.chance(.28),factor=soft?r.range(.74,.90):r.range(1.12,1.38),start=t+r.range(5,14)*DAY,until=start+r.range(24,55)*DAY,fake=r.chance(.18),cause=flowCause(cargo,side,factor>1,r),word=side==='SUPPLY'?(factor>1?'산지 출하 강세':'산지 출하 차질'):(factor>1?'수입 주문 강세':'수요 둔화'),e={id:`F${mon}-${i}-${region}-${cargo}`,region,cargo,side,factor,start,until,fake,cause,label:`${R.name} ${CARGO[cargo].name} ${word}`};this.flow.events.push(e);out.push(e)}return out}
+flowRateFactor(from,to,cargo,t){let f=1;const rf=PORT_FLOW_REGION[from],rt=PORT_FLOW_REGION[to];for(const e of this.flowEvents(t)){if(e.cargo!==cargo)continue;if(e.side==='SUPPLY'&&e.region===rf)f*=1+1.2*(e.factor-1);if(e.side==='DEMAND'&&e.region===rt)f*=1+1.4*(e.factor-1)}return Math.max(.6,Math.min(1.7,f))}
+postFactor(at,t){let f=1;const reg=PORT_FLOW_REGION[at];for(const e of this.flowEvents(t))if(e.side==='SUPPLY'&&e.region===reg)f*=e.factor;return Math.max(.7,Math.min(1.5,f))}
 flowFactor(port,cargo,side,t){let f=flowSeasonFactor(port,cargo,t,side)*flowStructuralFactor(port,cargo,t,side),reg=PORT_FLOW_REGION[port];for(const e of this.flowEvents(t))if(e.region===reg&&e.cargo===cargo&&e.side===side)f*=e.factor;return Math.max(.55,Math.min(1.65,f))}
 tradeWeight(port,cargo,side,t){return flowBaseWeight(port,cargo,side)*this.flowFactor(port,cargo,side,t)}
 flowTarget(port,cargo,t){const a=this.tradeWeight(port,cargo,'SUPPLY',t),b=this.tradeWeight(port,cargo,'DEMAND',t);return Math.max(.35,Math.min(1.68,1+.30*(a-b)))}
@@ -2686,10 +2731,10 @@ const k = tons / 4000;
 this.stock[from][cargo] = Math.max(0.05, this.stock[from][cargo] - k);
 this.stock[to][cargo] = this.stock[to][cargo] + k;
 }
-regen(t=0){const events=this.rollFlowMonth(t);for(const p of PORT_IDS)for(const c of CARGO_IDS){const target=this.flowTarget(p,c,t);this.stock[p][c]+=(target-this.stock[p][c])*.025}return events}
+regen(t=0,co=null,near=null){const rolled=this.rollFlowMonth(t);for(const p of PORT_IDS)for(const c of CARGO_IDS){const target=this.flowTarget(p,c,t);this.stock[p][c]+=(target-this.stock[p][c])*.025}const wires=[];for(const e of rolled){if(near&&!near(e.region))continue;if(e.fake&&regionIntelQuality(co,e.region)>=.6)continue;e.wired=true;wires.push(wireFromFlow('rumor',e,t,co))}for(const e of this.flow.events){if(e.announced)continue;if(e.start==null){e.announced=true;continue}if(e.start>t)continue;e.announced=true;if(!e.wired)continue;wires.push(wireFromFlow(e.fake?'false':'confirm',e,t,co))}return wires}
 generate(at, t, reach, portFilter = null) {
 const r = this.rng.market;
-const want = Math.round((POST_BASE[at] ?? 4) * this.cycle * r.range(0.8, 1.25));
+const want = Math.round((POST_BASE[at] ?? 4) * this.cycle * r.range(0.8, 1.25) * this.postFactor(at, t));
 const list = (this.posted[at] ?? []).filter((c) => c.expires > t);
 let visible = portFilter ? list.filter((c) => portFilter(c.to)) : list.slice();
 let guard = 0;
@@ -2709,7 +2754,7 @@ let cargo=weightedPick(r,CARGO_IDS,c=>{if(c==='OIL'&&!TRADE[from]?.produce?.incl
 const destScope=cargo==='OIL'?scope.filter(p=>TRADE[p]?.consume?.includes('OIL')):scope;const to=weightedPick(r,destScope,p=>{const need=this.tradeWeight(p,cargo,'DEMAND',t),short=Math.max(.2,1.55-(this.stock?.[p]?.[cargo]??1)),lane=(1/Math.pow(1+dist(from,p)/1200,.18))*oceanLaneWeight(from,p,cargo);return .03+need*short*lane});if(!to)return null;
 const d=dist(from,to),serviceClass=contractClassForDistance(d),classCfg=CONTRACT_CLASSES[serviceClass],fs=this.tradeWeight(from,cargo,'SUPPLY',t),fd=this.tradeWeight(to,cargo,'DEMAND',t),vol=Math.max(.78,Math.min(1.18,.92+.07*(fs+fd-2)+.05*((this.stock[from][cargo]??1)-(this.stock[to][cargo]??1))));
 const tons=worldContractLot(from,cargo,d,r,vol,t),flowPremium=Math.max(.88,Math.min(1.20,1+.07*(fd-fs)+.035*((1-(this.stock[to][cargo]??1))+((this.stock[from][cargo]??1)-1))));
-const perTon=freightBase(d,cargo)*this.supplyFactor(from,to,cargo)*flowPremium*classCfg.premium*(this.rivals&&this._pressure?this._pressure(this.rivals,from,to,cargo):1)*r.range(.90,1.12)*shippingEconomyIndexForCargo(this,cargo);
+const perTon=freightBase(d,cargo)*this.supplyFactor(from,to,cargo)*flowPremium*classCfg.premium*(this.rivals&&this._pressure?this._pressure(this.rivals,from,to,cargo):1)*r.range(.90,1.12)*shippingEconomyIndexForCargo(this,cargo)*this.flowRateFactor(from,to,cargo,t);const flowBoost=this.flowRateFactor(from,to,cargo,t);
 const manifest=pickManifest(from,cargo,r),bb=makeBreakbulkHandling(cargo,r),rl=dischargeRate(from,cargo,100,0,0)*bb.handlingFactor,rd=dischargeRate(to,cargo,100,0,0)*bb.handlingFactor;
 const elapsed=((tons/rl)/16*24+(tons/rd)/16*24)*HOUR*(6/7);
 const slackRoll = r.next();
@@ -2730,7 +2775,7 @@ laytime: elapsed * slack + typicalWait, slack, wibon,
 demurrage: freight * DEMURRAGE_RATE,
 despatch: r.chance(0.45) ? freight * DEMURRAGE_RATE * 0.5 : 0,
 credit: Math.round(r.range(35, 98)),
-posted:t,expires:t+r.range(serviceClass==='OCEANIC'?42:18,serviceClass==='OCEANIC'?120:72)*HOUR,manifest,packageType:bb.packageType,handlingFactor:bb.handlingFactor,flowSupply:fs,flowDemand:fd,flowPremium,flowRegion:PORT_FLOW_REGION[from],serviceClass,serviceClassLabel:classCfg.label,laneWeight:oceanLaneWeight(from,to,cargo),specialty:contractSpecialty(cargo,tons),
+posted:t,expires:t+r.range(serviceClass==='OCEANIC'?42:18,serviceClass==='OCEANIC'?120:72)*HOUR,manifest,packageType:bb.packageType,handlingFactor:bb.handlingFactor,flowSupply:fs,flowDemand:fd,flowPremium,flowRegion:PORT_FLOW_REGION[from],serviceClass,serviceClassLabel:classCfg.label,laneWeight:oceanLaneWeight(from,to,cargo),specialty:contractSpecialty(cargo,tons),flowBoost,
 };
 }
 decay(at, t, hours, rivals = null, whoTook = null) {
@@ -2797,7 +2842,7 @@ bunker: SHIP.bunkerMax,
 bunkerUnitCost: COST.bunker, bunkerLastPrice: COST.bunker, bunkerLastPort:'BUSAN', bunkerPurchased:0,
 cargo: null,
 state: { ENGINE:100, COOLING:100, HULL:100, CARGOGR:100, NAV:100 },
-cash: 120000,
+cash: 40000,
 voyages: 0,
 };
 }
@@ -5752,7 +5797,7 @@ hint:'거리는 더 멀지만 강재는 촘촘히 실린다. 운임과 비용을
 }
 const STEPS = [
 {id:'OPEN',at:'start',title:'금하호, 부산',
-body:'1,600 재화중량톤 화물선 한 척. 선원 열넷. 현금 12만원.\n해운회사는 화물을 받아 나르고 운임을 받는다. 첫 항차에서는 그 가장 작은 한 바퀴만 익힌다.',
+body:'1,600 재화중량톤 화물선 한 척. 선원 열넷. 현금 4만원.\n배값 11만원은 산업은행 빚이다 — 매달 갚아야 하고, 두 달 밀리면 배를 잃는다. 위 띠의 「상환 D-」를 보라.',
 todo:'화면 아래 「항차를 짠다」를 누르면 해도에 실을 수 있는 계약이 선으로 뜬다. 선을 눌러 남는 돈을 보고 계획에 넣으십시오.',term:'DWT'},
 {id:'MARKET',at:'market',title:'1/10 · 선복과 첫 계약',
 body:'첫 항차는 계약 한 건이면 충분하다. 계약량보다 실제 적재 가능한 양, 항로거리, 예상 순익을 먼저 본다.\n지금은 복수계약이나 정치·금융을 고민하지 않아도 된다.',
@@ -5957,6 +6002,111 @@ const course = Math.atan2(B.y - A.y, B.x - A.x);
 let d = Math.abs(((windDir + Math.PI) - course + Math.PI * 3) % (Math.PI * 2) - Math.PI);
 return d * 180 / Math.PI;
 };
+// ── 전보 · 빚 ────────────────────────────────────────────────
+// 시장은 미리 소문으로 온다. 배를 어디에 둘지 고르는 판이 된다.
+// 금하호는 은행 돈으로 산 배다. 매달 갚아야 하고, 두 달 밀리면 배를 잃는다.
+const FLOW_CAUSE = {
+  COAL:    { DEMAND:['제철소 고로 증설','겨울 난방용 비축','화력발전소 증설'], SUPPLY:['탄광 증산','새 갱도 개착'], DOWN_S:['탄광 파업','갱도 붕락'], DOWN_D:['재고 과잉'] },
+  ORE:     { DEMAND:['제철소 증설','철강 수출 호조'], SUPPLY:['광산 증산','새 적출 부두 개장'], DOWN_S:['광산 노조 파업','우기 적출 지연'], DOWN_D:['고로 수리 휴지'] },
+  OIL:     { DEMAND:['정유공장 가동','군수 수요'], SUPPLY:['유전 증산'], DOWN_S:['송유관 고장'], DOWN_D:['재고 과잉'] },
+  STEEL:   { DEMAND:['조선소 수주 몰림','교량·항만 공사'], SUPPLY:['압연공장 증설'], DOWN_S:['압연공장 정전'], DOWN_D:['공사 연기'] },
+  MACHINE: { DEMAND:['공장 건설 붐','원조 물자 배정'], SUPPLY:['수출 주문 선적 몰림'], DOWN_S:['부품 수입 지연'], DOWN_D:['원조 예산 삭감'] },
+  TIMBER:  { DEMAND:['건설 붐','합판공장 증설'], SUPPLY:['벌채기 시작','강 하류 원목 집하'], DOWN_S:['우기 벌채 중단'], DOWN_D:['합판 재고 누적'] },
+  GRAIN:   { DEMAND:['흉작으로 긴급 수입','원조 양곡 배정'], SUPPLY:['풍작','수확기 출하'], DOWN_S:['가뭄 흉작'], DOWN_D:['정부 비축 충분'] },
+  FOOD:    { DEMAND:['명절 수요','도시 인구 급증'], SUPPLY:['어획 호조','수확기 출하'], DOWN_S:['태풍 피해'], DOWN_D:['가격 통제'] },
+  GENERAL: { DEMAND:['수입 주문 몰림','상점가 재고 확충'], SUPPLY:['수출 주문 몰림','공장 출하 증가'], DOWN_S:['부두 노조 파업'], DOWN_D:['수입 허가 축소'] },
+  REEFER:  { DEMAND:['여름 냉동 수요'], SUPPLY:['어획 호조','과일 수확기'], DOWN_S:['냉동창고 고장'], DOWN_D:['재고 과잉'] },
+};
+function flowCause(cargo, side, up, r) {
+  const T = FLOW_CAUSE[cargo] ?? FLOW_CAUSE.GENERAL;
+  const list = up ? T[side] : T[side === 'SUPPLY' ? 'DOWN_S' : 'DOWN_D'];
+  return list?.length ? r.pick(list) : (up ? '수요 증가' : '수요 감소');
+}
+// 지역 전체의 정보망 — 그 권역 항구 중 가장 좋은 지점 품질
+function regionIntelQuality(co, region) {
+  const R = FLOW_REGIONS[region]; if (!R) return 0.38;
+  let q = 0.38;
+  for (const p of R.ports) { try { q = Math.max(q, shippingIntelQuality(co, p)); } catch (_) {} }
+  return q;
+}
+// 운임이 얼마나 움직이는가 — 사람이 읽는 말로
+function flowEffectWord(e) {
+  const up = e.factor > 1;
+  const pct = Math.round(Math.abs((e.side === 'DEMAND' ? 1.4 : 1.2) * (e.factor - 1)) * 100);
+  return `${CARGO[e.cargo]?.name ?? '화물'} 운임 ${up ? '▲' : '▼'} 약 ${pct}%`;
+}
+function flowWhere(e) {
+  const R = FLOW_REGIONS[e.region];
+  const names = (R?.ports ?? []).filter(p => PORTS[p]).map(p => PORTS[p].name).slice(0, 3).join('·');
+  return e.side === 'DEMAND' ? `${names} 도착` : `${names} 출발`;
+}
+// 전보를 만든다 — 시뮬레이션 쪽(결정론)에서 부른다
+function wireFromFlow(kind, e, t, co) {
+  const R = FLOW_REGIONS[e.region], q = regionIntelQuality(co, e.region);
+  const days = Math.max(1, Math.round(((e.start ?? t) - t) / DAY));
+  const src = q >= 0.6 ? '지점 전보' : '부두 소문';
+  const up = e.factor > 1;
+  let title, body;
+  if (kind === 'rumor') {
+    title = `${R?.name ?? '권역'} · ${CARGO[e.cargo]?.name ?? ''}`;
+    body = `${e.cause} — ${days}일쯤 뒤 ${flowWhere(e)} ${flowEffectWord(e)}`;
+  } else if (kind === 'confirm') {
+    title = `확인 · ${R?.name ?? ''}`;
+    body = `${e.cause} 시작. 지금부터 약 ${Math.round((e.until - t) / DAY)}일, ${flowWhere(e)} ${flowEffectWord(e)}`;
+  } else {
+    title = `정정 · ${R?.name ?? ''}`;
+    body = `${CARGO[e.cargo]?.name ?? ''} ${e.cause} 소문은 헛소문이었다. 운임은 그대로다.`;
+  }
+  return { id:`W-${kind}-${e.id}`, t, kind, src, title, body, region:e.region, cargo:e.cargo, up, ports:(R?.ports ?? []).filter(p => PORTS[p]) };
+}
+function wireMoney(kind, title, body, t) { return { id:`W-${kind}-${Math.floor(t)}`, t, kind, src:'은행', title, body, ports:[] }; }
+
+// ── 빚 ───────────────────────────────────────────────────────
+const START_LOAN = { amount:110000, annual:0.072, term:12, office:'산업은행 선박자금부' };
+function seedStartingLoan(co) {
+  const f = normalizeFinance(co);
+  if (f.startLoanSeeded) return;
+  f.startLoanSeeded = true;
+  const L = { id:'L000', product:'MORTGAGE', name:'금하호 구입 잔금', office:START_LOAN.office, original:START_LOAN.amount,
+    balance:START_LOAN.amount, annual:START_LOAN.annual, term:START_LOAN.term, remaining:START_LOAN.term, fee:0, startedAt:0,
+    status:'ACTIVE', arrears:0, missed:0, paidPrincipal:0, paidInterest:0, collateralShipId:'GEUMHA', bankName:START_LOAN.office, starter:true };
+  f.loans.push(L);
+  const s = (co.ships ?? []).find(x => x.id === 'GEUMHA'); if (s) s.pledgedLoanId = L.id;
+}
+// 다음 상환일과 금액 — financeMonthlyTick 과 같은 셈
+function debtDue(co, t) {
+  const f = co?.finance; if (!f) return { due:0, days:99, next:t, loans:[] };
+  const next = (Math.floor(t / FMONTH) + 1) * FMONTH;
+  let due = 0; const loans = [];
+  for (const L of f.loans ?? []) {
+    if (L.status !== 'ACTIVE') continue;
+    const interest = Math.round(L.balance * (L.annual / 12));
+    const principal = L.remaining <= 1 ? Math.round(L.balance) : Math.max(0, Math.round(L.balance / Math.max(1, L.remaining)));
+    const d = (L.arrears ?? 0) + interest + principal; due += d; loans.push({ L, d });
+  }
+  for (const s of supportShips(co)) if (s.charter?.active) due += (s.charter.monthlyHire ?? 0) + (s.charter.arrears ?? 0);
+  return { due, days:(next - t) / DAY, next, loans };
+}
+function debtTotal(co) { return (co?.finance?.loans ?? []).filter(L => L.status === 'ACTIVE').reduce((a, L) => a + (L.balance ?? 0) + (L.arrears ?? 0), 0); }
+// 달이 넘어갈 때 — 은행에서 오는 전보
+function financeWires(co, rep, t) {
+  const out = [];
+  for (const x of rep?.loans ?? []) {
+    const lost = (rep.seized ?? []).find(z => z.loan === x.id);
+    if (lost) { out.push(wireMoney('gameover', '압류', `${lost.ship}를 압류당했다. 은행은 배를 팔아 빚을 메웠다.`, t)); continue; }
+    if (x.pay < x.due) {
+      const L = co.finance.loans.find(l => l.id === x.id);
+      out.push(wireMoney('debt', `독촉 · ${L?.office ?? '은행'}`,
+        `이번 달 ${won(x.due)}원 중 ${won(x.due - x.pay)}원 미납. ` +
+        ((x.missed ?? 0) >= 1 && L?.collateralShipId ? `다음 달도 밀리면 ${L.collateralShipId === 'GEUMHA' ? '금하호' : '담보선'}를 압류한다.` : '신용이 깎였다.'), t));
+    } else if (x.balance <= 1) {
+      const L = co.finance.loans.find(l => l.id === x.id);
+      out.push(wireMoney('paid', '완납', L?.starter ? '금하호 빚을 다 갚았다. 이제 금하호는 온전히 우리 배다.' : `${L?.name ?? '대출'} 완납.`, t));
+    }
+  }
+  return out;
+}
+
 class Sim {
 constructor(seed, opts = {}) {
 this.seed = seed;
@@ -5980,6 +6130,7 @@ syncDiplomacy(this.company, this.rivals, this.t);
 this.politics = newPolitics();
 normalizePoliticalEconomy(this.company, this.rivals, this.t);
 normalizeFinance(this.company);
+seedStartingLoan(this.company);
 normalizeManagement(this.company, this.t);
 this.lastMonth = Math.floor(this.t / MONTH);
 this.company.lastFleetMonth = this.lastMonth;
@@ -6000,6 +6151,12 @@ if (level === 0) { V._alertState[key] = 0; return; }
 if (!force && V._alertState[key] >= level) return;
 V._alertState[key] = level;
 V.alerts[level] = (V.alerts[level] ?? 0) + 1;
+}
+pushWires(ws) {
+if (!ws?.length) return;
+const f = this.market.flow ?? (this.market.flow = { lastMonth:-1, events:[] });
+f.wires = [...(f.wires ?? []), ...ws].slice(-40);
+this.newWires = [...(this.newWires ?? []), ...ws];
 }
 tick(sec) {
 const steps = Math.round(sec / DT);
@@ -6029,6 +6186,8 @@ this.politicalReport = peMonthlyTick(this.company, this.rivals, this.t, this.pol
 if (this.politicalReport.news?.length) this.rivalNews = [...(this.rivalNews ?? []), ...this.politicalReport.news];
 this.financeReport = financeMonthlyTick(this.company, this.t, this.ship.cash, { rng:this.rng.npc, reputation:this.politics?.reputation??50, voyages:this.ship.voyages, bunkerPrice:this.bunkerPrice });
 this.ship.cash = this.financeReport.cash;
+this.pushWires(financeWires(this.company, this.financeReport, this.t));
+{ const me = (this.company.ships ?? []).find(x => x.role === 'PLAYER'); if (me?.seized && !this.gameOver) this.gameOver = { t:this.t, reason:'산업은행이 밀린 빚 대신 금하호를 압류했다.' }; }
 const nb=newbuildMonthlyTick(this.company,this.t,this.ship.cash);this.ship.cash=nb.cash;if(nb.news?.length)this.rivalNews=[...(this.rivalNews??[]),...nb.news.map(msg=>({msg,big:true}))];
 this.reach = companyReach(this.t, { dwt: companyDwt(this.company), voyages: this.ship.voyages }, this.politics);
 }
@@ -6040,7 +6199,7 @@ syncDiplomacy(this.company, this.rivals, this.t);
 const whExpired=warehouseHousekeeping(this.company,this.market,this.t);
 if(whExpired.length)this.rivalNews=[...(this.rivalNews??[]),...whExpired.map(x=>({msg:`【창고 선확보 만료】 ${PORTS[x.portId]?.name??x.portId} ${CARGO[x.book.cargo]?.name??x.book.cargo} ${Math.round(x.book.tons)}t · 수수료는 반환되지 않았다`,big:false}))];
 for (const p of PORT_IDS) this.queues[p].rollDaily(this.t);
-const flowNews=this.market.regen(this.t);if(flowNews?.length)this.rivalNews=[...(this.rivalNews??[]),...flowNews.map(e=>({msg:`【지역 물류】 ${e.label} · 계약량과 운임이 당분간 흔들릴 수 있다`,big:false}))];
+const flowWires=this.market.regen(this.t,this.company,(rg)=>(FLOW_REGIONS[rg]?.ports??[]).some(p=>PORTS[p]&&economyPortOpen(p,this.t,{dwt:companyDwt(this.company),voyages:this.ship.voyages},this.politics)&&dist(this.ship.at,p)<=this.reach*1.15));if(flowWires?.length)this.pushWires(flowWires);
 if (this.rivalActivity) {
 const rr = rivalDailyTick(this.rivals, this.t, this.market, this.market.cycle, this.rng.npc, {
 bunkerPrice:this.bunkerPrice, playerAt:this.ship.at,
@@ -7073,7 +7232,7 @@ fit(); drawSea(); drawGraticule();
 LON_OFF = 0; drawMarineWeather();
 for (const o of wraps()) {
 LON_OFF = o;
-drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); drawTrack(st); drawPlanLines();
+drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); drawTrack(st); drawMarketSignals(); drawPlanLines();
 }
 LON_OFF = 0;
 drawNight(); drawNightLights(); drawRose(); drawScaleBar();
@@ -9248,7 +9407,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.10.0 · 선교 계기 · 해도 위 항차 계획 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.11.0 · 전보와 빚 · 선교 계기 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -11101,6 +11260,168 @@ document.addEventListener('contextmenu', (e) => { if (e.target.closest?.('button
 $('h-eot').classList.remove('btnrow');
 $('h-eot').innerHTML = eotDialHTML('sea', st.eot ?? 'SERVICE', { reply:true });
 
+// ── 전보 화면 · 해도 시세 표시 · 빚 독촉 ─────────────────────────
+let wireToastT = 0, wireQueue = [], wireFlash = null;
+function wiresAll() { return sim.market?.flow?.wires ?? []; }
+function wireTapeHTML(w, full = false) {
+  const d = gameDate(w.t);
+  const cls = w.kind === 'debt' || w.kind === 'gameover' ? 'bad' : w.kind === 'paid' ? 'good' : w.kind === 'false' ? 'dim' : (w.up ? 'up' : 'dn');
+  return `<div class="wire ${cls}" data-wid="${w.id}">` +
+    `<div class="wh"><span class="ws">電報 · ${w.src}</span><span class="wd">${d.getUTCMonth() + 1}/${d.getUTCDate()}</span></div>` +
+    `<b>${w.title}</b><p>${w.body}</p>` +
+    (full && w.ports?.length ? `<button class="wgo" data-wgo="${w.id}">해도에서 보기</button>` : '') + `</div>`;
+}
+function wireUnread() { return wiresAll().filter(w => !w.read).length; }
+function wireBtnPaint() {
+  const b = $('wire-btn'); if (!b) return;
+  const n = wireUnread(), any = wiresAll().length > 0;
+  b.hidden = !any;
+  $('wire-n').textContent = n ? String(n) : '';
+  b.classList.toggle('unread', n > 0);
+}
+function wireShowNext() {
+  const box = $('wire-toast'); if (!box) return;
+  if (box.dataset.busy === '1' || !wireQueue.length) return;
+  const w = wireQueue.shift();
+  box.innerHTML = wireTapeHTML(w); box.hidden = false; box.dataset.busy = '1'; box.dataset.wid = w.id;
+  box.classList.remove('in'); void box.offsetWidth; box.classList.add('in');
+  try { soundscape.ui('telegraph'); } catch (_) {}
+  clearTimeout(wireToastT);
+  wireToastT = setTimeout(() => { box.hidden = true; box.dataset.busy = '0'; wireShowNext(); }, w.kind === 'debt' ? 9000 : 6500);
+}
+function pollWires() {
+  if (!sim.newWires?.length) return;
+  const fresh = sim.newWires; sim.newWires = [];
+  for (const w of fresh) { wireQueue.push(w); say(`【${w.kind === 'rumor' ? '전보' : w.title.split(' · ')[0]}】 ${w.title} — ${w.body}`, w.kind === 'debt' ? 'm' : 'b'); }
+  wireBtnPaint(); wireShowNext();
+}
+function openWires(focusId) {
+  const list = wiresAll().slice().reverse();
+  $('ws-body').innerHTML = list.length ? list.map(w => wireTapeHTML(w, true)).join('') : '<div class="planner-none">받은 전보가 없다.</div>';
+  for (const w of wiresAll()) w.read = true;
+  wireBtnPaint();
+  $('wiresheet').classList.add('on'); $('wiresheet').scrollTop = 0; $('coach').classList.remove('on');
+  if (focusId) $('ws-body').querySelector(`[data-wid="${focusId}"]`)?.scrollIntoView({ block:'center' });
+}
+function closeWires() { $('wiresheet').classList.remove('on'); }
+// 해도에서 그 권역을 보여 준다
+function wireGo(id) {
+  const w = wiresAll().find(x => x.id === id); if (!w?.ports?.length) return;
+  closeWires();
+  const ps = w.ports.map(p => PORTS[p]).filter(Boolean);
+  const lat = ps.reduce((a, p) => a + p.lat, 0) / ps.length, lon = ps.reduce((a, p) => a + p.lon, 0) / ps.length;
+  const here = PORTS[sim.ship.at];
+  view.lat = (lat + (here?.lat ?? lat)) / 2; view.lon = (lon + (here?.lon ?? lon)) / 2;
+  const span = Math.max(4, ...ps.map(p => Math.abs(p.lat - (here?.lat ?? p.lat)) * 1.6), ...ps.map(p => Math.abs(p.lon - (here?.lon ?? p.lon)) * 0.9));
+  view.k = Math.max(6, Math.min(60, (cv.clientHeight * 0.75) / span));
+  try { clampView(); dropViewPreset(); } catch (_) {}
+  wireFlash = { ports:w.ports, until:performance.now() + 4500 };
+  if (typeof uiSwitch === 'function') { /* 해도는 그대로 — 독만 접어 둘 필요는 없다 */ }
+}
+// 해도 위 표시 — 소문은 빈 깃발, 확인된 것은 찬 깃발
+function drawMarketSignals() {
+  const m = sim.market; if (!m?.flow) return;
+  const now = sim.t, b = bounds();
+  const seen = new Set((m.flow.wires ?? []).filter(w => w.kind === 'rumor').map(w => w.id.replace('W-rumor-', '')));
+  const marks = new Map();
+  for (const e of m.flow.events ?? []) {
+    if (e.until <= now) continue;
+    const active = !e.fake && (e.start ?? 0) <= now;
+    const rumor = (e.start ?? 0) > now && seen.has(e.id);
+    if (!active && !rumor) continue;
+    for (const p of FLOW_REGIONS[e.region]?.ports ?? []) {
+      if (!PORTS[p] || marks.has(p)) continue;
+      marks.set(p, { e, active });
+    }
+  }
+  cx.save();
+  for (const [p, { e, active }] of marks) {
+    const P = PORTS[p];
+    if (P.lat < b.la0 - 2 || P.lat > b.la1 + 2 || P.lon + LON_OFF < b.lo0 - 2 || P.lon + LON_OFF > b.lo1 + 2) continue;
+    const [x, y] = px(P.lat, P.lon), up = e.factor > 1;
+    const txt = `${up ? '▲' : '▼'}${CARGO[e.cargo]?.name ?? ''}`;
+    cx.font = `bold 9px ${C('--face-num')}`;
+    const w = cx.measureText(txt).width + 8, bx = x + 9, by = y - 21;
+    const col = up ? C('--magenta') : C('--ink2');
+    cx.globalAlpha = .95; cx.lineWidth = 1;
+    if (active) { cx.fillStyle = col; cx.fillRect(bx, by, w, 13); cx.fillStyle = C('--paper'); }
+    else { cx.fillStyle = C('--paper'); cx.fillRect(bx, by, w, 13); cx.setLineDash([2, 2]); cx.strokeStyle = col; cx.strokeRect(bx + .5, by + .5, w - 1, 12); cx.setLineDash([]); cx.fillStyle = col; }
+    cx.fillText(txt, bx + 4, by + 10);
+    cx.strokeStyle = col; cx.beginPath(); cx.moveTo(bx, by + 13); cx.lineTo(x + 3, y - 3); cx.stroke();
+  }
+  if (wireFlash && performance.now() < wireFlash.until) {
+    const a = (Math.sin(performance.now() / 160) + 1) / 2;
+    for (const p of wireFlash.ports) {
+      const P = PORTS[p]; if (!P) continue; const [x, y] = px(P.lat, P.lon);
+      cx.globalAlpha = .35 + .5 * a; cx.strokeStyle = C('--magenta'); cx.lineWidth = 2;
+      cx.beginPath(); cx.arc(x, y, 11 + 5 * a, 0, Math.PI * 2); cx.stroke();
+    }
+  } else wireFlash = null;
+  cx.restore();
+}
+// ── 빚 — 위 띠 · 사흘 전 보고 · 파산 ─────────────────────────
+function debtChipPaint() {
+  const el = $('f-dwt'); if (!el) return;
+  const D = debtDue(sim.company, sim.t);
+  if (D.due > 0) {
+    const short = sim.ship.cash < D.due;
+    const txt = `상환 D-${Math.max(0, Math.ceil(D.days))} · ${won(D.due)}원`;
+    if (el.textContent !== txt) el.textContent = txt;
+    el.classList.toggle('due', true); el.classList.toggle('short', short);
+  } else {
+    el.classList.remove('due', 'short');
+    const txt = companyDwt(sim.company).toLocaleString() + ' DWT · ' + sim.ship.voyages + '항차';
+    if (el.textContent !== txt) el.textContent = txt;
+  }
+}
+function pollDebt() {
+  if (sim.gameOver) return showGameOver();
+  if (asking) return;
+  const f = sim.company?.finance; if (!f) return;
+  const D = debtDue(sim.company, sim.t);
+  if (D.due <= 0 || D.days > 3 || sim.ship.cash >= D.due) return;
+  const mon = Math.floor(sim.t / FMONTH);
+  if (f.warnedMonth === mon) return;
+  f.warnedMonth = mon;
+  const gap = D.due - sim.ship.cash;
+  const choices = [];
+  try {
+    const T = loanTerms(sim.company, 'WORKING', sim.ship.cash, sim.ship.voyages, sim.politics?.reputation ?? 50, null);
+    const amount = Math.min(T.max ?? 0, Math.max(10000, Math.ceil(gap * 1.2 / 5000) * 5000));
+    if (T.ok && amount >= gap) {
+      const cost = Math.round(amount * (T.product.fee + T.annual * 0.55));
+      choices.push({ label:'운영자금을 빌린다', sub:`${won(amount)}원 · 12개월 · 연 ${(T.annual * 100).toFixed(1)}%`, cost,
+        run:() => { const r = takeLoan(sim.company, 'WORKING', amount, sim.t, sim.ship.cash, sim.ship.voyages, sim.politics?.reputation ?? 50);
+          if (r.ok) { sim.ship.cash += r.proceeds; say(`운영자금 ${won(amount)}원 융자 · 수수료 ${won(r.fee)}원`, 'b'); } else say(`융자 거절 — ${r.reason}`, 'm');
+          st.paused = false; } });
+    }
+  } catch (_) {}
+  const L0 = D.loans.find(x => x.L.collateralShipId)?.L;
+  if (!choices.length) {           // 빌릴 데도 없다 — 고를 것이 없으니 묻지 않고 알린다
+    const w = wireMoney('debt', '상환 사흘 전', `${won(D.due)}원이 나가야 하는데 ${won(gap)}원이 모자란다. 은행 신용으로는 더 빌릴 수 없다 — 운임을 먼저 받아야 한다.` +
+      (L0 && (L0.missed ?? 0) >= 1 ? ' 이번에도 밀리면 금하호를 잃는다.' : ''), sim.t);
+    sim.pushWires([w]); return;
+  }
+  choices.push({ label:'그대로 둔다', sub: L0 && (L0.missed ?? 0) >= 1 ? '이번에도 밀리면 금하호를 잃는다' : '모자라면 연체 · 신용이 깎인다',
+    run:() => { st.paused = false; } });
+  ask('은행', `사흘 뒤 상환일입니다. <b>${won(D.due)}원</b>이 나가야 하는데 현금은 <b>${won(sim.ship.cash)}원</b> — <b>${won(gap)}원</b>이 모자랍니다.`, choices);
+}
+let gameOverShown = false;
+function showGameOver() {
+  if (gameOverShown) return; gameOverShown = true; st.paused = true;
+  $('go-b').innerHTML = `${clock(sim.t)} — ${sim.gameOver.reason}<br>회사는 문을 닫았다. ${sim.ship.voyages}항차를 뛰었다.`;
+  $('gameover').classList.add('on');
+}
+function wireBoot() {
+  $('wire-btn').onclick = () => openWires();
+  $('ws-close').onclick = closeWires;
+  $('ws-body').onclick = (e) => { const b = e.target.closest('[data-wgo]'); if (b) wireGo(b.dataset.wgo); };
+  $('wire-toast').onclick = () => { const id = $('wire-toast').dataset.wid; $('wire-toast').hidden = true; $('wire-toast').dataset.busy = '0'; clearTimeout(wireToastT); openWires(id); };
+  $('go-load').onclick = () => { $('gameover').classList.remove('on'); gameOverShown = false; openMainMenu(false); $('mm-slots-wrap')?.classList.add('on'); renderSaveSlots(); };
+  $('go-new').onclick = () => { try { localStorage.setItem('TRAMP_LINE_1962_BOOT_NEW', '1'); } catch (_) {} location.reload(); };
+  wireBtnPaint();
+}
+
 // ── 해도 위 항차 ─────────────────────────────────────────────
 // 정박 중 첫 화면은 해도다. 「항차를 짠다」를 누르면 지금 항구에서 실을 수 있는
 // 계약이 목적항까지 가는 선으로 그려지고, 계획에 넣은 것은 굵은 선이 된다.
@@ -11225,7 +11546,7 @@ function drawPlanLines() {
       if (inDraft.has(k.c.id)) continue;
       const hot = mapSel?.kind === 'cand' && mapSel.c.id === k.c.id;
       const m = mapMid(k.path); let [mx, my] = px(m[0], m[1]);
-      const text = k.gain == null ? `${PORTS[k.c.to].name} 선복 없음` : `${PORTS[k.c.to].name} ${k.gain >= 0 ? '+' : '−'}${won(Math.abs(k.gain))}`;
+      const text = (k.gain == null ? `${PORTS[k.c.to].name} 선복 없음` : `${PORTS[k.c.to].name} ${k.gain >= 0 ? '+' : '−'}${won(Math.abs(k.gain))}`) + ((k.c.flowBoost ?? 1) > 1.04 ? ' ▲' : '');
       cx.font = `10px ${C('--face-num')}`; const w = cx.measureText(text).width + 8;
       for (let tries = 0; tries < 6; tries++) {                 // 겹치면 아래로 한 줄씩 민다
         const clash = placed.some(r => Math.abs(r.x - mx) < (r.w + w) / 2 + 2 && Math.abs(r.y - my) < 16);
@@ -11294,7 +11615,20 @@ function mapCandCard(c) {
       act = `<button data-mc="add" class="${d.delta >= 0 ? 'good' : ''}">계획에 넣는다 ${money(d.delta)}</button>`;
     }
   } catch (e) { body = `<div class="mc-no">${e.message}</div>`; }
-  return `<div class="mc-head">${head}</div>${body}<div class="btnrow">${act}<button data-mc="close">닫기</button></div>`;
+  return `<div class="mc-head">${head}</div>${body}${mapNextLine(c)}<div class="btnrow">${act}<button data-mc="close">닫기</button></div>`;
+}
+// 그 항구에 내려놓은 뒤 — 다음 화물이 있는가. 배를 어디에 둘지 고르는 데 필요한 한 줄
+function mapNextLine(c) {
+  let out = '';
+  try {
+    const I = shippingMarketIntel(sim.market, c.to, sim.t, sim.company, sim.rivals);
+    out += `<div class="mc-row dim"><span>${PORTS[c.to].name} 다음 화물</span><b>${I.inquiry} · ${I.rate}</b><em>${I.out14}</em></div>`;
+  } catch (_) {}
+  const reg = PORT_FLOW_REGION[c.to];
+  const e = (sim.market?.flow?.events ?? []).find(x => x.region === reg && x.side === 'SUPPLY' && x.until > sim.t && x.wired && !(x.fake && (x.start ?? 0) <= sim.t));
+  if (e) out += `<div class="mc-row dim"><span>전보 · ${e.cause}</span><b>${CARGO[e.cargo]?.name ?? ''} 운임 ${e.factor > 1 ? '▲' : '▼'}</b><em>${(e.start ?? 0) > sim.t ? `${Math.ceil((e.start - sim.t) / DAY)}일 뒤` : '지금'}</em></div>`;
+  if ((c.flowBoost ?? 1) > 1.04) out += `<div class="mc-row dim"><span>이 운임은 전보 효과</span><b class="up">+${Math.round((c.flowBoost - 1) * 100)}%</b><em></em></div>`;
+  return out;
 }
 function mapDraftCard() {
   const E = lastPlanEval = planEvaluation();
@@ -12068,7 +12402,7 @@ $('practice-help').innerHTML=practiceHelpHTML();
 paintNavWatch();
 if (!st.leg && st.phase === '정박' && !asking) captainReports();
 uiPaintNow();
-wharfPaint(); mapPlanTick();
+wharfPaint(); mapPlanTick(); pollWires(); pollDebt(); debtChipPaint();
 if (document.querySelector('#tabs [data-page="company"]')?.getAttribute('aria-selected') === 'true') uiPaintCompany();
 paintAnalysis();
 renderNightDecision();
@@ -12114,7 +12448,7 @@ $('f-rank').textContent = me ? `${me.rank}위 / ${rows.length}` : '';
 try { (window.__fcd ??= drumLive($('f-cash'), { suffix:'<span class="cur">원</span>' }))(sim.ship.cash); }
 catch (_) { $('f-cash').textContent = Math.round(sim.ship.cash).toLocaleString() + '원'; }
 $('f-cash').className = 'fcash' + (sim.ship.cash < 20000 ? ' warn' : '');
-$('f-dwt').textContent = companyDwt(sim.company).toLocaleString() + ' DWT · ' + sim.ship.voyages + '항차';
+debtChipPaint();
 }
 updateDesktopSummary();
 const names = { ENGINE: '주기관', COOLING: '냉각', HULL: '선체', CARGOGR: '하역장비', NAV: '항해장비' };
@@ -12301,7 +12635,7 @@ DIP_ACTIONS, normalizeDiplomacy, syncDiplomacy, diplomacyStatus, diplomacyAction
 LOAN_PRODUCTS, INSURANCE_PLANS, CHARTER_OFFERS, normalizeFinance, financeSnapshot, financeRating, financeCreditLimit, loanTerms, takeLoan, repayLoan, charterIn, charterPrepareRedelivery, charterReturnEarly, charterEarlyReturnQuote, charterRedeliveryQuote, normalizeCorporateDeals, corporateDealsMonthlyTick, buyLiquidationAuction, acquireRivalCompany, setInsurancePlan, financeMonthlyTick, openFinance,
 PE_BANKS, PE_OFFICES, PE_ACTIONS, PE_RIVAL_PATRON, normalizePoliticalEconomy, peAgenda, peRefreshFinanceTerms, peSetMainBank, peInstitutionAction, peLegacyLobbyEffect, peMonthlyTick, peSnapshot, openPoliticalEconomy,
 MG_FACTIONS, MG_ROLES, EXECUTIVE_POOL, normalizeManagement, managementSnapshot, managementFactionSnapshot, availableExecutiveCandidates, promoteFleetChief, demoteFleetChief, hireExecutive, dismissExecutive, supportManagementFaction, managementMonthlyTick, openManagement,
-get asking() { return asking; }, get draftPlan(){ return draftPlan; }, eotSeaSync, eotPlanSet, tonsCap, instrLast, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
+get asking() { return asking; }, get draftPlan(){ return draftPlan; }, eotSeaSync, eotPlanSet, tonsCap, instrLast, debtDue, debtTotal, pollDebt, openWires, wireGo, get gameOver(){ return sim.gameOver; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
 SLOTS, SLOT_BY_ID, slotOf, slotSet, stowSnapshot, stowStability, stowShifting, stowCharacter, wharfItems, wharfPaint,
 navState, navLegReset, navTick, navOpportunities, navDoFix, navProgressFactor, navPenalty, navNearestLand, navLoranChain, navSunAlt, paintNavWatch, navCycleBerthPolicy, navBuyLoran, BERTH_POLICY,
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
@@ -12313,6 +12647,7 @@ renderSaveSlots();
 uiBoot();
 wharfBoot();
 mapPlanBoot();
+wireBoot();
 fit(); requestAnimationFrame(loop);
 </script>
 </body>
