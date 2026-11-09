@@ -35,6 +35,11 @@ public class MainActivity extends Activity {
     private static final String REPO = "Byanka-Rail/TRAMP-LINE-1962";
     private static final String RELEASE_API =
             "https://api.github.com/repos/" + REPO + "/releases/latest";
+    // 릴리스 없이도 갱신되게: main 브랜치의 index.html 을 직접 본다.
+    // (푸시만 하면 폰에 실린다. 릴리스는 브랜치 확인이 안 될 때의 예비 경로.)
+    private static final String BRANCH_RAW =
+            "https://raw.githubusercontent.com/" + REPO + "/main/index.html";
+    private static final String UA = "TRAMP-LINE-1962-Android/2.4.0";
     private static final Pattern CONTENT_VERSION = Pattern.compile(
             "TRAMP_LINE_CONTENT_VERSION\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]"
     );
@@ -112,11 +117,7 @@ public class MainActivity extends Activity {
 
     private String readAssetVersion() {
         try (InputStream in = getAssets().open("index.html")) {
-            byte[] buf = new byte[65536];
-            int n = in.read(buf);
-            if (n <= 0) return "0";
-            Matcher mt = CONTENT_VERSION.matcher(new String(buf, 0, n, "UTF-8"));
-            return mt.find() ? mt.group(1) : "0";
+            return versionInHead(in);
         } catch (Exception e) { return "0"; }
     }
 
@@ -164,14 +165,86 @@ public class MainActivity extends Activity {
         return 0;
     }
 
+    // 파일 앞쪽 1MB 안에서 TRAMP_LINE_CONTENT_VERSION 을 찾는다.
+    private String versionInHead(InputStream in) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int n;
+        while (out.size() < HEAD_BYTES && (n = in.read(buf)) > 0) out.write(buf, 0, n);
+        Matcher mt = CONTENT_VERSION.matcher(out.toString(StandardCharsets.UTF_8.name()));
+        return mt.find() ? normalizeVersion(mt.group(1)) : "0";
+    }
+
+    private static final int HEAD_BYTES = 1024 * 1024;
+
     private void checkForContentUpdate() {
+        String r = checkBranchUpdate();
+        if (r == null) checkReleaseUpdate();       // 브랜치를 못 봤을 때만 릴리스로
+        else if (!r.isEmpty()) toast(r);
+    }
+
+    // 성공(최신이든 갱신했든)이면 알릴 말, 확인 자체가 안 됐으면 null.
+    private String checkBranchUpdate() {
+        HttpURLConnection c = null;
+        try {
+            String bust = "?t=" + (System.currentTimeMillis() / 60000L);
+            c = (HttpURLConnection) new URL(BRANCH_RAW + bust).openConnection();
+            c.setConnectTimeout(8000);
+            c.setReadTimeout(10000);
+            c.setRequestProperty("User-Agent", UA);
+            c.setRequestProperty("Range", "bytes=0-" + (HEAD_BYTES - 1));
+            int code = c.getResponseCode();
+            if (code != 200 && code != 206) return null;
+            String latest;
+            try (InputStream in = c.getInputStream()) { latest = versionInHead(in); }
+            c.disconnect(); c = null;
+            if ("0".equals(latest)) return null;
+
+            String current = readVersion(activeIndex);
+            if (compareVersions(latest, current) <= 0) return "콘텐츠 " + current + " · 최신입니다";
+
+            File candidate = new File(webDir, "index.new.html");
+            download(BRANCH_RAW + bust, candidate);
+            String got = readVersion(candidate);
+            if (compareVersions(got, latest) < 0 || candidate.length() < 100000) {
+                candidate.delete();
+                return null;                       // 받다 끊겼거나 이상하면 릴리스로 넘긴다
+            }
+            if (!installCandidate(candidate)) return null;
+            final String shown = got;
+            main.post(() -> {
+                Toast.makeText(MainActivity.this, "콘텐츠 " + shown + " 업데이트 완료", Toast.LENGTH_LONG).show();
+                loadGame();
+            });
+            return "";
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (c != null) c.disconnect();
+        }
+    }
+
+    private boolean installCandidate(File candidate) {
+        if (backupIndex.exists()) backupIndex.delete();
+        if (activeIndex.exists() && !activeIndex.renameTo(backupIndex)) {
+            candidate.delete();
+            return false;
+        }
+        if (!candidate.renameTo(activeIndex)) {
+            if (backupIndex.exists()) backupIndex.renameTo(activeIndex);
+            return false;
+        }
+        return true;
+    }
+
+    private void checkReleaseUpdate() {
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(RELEASE_API).openConnection();
             conn.setConnectTimeout(8000);
             conn.setReadTimeout(10000);
             conn.setRequestProperty("Accept", "application/vnd.github+json");
-            conn.setRequestProperty("User-Agent", "TRAMP-LINE-1962-Android/2.3.0");
+            conn.setRequestProperty("User-Agent", UA);
 
             if (conn.getResponseCode() != 200) { toast("갱신 확인 실패 · GitHub 응답 " + conn.getResponseCode()); return; }
             String json = readAll(conn.getInputStream(), 2 * 1024 * 1024);
@@ -255,7 +328,7 @@ public class MainActivity extends Activity {
         c.setConnectTimeout(10000);
         c.setReadTimeout(20000);
         c.setInstanceFollowRedirects(true);
-        c.setRequestProperty("User-Agent", "TRAMP-LINE-1962-Android/2.3.0");
+        c.setRequestProperty("User-Agent", UA);
         int code = c.getResponseCode();
         if (code < 200 || code >= 300) throw new Exception("HTTP " + code);
 

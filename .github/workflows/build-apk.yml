@@ -42,6 +42,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TRAMP_LINE_1962_ANDROID_v2.3
+          name: TRAMP_LINE_1962_ANDROID_v2.4
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
