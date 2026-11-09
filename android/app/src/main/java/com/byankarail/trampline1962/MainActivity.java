@@ -11,7 +11,12 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.Toast;
+import android.graphics.Color;
+import android.os.Build;
+import android.view.View;
+import android.view.WindowInsets;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,7 +44,7 @@ public class MainActivity extends Activity {
     // (푸시만 하면 폰에 실린다. 릴리스는 브랜치 확인이 안 될 때의 예비 경로.)
     private static final String BRANCH_RAW =
             "https://raw.githubusercontent.com/" + REPO + "/main/index.html";
-    private static final String UA = "TRAMP-LINE-1962-Android/2.4.0";
+    private static final String UA = "TRAMP-LINE-1962-Android/2.5.0";
     private static final Pattern CONTENT_VERSION = Pattern.compile(
             "TRAMP_LINE_CONTENT_VERSION\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]"
     );
@@ -64,7 +69,27 @@ public class MainActivity extends Activity {
         ensureBaseContent();
 
         webView = new WebView(this);
-        setContentView(webView);
+        // Android 15(targetSdk 35)부터 앱이 상태 표시줄·내비게이션 바 밑까지 그려진다.
+        // 게임 화면을 그 사이에만 두고, 바깥은 막대 색으로 칠한다.
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.parseColor("#0b1114"));
+        root.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        root.setOnApplyWindowInsetsListener((View v, WindowInsets in) -> {
+            int l, t, r, b;
+            if (Build.VERSION.SDK_INT >= 30) {
+                android.graphics.Insets i = in.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout() | WindowInsets.Type.ime());
+                l = i.left; t = i.top; r = i.right; b = i.bottom;
+            } else {
+                l = in.getSystemWindowInsetLeft(); t = in.getSystemWindowInsetTop();
+                r = in.getSystemWindowInsetRight(); b = in.getSystemWindowInsetBottom();
+            }
+            v.setPadding(l, t, r, b);
+            return in;
+        });
+        setContentView(root);
+        root.requestApplyInsets();
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);

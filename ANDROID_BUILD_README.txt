@@ -1,9 +1,9 @@
-TRAMP LINE 1962 Android v2.4
+TRAMP LINE 1962 Android v2.5
 
 1) 이 패키지의 android/ 폴더와 .github/workflows/build-apk.yml 을
    TRAMP-LINE-1962 저장소 루트에 올립니다.
 2) GitHub -> Actions -> Build TRAMP LINE APK -> Run workflow.
-3) 빌드 완료 후 Artifacts의 TRAMP_LINE_1962_ANDROID_v2.4 를 내려받습니다.
+3) 빌드 완료 후 Artifacts의 TRAMP_LINE_1962_ANDROID_v2.5 를 내려받습니다.
 4) 내부 app-debug.apk 를 Android 기기에 설치합니다.
 
 v2.4 부터: main 브랜치에 index.html 을 푸시하기만 하면 된다.
