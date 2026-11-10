@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.18.0</title>
+<title>TRAMP LINE 1962 · v3.19.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,7 +492,11 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
-.sx-box{max-width:380px}#bg-c{display:block;width:100%;aspect-ratio:320/300;background:#2d4650;touch-action:none}
+.sx-box{max-width:380px}#cf-c{display:block;width:100%;aspect-ratio:320/300;background:#1d2427;touch-action:none}
+.cf-ctl{display:grid;grid-template-columns:1fr 1.4fr 1.6fr 1fr;gap:6px;padding:6px 12px}.cf-ctl button{min-height:50px;font-size:15px}.cf-ctl [data-cf=D]{background:var(--magenta);color:#fff;border-color:var(--magenta)}
+#craft-btn{position:absolute;right:8px;bottom:34px;z-index:9;box-shadow:0 3px 10px rgba(0,0,0,.25);min-height:34px;padding:0 12px;background:#f3e6ee;color:var(--magenta);border:1px solid var(--magenta)}#craft-btn[hidden]{display:none}#ty-c{display:block;width:100%;aspect-ratio:320/300;background:#2d4650;touch-action:none}
+.ty-wait{display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr;gap:4px;align-items:center;padding:4px 10px;font-size:11px}.ty-wait button{min-height:36px;font-size:12px;padding:0}.ty-wait button.on{background:var(--ink);color:var(--paper)}
+#ty-ok:disabled{opacity:.45}#bg-c{display:block;width:100%;aspect-ratio:320/300;background:#2d4650;touch-action:none}
 .bg-eng,.bg-rud{display:grid;gap:5px;padding:5px 10px}.bg-eng{grid-template-columns:repeat(5,1fr)}.bg-rud{grid-template-columns:1fr 1fr 1fr}
 .bg-eng button,.bg-rud button{min-height:46px;font-size:13px;padding:2px}.bg-rud small{display:block;font-size:10px;color:var(--ink2)}
 .bg-eng button.on{background:var(--ink);color:var(--paper)}.bg-rud button.on{background:var(--magenta);color:#fff}#sx-c{display:block;width:100%;aspect-ratio:320/300;background:#0b1116;touch-action:none}
@@ -984,7 +988,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.18.0</div>
+      <div class="mm-version">CONTENT v3.19.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1069,6 +1073,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="pa-meta"><span id="sv-time">—</span><span id="sv-weather">—</span><span id="sv-race">—</span><span id="sv-left">—</span></div>
     </aside>
     <button id="sea-show" hidden>선교 창</button>
+    <button id="craft-btn" hidden>🏗 직접 적재 감독</button>
     <div id="talk-toast" hidden></div>
   </main>
   <!-- ── 아래: 조작 독 ── -->
@@ -1233,7 +1238,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.18.0 · 직접 접안 — 조선 미니게임</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.19.0 · 적재 감독·태풍 항로 미니게임</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1491,10 +1496,28 @@ button[data-hold].nudge{animation:nudge .32s}
     <div class="evfoot"><div class="btnrow"><button id="bg-x">도선사에게 맡긴다</button></div></div>
   </div>
 </div>
+<div id="typhoon" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="ty-t">
+  <div class="sheetbox sx-box">
+    <header><h2><span id="ty-t">항로를 긋는다</span></h2><span class="stamp" id="ty-s">—</span></header>
+    <canvas id="ty-c" width="320" height="300"></canvas>
+    <div class="note sx-help" id="ty-r">자홍 고리를 끌어 항로를 휘게 한다. 선 색이 그 시각 그 자리의 예상 파고다.</div>
+    <div class="ty-wait"><span>출발을 늦춘다</span><button data-w="0">바로</button><button data-w="6">6시간</button><button data-w="12">12시간</button><button data-w="24">24시간</button></div>
+    <div class="evfoot"><div class="btnrow"><button id="ty-ok" class="primary">이 항로로 간다</button><button id="ty-x">선장에게 맡긴다</button></div></div>
+  </div>
+</div>
+<div id="craft" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="cf-t">
+  <div class="sheetbox sx-box">
+    <header><h2><span id="cf-t">적재 감독</span></h2><span class="stamp" id="cf-s">—</span></header>
+    <canvas id="cf-c" width="320" height="300"></canvas>
+    <div class="note sx-help" id="cf-help">—</div>
+    <div class="cf-ctl" id="cf-ctl"><button data-cf="L">◀</button><button data-cf="R">⟳ 돌린다</button><button data-cf="D" class="primary">▼ 내린다</button><button data-cf="X">▶</button></div>
+    <div class="evfoot"><div class="btnrow"><button id="cf-x">갑판장에게 맡긴다</button></div></div>
+  </div>
+</div>
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.18.0';
+const TRAMP_LINE_CONTENT_VERSION='3.19.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -7966,6 +7989,278 @@ function berthPrompt() {
   const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = 'bg:' + o.key;
   if (!T.said[k]) { T.said[k] = 1; try { talkSay(`${playerCaptain()?.name ?? ''} 선장`.trim(), `곧 ${PORTS[o.port].name}입니다. 직접 붙여 보시겠습니까?`); } catch (_) {} }
 }
+
+// ── 직접 항로 (태풍 피하기) ─────────────────────────────────────
+// 선장 판단창에 「직접 항로를 긋는다」. 남은 항로를 옆으로 휘게 하고(고리 끌기), 출발을 늦출 수 있다.
+// 기상 계통은 지금 속도대로 움직인다고 보고(sim.weather 계통 vx·vy), 선 위 각 점에서 그 시각 파고를 미리 본다.
+// 고른 항로의 최대 파고가 그 시간 동안 실제로 맞는 파고의 상한이 된다(st.stormShield).
+const typhoonUI = { on:false };
+function wxFuture(lat, lon, hAhead) {
+  const W = sim.weather, save = W.systems.map(s => ({ x:s.x, y:s.y }));
+  for (const s of W.systems) { s.x += (s.vx ?? 0) * hAhead; s.y += (s.vy ?? 0) * hAhead; }
+  const pr = project(lat, lon); let w;
+  try { w = W.at(pr.x, pr.y, sim.t + hAhead * HOUR); } finally { W.systems.forEach((s, i) => { s.x = save[i].x; s.y = save[i].y; }); }
+  return w;
+}
+function shieldWx(w) {
+  const S = st.stormShield; if (!S || !w) return w;
+  if (sim.t > S.until || !st.leg) { st.stormShield = null; return w; }
+  return w.hs <= S.cap ? w : { ...w, hs: S.cap, U: Math.min(w.U, 6 + S.cap * 2.2) };
+}
+function typhoonBase() {   // 남은 항로를 점으로
+  const a = st.leg[0], b = st.leg[1], D = dist(a, b), f0 = Math.min(.99, st.done / D), N = 36, pts = [];
+  for (let i = 0; i <= N; i++) { const f = f0 + (1 - f0) * i / N, q = posOnLeg(a, b, f); pts.push({ lat:q.lat, lon:q.lon }); }
+  return { pts, leftNm: D * (1 - f0) };
+}
+function typhoonPath(off) {
+  const B = typhoonUI.base.pts, N = B.length - 1, out = [];
+  for (let i = 0; i <= N; i++) {
+    const p = B[i], a = B[Math.max(0, i - 1)], b = B[Math.min(N, i + 1)];
+    const dE = (b.lon - a.lon) * Math.cos(p.lat * D2R), dN = b.lat - a.lat, L = Math.hypot(dE, dN) || 1;
+    const nE = -dN / L, nN = dE / L, k = off * Math.sin(Math.PI * i / N);   // 가운데가 가장 많이 휜다
+    out.push({ lat: p.lat + nN * k / 60, lon: p.lon + nE * k / 60 / Math.cos(p.lat * D2R) });
+  }
+  return out;
+}
+function typhoonEval(off, waitH) {
+  const P = typhoonPath(off), v = Math.max(5, st.curV || SHIP.serviceSpeed);
+  let nm = 0, maxHs = 0, rough = 0, land = false; const seg = [];
+  for (let i = 0; i < P.length; i++) {
+    if (i) nm += gcNm(P[i - 1].lat, P[i - 1].lon, P[i].lat, P[i].lon);
+    const h = waitH + nm / v, w = wxFuture(P[i].lat, P[i].lon, h);
+    if (i > 0 && i < P.length - 1 && Math.abs(off) > 2 && isLand(P[i].lat, P[i].lon)) land = true;
+    maxHs = Math.max(maxHs, w.hs); seg.push(w.hs);
+    if (i) rough += (w.hs >= 4 ? 1 : 0) * gcNm(P[i - 1].lat, P[i - 1].lon, P[i].lat, P[i].lon) / v;
+  }
+  return { P, nm, hours: waitH + nm / v, maxHs, rough, land, seg, v };
+}
+function typhoonOpen(onDone) {
+  const M = marineState();
+  Object.assign(typhoonUI, { on:true, onDone, off:0, wait:0, base:typhoonBase(), prevPaused:st.paused, drag:false });
+  typhoonUI.straight = typhoonEval(0, 0);
+  // 화면 범위: 남은 항로 + 가까운 계통 중심
+  const pts = [...typhoonUI.base.pts]; const sys = M.nearest;
+  if (sys && sys.nm < 600) { const g = unproject(sys.x, sys.y); pts.push({ lat:g.lat, lon:g.lon }); typhoonUI.sys = { ...sys, g }; } else typhoonUI.sys = null;
+  let la0 = Math.min(...pts.map(p => p.lat)), la1 = Math.max(...pts.map(p => p.lat)), lo0 = Math.min(...pts.map(p => p.lon)), lo1 = Math.max(...pts.map(p => p.lon));
+  const pad = Math.max(.8, (la1 - la0) * .35, (lo1 - lo0) * .25); la0 -= pad; la1 += pad; lo0 -= pad; lo1 += pad;
+  const sp = Math.max(la1 - la0, (lo1 - lo0) * Math.cos((la0 + la1) / 2 * D2R) * 300 / 320);
+  const cl = (la0 + la1) / 2, co = (lo0 + lo1) / 2;
+  typhoonUI.box = { la0: cl - sp / 2, la1: cl + sp / 2, lo0: co - sp / 2 / Math.cos(cl * D2R) * 320 / 300, lo1: co + sp / 2 / Math.cos(cl * D2R) * 320 / 300 };
+  // 육지 칸 (한 번만)
+  const L = []; const bx = typhoonUI.box;
+  for (let r = 0; r < 30; r++) for (let c = 0; c < 32; c++) { const lat = bx.la1 - (r + .5) / 30 * (bx.la1 - bx.la0), lon = bx.lo0 + (c + .5) / 32 * (bx.lo1 - bx.lo0); if (isLand(lat, lon)) L.push([c, r]); }
+  typhoonUI.landCells = L;
+  st.paused = true; $('typhoon').classList.add('on');
+  $('ty-s').textContent = typhoonUI.sys ? `${typhoonUI.sys.typhoon ? '태풍' : '저기압'} ${Math.round(typhoonUI.sys.p)}mb` : '거친 바다';
+  typhoonRefresh();
+}
+function typhoonXY(lat, lon) { const b = typhoonUI.box; return [(lon - b.lo0) / (b.lo1 - b.lo0) * 320, (b.la1 - lat) / (b.la1 - b.la0) * 300]; }
+function typhoonRefresh() {
+  const T = typhoonUI, E = T.E = typhoonEval(T.off, T.wait), S0 = T.straight;
+  const c = $('ty-c').getContext('2d');
+  // 파고 바탕: 항로 한가운데를 지날 즈음의 바다
+  const hMid = T.wait + E.nm / E.v / 2, b = T.box;
+  for (let r = 0; r < 30; r++) for (let k = 0; k < 32; k++) {
+    const lat = b.la1 - (r + .5) / 30 * (b.la1 - b.la0), lon = b.lo0 + (k + .5) / 32 * (b.lo1 - b.lo0);
+    const hs = (T._grid?.[r * 32 + k] != null && T._gridH === Math.round(hMid)) ? T._grid[r * 32 + k] : null;
+    let v = hs; if (v == null) { v = wxFuture(lat, lon, hMid).hs; (T._g2 ??= [])[r * 32 + k] = v; }
+    const t = Math.min(1, v / 8);
+    c.fillStyle = `rgb(${Math.round(40 + t * 150)},${Math.round(80 - t * 40)},${Math.round(100 - t * 40)})`; c.fillRect(k * 10, r * 10, 10, 10);
+  }
+  if (T._g2) { T._grid = T._g2; T._g2 = null; T._gridH = Math.round(hMid); }
+  c.fillStyle = '#a99f86'; for (const [k, r] of T.landCells) c.fillRect(k * 10, r * 10, 10, 10);
+  // 계통 예상 경로
+  if (T.sys) { c.fillStyle = '#f1e7cf'; c.strokeStyle = '#f1e7cf'; c.font = '10px ' + C('--face-num');
+    for (const h of [0, 12, 24, 36]) { const g = unproject(T.sys.x + (T.sys.vx ?? 0) * h, T.sys.y + (T.sys.vy ?? 0) * h); const [x, y] = typhoonXY(g.lat, g.lon);
+      c.beginPath(); c.arc(x, y, h ? 3 : 6, 0, Math.PI * 2); h ? c.fill() : c.stroke(); c.fillText(h ? `+${h}h` : (T.sys.typhoon ? '태풍' : '저기압'), x + 6, y - 4); } }
+  // 원래 항로(점선)
+  c.setLineDash([3, 3]); c.strokeStyle = 'rgba(240,240,230,.6)'; c.lineWidth = 1; c.beginPath();
+  S0.P.forEach((p, i) => { const [x, y] = typhoonXY(p.lat, p.lon); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); c.setLineDash([]);
+  // 고른 항로: 파고 색
+  c.lineWidth = 4;
+  for (let i = 1; i < E.P.length; i++) { const hs = E.seg[i]; c.strokeStyle = hs >= 5 ? '#e0455e' : hs >= 3.5 ? '#e8b04a' : '#8fe0a8';
+    const [x0, y0] = typhoonXY(E.P[i - 1].lat, E.P[i - 1].lon), [x1, y1] = typhoonXY(E.P[i].lat, E.P[i].lon); c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); }
+  const mid = E.P[Math.floor(E.P.length / 2)], [mx, my] = typhoonXY(mid.lat, mid.lon); T.handle = [mx, my];
+  c.strokeStyle = '#c0185f'; c.lineWidth = 3; c.beginPath(); c.arc(mx, my, 10, 0, Math.PI * 2); c.stroke();
+  const [sx, sy] = typhoonXY(E.P[0].lat, E.P[0].lon); c.fillStyle = '#fff'; c.beginPath(); c.arc(sx, sy, 4, 0, Math.PI * 2); c.fill();
+  const [ex, ey] = typhoonXY(E.P.at(-1).lat, E.P.at(-1).lon); c.fillStyle = '#fff'; c.fillRect(ex - 4, ey - 4, 8, 8);
+  c.fillStyle = '#fff'; c.font = '11px ' + C('--face-num'); c.fillText(PORTS[st.leg[1]].name, ex + 7, ey + 4);
+  const extraH = E.hours - S0.hours;
+  $('ty-r').innerHTML = E.land ? '<b style="color:var(--magenta)">육지를 지난다 — 이 항로는 못 간다</b>'
+    : `최대 파고 <b>${E.maxHs.toFixed(1)}m</b> (그대로 가면 ${S0.maxHs.toFixed(1)}m) · 4m 넘는 바다 ${E.rough.toFixed(0)}시간<br>` +
+      `${extraH > .2 ? `${extraH.toFixed(1)}시간 더 걸린다` : '시간은 거의 같다'}${T.wait ? ` (대기 ${T.wait}시간 포함)` : ''} · 돌아가는 거리 ${Math.max(0, E.nm - S0.nm).toFixed(0)}해리`;
+  $('ty-ok').disabled = E.land;
+  for (const bt of document.querySelectorAll('#typhoon [data-w]')) bt.classList.toggle('on', +bt.dataset.w === T.wait);
+}
+function typhoonClose() { typhoonUI.on = false; $('typhoon').classList.remove('on'); st.paused = typhoonUI.prevPaused; }
+$('ty-c').addEventListener('pointerdown', (e) => { const T = typhoonUI, r = $('ty-c').getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 320, y = (e.clientY - r.top) / r.height * 300;
+  if (T.handle && Math.hypot(x - T.handle[0], y - T.handle[1]) < 30) { T.drag = true; $('ty-c').setPointerCapture(e.pointerId); } });
+$('ty-c').addEventListener('pointermove', (e) => { const T = typhoonUI; if (!T.drag) return; const r = $('ty-c').getBoundingClientRect(), y = (e.clientY - r.top) / r.height * 300, x = (e.clientX - r.left) / r.width * 320;
+  // 끌린 점까지의 거리(해리)를 항로 법선 방향 성분으로
+  const B = T.base.pts, i = Math.floor(B.length / 2), p = B[i], a = B[i - 1], b2 = B[i + 1];
+  const dE = (b2.lon - a.lon) * Math.cos(p.lat * D2R), dN = b2.lat - a.lat, L = Math.hypot(dE, dN) || 1, nE = -dN / L, nN = dE / L;
+  const bx = T.box, lat = bx.la1 - y / 300 * (bx.la1 - bx.la0), lon = bx.lo0 + x / 320 * (bx.lo1 - bx.lo0);
+  const off = ((lon - p.lon) * Math.cos(p.lat * D2R) * nE + (lat - p.lat) * nN) * 60;
+  T.off = Math.max(-220, Math.min(220, Math.round(off / 4) * 4)); if (T._raf) return; T._raf = requestAnimationFrame(() => { T._raf = 0; typhoonRefresh(); }); });
+$('ty-c').addEventListener('pointerup', () => { typhoonUI.drag = false; });
+document.querySelectorAll('#typhoon [data-w]').forEach(b => b.onclick = () => { typhoonUI.wait = +b.dataset.w; typhoonRefresh(); });
+$('ty-x').onclick = () => { const f = typhoonUI.onDone; typhoonClose(); f?.(null); };
+$('ty-ok').onclick = () => {
+  const T = typhoonUI, E = T.E; if (!E || E.land) return; typhoonClose();
+  const extraNm = Math.max(0, E.nm - T.straight.nm) + T.wait * (st.curV || 9);
+  st.done = Math.max(0, st.done - extraNm);
+  st.stormShield = { until: sim.t + (E.hours + 2) * HOUR, cap: Math.max(1, E.maxHs + 0.3) };
+  say(`직접 항로 — ${T.off ? `${Math.abs(T.off)}해리 ${T.off > 0 ? '왼쪽' : '오른쪽'}으로 휘어` : '원래 항로대로'}${T.wait ? ` · ${T.wait}시간 기다렸다가` : ''} 간다 · 예상 최대 파고 ${E.maxHs.toFixed(1)}m (그대로면 ${T.straight.maxHs.toFixed(1)}m) · ${(E.hours - T.straight.hours).toFixed(1)}시간 더`, E.maxHs < T.straight.maxHs - .5 ? 'b' : '');
+  try { talkSay(navCaptainName(), E.maxHs < 4 ? '좋은 길입니다. 이쪽이면 배가 편합니다.' : E.maxHs < T.straight.maxHs - .5 ? '조금은 맞겠지만 정면보다는 낫습니다.' : '이 길도 거칠겠습니다. 단단히 묶겠습니다.'); } catch (_) {}
+  T.onDone?.(E);
+};
+
+// ── 직접 적재 감독 ─────────────────────────────────────────────
+// 선창 단면에 화물을 쌓는다. 덩어리 화물은 빈틈없이·무거운 것은 아래로, 벌크는 고르게(트리밍).
+// 하지 않으면 갑판장이 「무난」하게 한다. 잘하면 하역이 빠르고 화물 손상이 줄고, 망치면 그 반대.
+const CRAFT_W = 9, CRAFT_H = 7;
+const CRAFT_PIECES = {   // [가로, 세로, 무거움]
+  GENERAL: [[1,1,0],[2,1,0],[2,2,0],[1,2,0],[3,1,1],[2,1,1]],
+  STEEL:   [[4,1,1],[2,1,1],[1,1,1],[3,1,1]],
+  MACHINE: [[3,2,1],[2,2,1],[1,1,0],[2,1,0]],
+  TIMBER:  [[4,1,0],[3,1,0],[5,1,0],[2,1,0]],
+  FOOD:    [[2,1,0],[1,1,0],[2,2,0],[3,1,0],[2,1,1]],
+  REEFER:  [[2,1,0],[2,2,0],[1,1,0],[3,1,0]],
+};
+const CRAFT_BULK = new Set(['COAL','ORE','GRAIN']);
+const craft = { on:false };
+function craftKey() { return String(st.voyageStart || 0); }
+function craftCargo() {
+  const P = st.plan;
+  if (P?.active) { const x = (P.items ?? []).find(x => !x.loaded && !x.delivered && x.c.from === sim.ship.at); return x?.c?.cargo ?? null; }
+  return st.contract?.cargo ?? null;
+}
+function craftOpportunity() {
+  if (st.leg || !(st.phase === '적재' || st.phase === '적재 대기')) return null;
+  if (st.craft?.key === craftKey()) return null;
+  const cg = craftCargo(); if (!cg || !(CRAFT_BULK.has(cg) || CRAFT_PIECES[cg])) return null;
+  return { cargo: cg };
+}
+function craftBlocked(x, y) { return y === CRAFT_H - 1 && (x === 0 || x === CRAFT_W - 1); }
+function craftOpen() {
+  const o = craftOpportunity(); if (!o || craft.on) return;
+  const bulk = CRAFT_BULK.has(o.cargo);
+  Object.assign(craft, { on:true, cargo:o.cargo, bulk, t0:performance.now(), dur: bulk ? 25000 : 40000, prevPaused:st.paused,
+    grid: Array.from({ length:CRAFT_H }, () => Array(CRAFT_W).fill(null)), heights: Array(CRAFT_W).fill(0), pours: 0, needPours: 26,
+    queue: [], cur: null, cx: 3, unplaced: 0 });
+  if (!bulk) { const kinds = CRAFT_PIECES[o.cargo]; let cells = 0, i = 0;
+    while (cells < 52) { const k = kinds[Math.floor(Math.random() * kinds.length)]; craft.queue.push({ w:k[0], h:k[1], heavy:!!k[2], id:i++ }); cells += k[0] * k[1]; }
+    craftNext(); }
+  st.paused = true;
+  $('cf-t').textContent = `${CARGO[o.cargo].name} 적재 감독`;
+  $('cf-s').textContent = bulk ? '트리밍' : '고박·쌓기';
+  $('cf-help').innerHTML = bulk ? '칸을 눌러 그 자리에 붓는다. 산처럼 쌓이면 배가 기운다 — <b>평평하게</b> 고른다.' : '◀ ▶로 옮기고 ⟳로 돌려 「내린다」. <b>빈틈 없이</b>, <b>무거운 것(짙은색)은 아래</b>에.';
+  $('cf-ctl').style.display = bulk ? 'none' : '';
+  $('craft').classList.add('on');
+  requestAnimationFrame(craftLoop);
+}
+function craftNext() { craft.cur = craft.queue.shift() ?? null; if (craft.cur) craft.cx = Math.max(0, Math.min(CRAFT_W - craft.cur.w, craft.cx)); }
+function craftFits(pc, x, y) {
+  for (let dy = 0; dy < pc.h; dy++) for (let dx = 0; dx < pc.w; dx++) { const gx = x + dx, gy = y + dy;
+    if (gx < 0 || gx >= CRAFT_W || gy >= CRAFT_H) return false; if (gy < 0) continue;
+    if (craftBlocked(gx, gy) || craft.grid[gy][gx]) return false; }
+  return true;
+}
+function craftDrop() {
+  const pc = craft.cur; if (!pc) return;
+  let y = -pc.h; if (!craftFits(pc, craft.cx, 0)) { craft.unplaced++; craftNext(); if (!craft.cur) craftFinish(); return; }
+  while (craftFits(pc, craft.cx, y + 1)) y++;
+  if (y < 0) { craft.unplaced++; } else for (let dy = 0; dy < pc.h; dy++) for (let dx = 0; dx < pc.w; dx++) craft.grid[y + dy][craft.cx + dx] = { heavy: pc.heavy, id: pc.id };
+  try { soundscape.ui('telegraph'); } catch (_) {}
+  craftNext(); if (!craft.cur) craftFinish();
+}
+function craftPour(col) {   // 벌크: 붓고, 안식각(이웃과 2칸 이상 차)이면 흘러내린다
+  if (craft.pours >= craft.needPours) return;
+  const H = craft.heights, cap = (x) => CRAFT_H - (craftBlocked(x, CRAFT_H - 1) ? 1 : 0);
+  if (H[col] >= cap(col) + 2) return;
+  H[col] += 1; craft.pours++;
+  for (let it = 0; it < 60; it++) { let moved = false;
+    for (let x = 0; x < CRAFT_W; x++) for (const n of [x - 1, x + 1]) { if (n < 0 || n >= CRAFT_W) continue;
+      if (H[x] - H[n] >= 2) { H[x]--; H[n]++; moved = true; } }
+    if (!moved) break; }
+  if (craft.pours >= craft.needPours) craftFinish();
+}
+function craftScore() {
+  if (craft.bulk) { const H = craft.heights.map((h, x) => h + (craftBlocked(x, CRAFT_H - 1) ? 1 : 0)); const inner = H.slice(1, -1);
+    const spread = Math.max(...inner) - Math.min(...inner);
+    return { spread, tier: craft.pours < craft.needPours * .85 ? 'poor' : spread <= 1 ? 'best' : spread <= 2 ? 'ok' : 'poor' }; }
+  let filled = 0, holes = 0, crush = 0;
+  for (let x = 0; x < CRAFT_W; x++) { let seen = false;
+    for (let y = 0; y < CRAFT_H; y++) { const c = craft.grid[y][x]; if (c) { filled++; seen = true;
+        const below = craft.grid[y + 1]?.[x]; if (c.heavy && below && !below.heavy && below.id !== c.id) crush++; }
+      else if (seen && !craftBlocked(x, y)) holes++; } }
+  const gap = holes / Math.max(1, filled);
+  const tier = gap <= .06 && crush === 0 && craft.unplaced === 0 ? 'best' : gap <= .18 && crush <= 2 && craft.unplaced <= 1 ? 'ok' : 'poor';
+  return { filled, holes, crush, gap, tier };
+}
+function craftLoop(now) {
+  if (!craft.on) return;
+  const c = $('cf-c').getContext('2d'), W = 320, H = 300, cs = 30, ox = (W - CRAFT_W * cs) / 2, oy = 70;
+  c.fillStyle = '#1d2427'; c.fillRect(0, 0, W, H);
+  // 선창 단면
+  c.fillStyle = '#3a3f3c'; c.fillRect(ox - 6, oy - 4, CRAFT_W * cs + 12, CRAFT_H * cs + 10);
+  for (let y = 0; y < CRAFT_H; y++) for (let x = 0; x < CRAFT_W; x++) { const X = ox + x * cs, Y = oy + y * cs;
+    if (craftBlocked(x, y)) { c.fillStyle = '#3a3f3c'; c.fillRect(X, Y, cs, cs); continue; }
+    c.fillStyle = '#0f1416'; c.fillRect(X + 1, Y + 1, cs - 2, cs - 2); }
+  const col = craft.bulk ? svHex(svMix(WHARF_COLOR[craft.cargo] ?? '#8a8574', '#c9c2ad', .45)) : (WHARF_COLOR[craft.cargo] ?? '#8a8574');
+  if (craft.bulk) {
+    craft.heights.forEach((h, x) => { const base = craftBlocked(x, CRAFT_H - 1) ? 1 : 0;
+      for (let k = 0; k < h; k++) { const y = CRAFT_H - 1 - base - k; if (y < 0) { c.fillStyle = '#c0185f'; c.fillRect(ox + x * cs + 2, oy - 8, cs - 4, 4); continue; }
+        c.fillStyle = col; c.fillRect(ox + x * cs + 1, oy + y * cs + 1, cs - 2, cs - 2); c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(ox + x * cs + 3, oy + y * cs + 4, cs - 8, 2); } });
+    // 해치 위 그랩
+    c.fillStyle = '#e8e2cf'; c.font = '12px ' + C('--face-num'); c.fillText(`붓기 ${craft.pours} / ${craft.needPours}`, 10, 20);
+  } else {
+    for (let y = 0; y < CRAFT_H; y++) for (let x = 0; x < CRAFT_W; x++) { const g = craft.grid[y][x]; if (!g) continue;
+      c.fillStyle = g.heavy ? '#4b4f53' : col; c.fillRect(ox + x * cs + 1, oy + y * cs + 1, cs - 2, cs - 2);
+      c.strokeStyle = 'rgba(0,0,0,.4)'; c.strokeRect(ox + x * cs + 1.5, oy + y * cs + 1.5, cs - 3, cs - 3); }
+    const pc = craft.cur;
+    if (pc) { c.globalAlpha = .85; c.fillStyle = pc.heavy ? '#5e6368' : col; c.fillRect(ox + craft.cx * cs + 1, 22, pc.w * cs - 2, Math.min(2, pc.h) * 18 - 2);
+      c.globalAlpha = 1; c.fillStyle = '#e8e2cf'; c.font = '11px ' + C('--face-num'); c.fillText(pc.heavy ? '무거움' : '가벼움', ox + craft.cx * cs + 3, 16);
+      // 떨어질 자리 그림자
+      let y = -pc.h; if (craftFits(pc, craft.cx, 0)) { while (craftFits(pc, craft.cx, y + 1)) y++; c.strokeStyle = 'rgba(232,226,207,.55)'; c.setLineDash([3, 3]); c.strokeRect(ox + craft.cx * cs + 2, oy + y * cs + 2, pc.w * cs - 4, pc.h * cs - 4); c.setLineDash([]); } }
+    c.fillStyle = '#e8e2cf'; c.font = '11px ' + C('--face-num'); c.fillText(`남은 화물 ${craft.queue.length + (pc ? 1 : 0)}`, W - 90, 16);
+  }
+  const left = Math.max(0, craft.dur - (now - craft.t0)) / 1000;
+  c.fillStyle = '#e8e2cf'; c.font = '12px ' + C('--face-num'); c.fillText(`${left.toFixed(0)}초`, W - 40, H - 10);
+  if (left <= 0) return craftFinish();
+  requestAnimationFrame(craftLoop);
+}
+function craftFinish(abort = false) {
+  if (!craft.on) return;
+  craft.on = false; $('craft').classList.remove('on'); st.paused = craft.prevPaused;
+  if (abort) { st.craft = { key: craftKey(), tier:'ok', rate:1, dmg:1, speed:0 }; say('적재 감독을 갑판장에게 맡겼다', ''); return; }
+  if (craft.bulk) while (craft.pours < craft.needPours) craftPour(Math.floor(CRAFT_W / 2));   // 남은 것은 가운데로 쏟는다
+  if (!craft.bulk) craft.unplaced += craft.queue.length + (craft.cur ? 1 : 0);
+  const R = craftScore(), bulk = craft.bulk;
+  const E = { best: { rate:1.12, dmg:.5, speed:0 }, ok: { rate:1, dmg:1, speed:0 }, poor: bulk ? { rate:1, dmg:1.2, speed:.35 } : { rate:.95, dmg:1.6, speed:0 } }[R.tier];
+  st.craft = { key: craftKey(), tier: R.tier, ...E };
+  const what = bulk ? `표면 높낮이 ${R.spread}칸` : `빈틈 ${R.holes}칸 · 눌림 ${R.crush}곳${craft.unplaced ? ` · 못 실은 짐 ${craft.unplaced}` : ''}`;
+  const eff = R.tier === 'best' ? '하역 12% 빠르고 화물 손상 위험이 절반' : R.tier === 'ok' ? '갑판장이 한 것과 같다' : bulk ? '배가 기울어 항해 중 속력이 0.35kn 준다' : '하역 5% 느리고 화물 손상 위험이 커진다';
+  say(`직접 적재 감독 — ${what} · ${eff}`, R.tier === 'best' ? 'b' : R.tier === 'poor' ? 'm' : '');
+  try { talkSay(`갑판장 ${crewName('bosun')}`, R.tier === 'best' ? '이렇게 실으면 바다에서 걱정이 없습니다.' : R.tier === 'ok' ? '쓸 만합니다. 고박은 제가 마무리하겠습니다.' : bulk ? '한쪽으로 쏠렸습니다. 항해 중에 손을 좀 보겠습니다.' : '틈이 많습니다. 흔들리면 짐이 상하겠습니다.'); } catch (_) {}
+}
+document.querySelectorAll('#craft [data-cf]').forEach(b => b.onclick = () => { if (!craft.on || craft.bulk || !craft.cur) return; const k = b.dataset.cf, pc = craft.cur;
+  if (k === 'L') craft.cx = Math.max(0, craft.cx - 1);
+  if (k === 'X') craft.cx = Math.min(CRAFT_W - pc.w, craft.cx + 1);
+  if (k === 'R') { [pc.w, pc.h] = [pc.h, pc.w]; craft.cx = Math.max(0, Math.min(CRAFT_W - pc.w, craft.cx)); }
+  if (k === 'D') craftDrop(); });
+$('cf-c').addEventListener('pointerdown', (e) => { if (!craft.on) return; const r = $('cf-c').getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 320, col = Math.floor((x - (320 - CRAFT_W * 30) / 2) / 30);
+  if (col < 0 || col >= CRAFT_W) return;
+  if (craft.bulk) craftPour(col); else if (craft.cur) { const nx = Math.max(0, Math.min(CRAFT_W - craft.cur.w, col)); if (nx === craft.cx) craftDrop(); else craft.cx = nx; } });
+$('cf-x').onclick = () => craftFinish(true);
+$('craft-btn').onclick = craftOpen;
+function craftPrompt() {
+  const o = craftOpportunity(), b = $('craft-btn');
+  if (b) { b.hidden = !o || !!document.querySelector('.sheetwrap.on'); if (o) b.textContent = `🏗 ${CARGO[o.cargo].name} 직접 적재 감독`; }
+  if (o) { const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = 'cf:' + craftKey() + ':' + sim.ship.at;
+    if (!T.said[k]) { T.said[k] = 1; try { talkSay(`갑판장 ${crewName('bosun')}`, CRAFT_BULK.has(o.cargo) ? `${CARGO[o.cargo].name} 받습니다. 트리밍 직접 보시겠습니까?` : `${CARGO[o.cargo].name} 싣습니다. 쌓는 것 직접 보시겠습니까?`); } catch (_) {} } }
+}
+function craftLive() { const k = st.craft; return k && k.key === craftKey() ? k : null; }
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -8156,7 +8451,7 @@ if(st.leg){const d=Math.max(1e-6,dist(...st.leg));return posOnLeg(st.leg[0],st.l
 const p=PORTS[sim.ship.at];return {lat:p.lat,lon:p.lon,course:0};
 }
 function marineState() {
-const q=marinePosition(),pr=project(q.lat,q.lon),w=sim.weather.at(pr.x,pr.y,sim.t),cur=surfaceCurrent(q.lat,q.lon,sim.t);
+const q=marinePosition(),pr=project(q.lat,q.lon),w=shieldWx(sim.weather.at(pr.x,pr.y,sim.t)),cur=surfaceCurrent(q.lat,q.lon,sim.t);
 const along=st.leg?cur.east*Math.cos(q.course)+cur.north*Math.sin(q.course):0;
 let nearest=null;
 for(const sys of sim.weather.systems??[]){
@@ -9322,7 +9617,7 @@ return;
 if (st.phase === '항해') {
 const d = dist(...st.leg), frac = Math.min(0.999, st.done / d);
 const q=posOnLeg(st.leg[0],st.leg[1],frac),pr=project(q.lat,q.lon);
-const w = sim.weather.at(pr.x,pr.y,sim.t), course=q.course;
+const w = shieldWx(sim.weather.at(pr.x,pr.y,sim.t)), course=q.course;
 if(st.voyageRisk){st.voyageRisk.maxHs=Math.max(st.voyageRisk.maxHs??0,w.hs);if(w.hs>=4)st.voyageRisk.roughHours=(st.voyageRisk.roughHours??0)+DT/HOUR;} directCrewTick('SEA',DT,{hs:w.hs});
 if(st.voyageRisk){st.voyageRisk.maxHs=Math.max(st.voyageRisk.maxHs??0,w.hs);if(w.hs>=4)st.voyageRisk.roughHours=(st.voyageRisk.roughHours??0)+DT/HOUR;} directCrewTick('SEA',DT,{hs:w.hs});
 const rel=Math.abs(((w.dir+Math.PI)-course+Math.PI*3)%(Math.PI*2)-Math.PI)*180/Math.PI;
@@ -10247,7 +10542,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.18.0 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.19.0 · 적재 감독 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -11802,11 +12097,12 @@ function stowCurrent() {
 }
 function stowSpeedPenalty() {           // 항해 중 대지속력 손실 (kn)
   if (!stowLive().length) return 0;
-  return stowCurrent().stab.speed;
+  return stowCurrent().stab.speed + (craftLive()?.speed ?? 0);
 }
 function stowDamageBonus() {            // 화물 클레임 확률 가산
   if (!stowLive().length) return 0;
-  return stowCurrent().stab.damage;
+  const k = craftLive()?.dmg ?? 1;
+  return stowCurrent().stab.damage * k + (k > 1 ? 0.01 * (k - 1) : k < 1 ? -0.006 : 0);   // 직접 감독 결과
 }
 function stowFatigueBonus() {           // 항해 중 하루당 피로 가산
   if (!stowLive().length) return 0;
@@ -11818,7 +12114,7 @@ function stowRateFactor() {             // 하역 속도 배수
   if (P?.active) items = (P.items ?? []).filter(x => !x.delivered);
   else if (st.contract) items = [{ c:st.contract, tons:st.tons, hold:1, slot:st.stowSolo ?? '1L' }];
   if (!items.length) return 1;
-  return stowWorkRate(items);
+  return stowWorkRate(items) * (craftLive()?.rate ?? 1);
 }
 // 양하를 시작할 때, 덮고 있던 화물을 들어낸 값을 치른다
 function stowPayShifting(port) {
@@ -13066,6 +13362,8 @@ function capStormCall(M) {
             sim.ship.state.HULL = fleetClamp(sim.ship.state.HULL - d, 5, 100);
             say(`거친 바다를 천천히 지났다 — 선체 −${d.toFixed(0)}`, 'm'); }
           else say('속력을 줄여 무사히 지났다', ''); } },
+      { label:'직접 항로를 긋는다', sub:'해도에서 휘어 가거나 기다린다', run:() => {
+          typhoonOpen((E) => { if (!E) { setEot('ECO'); say('선장에게 맡겼다 — 감속해 지난다', ''); } }); } },
       { label:'그대로 뚫는다', sub:'시간은 안 잃는다',
         cost: 0.48 * hurt, run:() => {
           if (sim.rng.nav.chance(0.48)) { const d = 4 + sim.rng.nav.range(0, 8);
@@ -13476,7 +13774,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); } catch (_) {}
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); craftPrompt(); } catch (_) {}
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
@@ -13698,7 +13996,7 @@ return;
 if (st.phase === '항해') {
 const d = dist(...st.leg), frac = Math.min(0.999, st.done / d);
 const q=posOnLeg(st.leg[0],st.leg[1],frac),pr=project(q.lat,q.lon);
-const w = sim.weather.at(pr.x,pr.y,sim.t), course=q.course;
+const w = shieldWx(sim.weather.at(pr.x,pr.y,sim.t)), course=q.course;
 let rel = Math.abs(((w.dir + Math.PI) - course + Math.PI * 3) % (Math.PI * 2) - Math.PI) * 180 / Math.PI;
 let target = EOT.find(([k]) => k === st.eot)[1];
 const sts = legStraits(st.leg[0], st.leg[1]).map((n) => STRAIT_RULE[n]);
