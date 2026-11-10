@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.15.0</title>
+<title>TRAMP LINE 1962 · v3.16.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,6 +492,8 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
+#sv-talk{padding:5px 8px;font-size:11px;line-height:1.4;color:var(--ink);border-bottom:1px solid var(--line);background:#efece2}#sv-talk.omen{color:var(--magenta)}#sv-talk[hidden]{display:none}
+#talk-toast{position:absolute;left:8px;bottom:10px;z-index:7;max-width:min(330px,84vw);padding:6px 9px;font-size:11.5px;line-height:1.4;background:rgba(241,237,224,.96);border:1px solid rgba(24,32,34,.88);box-shadow:0 3px 10px rgba(0,0,0,.25)}#talk-toast.omen{color:var(--magenta);border-color:var(--magenta)}#talk-toast[hidden]{display:none}
 #sea-show{position:absolute;left:8px;top:8px;z-index:6;min-height:30px;padding:0 10px}#sea-show[hidden]{display:none}
 @media(max-width:430px){#sea-view{left:6px;bottom:6px;width:min(280px,74vw)}#sea-view.big{width:calc(100% - 12px)}}
 .pa-meta { display:grid; grid-template-columns:1fr 1fr; gap:2px 8px; padding:5px 7px 6px; font-size:9px; color:var(--ink2); line-height:1.35; }
@@ -975,7 +977,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.15.0</div>
+      <div class="mm-version">CONTENT v3.16.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1054,9 +1056,11 @@ button[data-hold].nudge{animation:nudge .32s}
     <aside id="sea-view" aria-hidden="true">
       <div class="pa-head"><b id="sv-title">선교</b><span><button id="sv-big" aria-label="크게">⤢</button><button id="sv-close" aria-label="선교 창 닫기">×</button></span></div>
       <canvas id="sv-canvas" width="240" height="135"></canvas>
+      <div id="sv-talk" hidden></div>
       <div class="pa-meta"><span id="sv-time">—</span><span id="sv-weather">—</span><span id="sv-race">—</span><span id="sv-left">—</span></div>
     </aside>
     <button id="sea-show" hidden>선교 창</button>
+    <div id="talk-toast" hidden></div>
   </main>
   <!-- ── 아래: 조작 독 ── -->
   <footer id="dock">
@@ -1220,7 +1224,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.15.0 · 선교 창 — 뱃머리 너머 바다</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.16.0 · 선내 소식 — 선장·기관장의 한마디</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1462,7 +1466,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.15.0';
+const TRAMP_LINE_CONTENT_VERSION='3.16.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -7661,6 +7665,7 @@ function svDraw() {
   const R = S.ships.filter(z => z.racer).sort((a, b) => a.nm - b.nm)[0], O = S.ships.filter(z => Math.abs(z.rel) <= 80).length;
   const side = (rel) => Math.abs(rel) < 12 ? '정면' : `${rel < 0 ? '좌현' : '우현'} ${Math.abs(rel) < 60 ? '앞' : '옆'}`;
   $('sv-race').textContent = R ? `${R.name} · ${side(R.rel)} ${R.nm.toFixed(0)}해리` : O ? `수평선에 배 ${O}척` : '보이는 배 없음';
+  const tk = $('sv-talk'), sh = st.talk?.shown; if (tk) { const on = sh && performance.now() - sh.at < 45000 && performance.now() >= sh.at; if (on && tk.textContent !== sh.line) { tk.textContent = sh.line; tk.classList.toggle('omen', !!sh.omen); } tk.hidden = !on; }
   const left = Math.max(0, dist(...st.leg) - st.done);
   $('sv-left').textContent = `${PORTS[st.leg[1]].name}까지 ${left.toFixed(0)}해리 · ${(st.curV ?? 0).toFixed(1)}kn`;
 }
@@ -9963,7 +9968,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.15.0 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.16.0 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -13019,8 +13024,103 @@ function drawRace() {
   }
   cx.restore();
 }
+
+// ── 선내 소식 ─────────────────────────────────────────────────────
+// 판단이 아니라 분위기. 그러나 대부분은 실제 상태에서 나온다 — 기관장 말은 고장 확률이 한 단계
+// 오르는 문턱(80·60·45)에서 나오므로, 들어 두면 쓸모가 있다. 난수 줄기는 건드리지 않는다(시각 해시).
+const CREW_NAMES = { chief:['오만석','권태호','민병철','장두식','배기수'], mate:['이상훈','조영길','한동수','윤재복'], radio:['서정민','김용택','남궁철'], bosun:['곽판돌','마영춘','표성길'], cook:['염순덕','하복남'] };
+function crewName(role) { const L = CREW_NAMES[role]; return L[raceHash((sim.company?.name ?? '금하') + role) % L.length]; }
+function josaIGa(w) { const c = w.charCodeAt(w.length - 1) - 0xAC00; return w + (c >= 0 && c <= 11171 && c % 28 ? '이' : '가'); }
+function talkSay(who, text, omen = false) {
+  const T = st.talk; T.last = sim.t;
+  const line = `${who} — ${text}`;
+  say(`【선내】 ${line}`, omen ? 'm' : '');
+  T.shown = { line, omen, at: performance.now() };
+  const el = $('sv-talk'); if (el) { el.textContent = line; el.classList.toggle('omen', omen); el.hidden = false; }
+  if (!seaView.on) { const t = $('talk-toast'); if (t) { t.textContent = line; t.classList.toggle('omen', omen); t.hidden = false; clearTimeout(talkSay._h); talkSay._h = setTimeout(() => { t.hidden = true; }, 7000); } }
+}
+function talkTick(M) {
+  const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 };
+  if (sim.t - T.chk < 1800) return; T.chk = sim.t;
+  const S = sim.ship, sea = st.phase === '항해' && st.leg;
+  const legKey = sea ? `${st.voyageStart || 0}:${st.leg.join('>')}` : null;
+  if (legKey && T.leg !== legKey) { T.leg = legKey; for (const k of Object.keys(T.said)) if (k.startsWith('leg:')) delete T.said[k]; }
+  const cap = playerCaptain(), capN = cap?.name ? `${cap.name} 선장` : '선장', tmp = captainTemper(cap);
+  const chief = `기관장 ${crewName('chief')}`, mate = `1항사 ${crewName('mate')}`, radio = `통신장 ${crewName('radio')}`, bosun = `갑판장 ${crewName('bosun')}`, cook = `조리장 ${crewName('cook')}`;
+  const once = (k) => T.said[k] ? false : (T.said[k] = 1, true);
+  // 1) 전조 — 문턱을 넘을 때 한 번. 수리해서 문턱+5 위로 올라가면 다시 말할 수 있다.
+  const OMEN = {
+    ENGINE: [[80, chief, '주기관 배기색이 조금 짙어졌습니다. 아직은 괜찮습니다.'], [60, chief, '주기관 2번 실린더 소리가 거슬립니다. 다음 항구에서 손봐야 합니다.'], [45, chief, '주기관이 언제 서도 이상하지 않습니다. 전속은 피하십시오.']],
+    COOLING: [[80, chief, '냉각수가 평소보다 빨리 데워집니다.'], [60, chief, '냉각 펌프 패킹에서 물이 샙니다. 계속 지켜보고 있습니다.'], [45, chief, '냉각계통이 버티질 못합니다. 감속을 권합니다.']],
+    NAV: [[80, mate, '자이로가 조금씩 틉니다. 물표로 맞춰 가겠습니다.'], [60, mate, '레이더 화면이 자꾸 흐려집니다.'], [45, mate, '항해장비를 믿기 어렵습니다. 천측과 물표로만 갑니다.']],
+    HULL: [[60, bosun, '선수 쪽 철판에 녹물이 번집니다. 언젠가 독에 넣어야 합니다.'], [45, bosun, '거친 날엔 선창에 물이 스밉니다.']],
+  };
+  for (const [k, steps] of Object.entries(OMEN)) {
+    const v = S.state[k];
+    for (const [th] of steps) if (v >= th + 5) delete T.said[`omen:${k}:${th}`];
+    const hit = steps.filter(([th]) => v < th).at(-1);
+    if (hit && once(`omen:${k}:${hit[0]}`)) { talkSay(hit[1], hit[2], hit[0] <= 60); return; }
+  }
+  // 2) 실제 사정 — 기름, 저기압
+  if (S.bunker < SHIP.bunkerMax * .22 && once('fuel:' + Math.floor(S.bunker / 20))) { talkSay(chief, `기름이 ${Math.round(S.bunker)}t 남았습니다. 다음 항구에서 넣어야 합니다.`, true); return; }
+  if (sea && M?.nearest && M.nearest.nm < 480 && M.nearest.p < 1000 && once('wx:' + Math.round(M.nearest.p / 4))) {
+    const ty = M.nearest.p < 985;
+    talkSay(radio, ty ? `기상 방송입니다. 태풍 중심기압 ${Math.round(M.nearest.p)}mb, ${Math.round(M.nearest.nm / 10) * 10}해리 거리입니다.` : `기압이 떨어집니다. 저기압이 ${Math.round(M.nearest.nm / 10) * 10}해리 밖에 있습니다.`, ty); return; }
+  // 아래는 분위기 — 너무 잦지 않게
+  if (sim.t - T.last < (sea ? 3 : 7) * HOUR) return;
+  if (sea) {
+    const q = M?.q ?? marineState().q;
+    // 경주선이 가까이
+    const R = st.race && !st.race.done ? st.race.racers.filter(x => !x.joined) : [];
+    for (const x of R) { const pp = x.npc ? raceNpcPos(x, st.race.port) : null; if (!pp) continue; const nm = gcNm(q.lat, q.lon, pp.lat, pp.lon);
+      if (nm < 6 && once('leg:near:' + x.sid)) { const rel = ((gcBrg(q.lat, q.lon, pp.lat, pp.lon) - courseBearing(q.course) + 540) % 360) - 180;
+        talkSay(mate, `${josaIGa(x.name)} ${rel < 0 ? '좌현' : '우현'} ${Math.abs(rel) < 60 ? '앞' : '옆'} ${nm.toFixed(0)}해리에 있습니다. 굴뚝 연기가 보입니다.`); return; } }
+    // 육지가 보인다
+    const L = navNearestLand(q);
+    const fromN = PORTS[st.leg[0]].name, toN = PORTS[st.leg[1]].name;
+    if (L && L.nm < 24 && L.name !== fromN && once('leg:land:' + L.name)) {
+      const dest = L.name === toN;
+      talkSay(capN, dest ? (tmp === 'safe' ? `${josaIGa(L.name)} 보입니다. 입항 준비하겠습니다.` : `${josaIGa(L.name)} 보인다. 다 왔다.`)
+                         : (tmp === 'safe' ? `${josaIGa(L.name)} 보입니다. 연안이니 견시를 늘리겠습니다.` : tmp === 'bold' ? `${josaIGa(L.name)} 보인다. 순조롭다.` : `${josaIGa(L.name)} 보인다.`)); return; }
+    // 도착 예정 — 구간 중간쯤 한 번
+    const d = dist(...st.leg);
+    if (st.done > d * .4 && once('leg:eta')) { const eta = raceOurEta();
+      talkSay(capN, tmp === 'bold' ? `이 속도면 ${clock(eta)}쯤 닿습니다. 늦을 일 없습니다.` : tmp === 'safe' ? `${clock(eta)}쯤 닿습니다만, 날씨 보고 다시 말씀드리겠습니다.` : `${clock(eta)}쯤 ${PORTS[st.leg[1]].name}입니다.`); return; }
+    // 화물
+    const cg = st.contract?.cargo ?? st.plan?.items?.find(x => x.activated && !x.delivered)?.c?.cargo;
+    const CG = { COAL:'석탄 가루가 갑판에 내려앉습니다. 물청소를 시키겠습니다.', ORE:'광석은 무거워서 배가 뻣뻣하게 흔들립니다.', STEEL:'강재 결박 다시 확인했습니다. 이상 없습니다.', MACHINE:'기계 상자 고박이 하나 풀려 다시 묶었습니다.', TIMBER:'갑판 원목이 조금 밀렸습니다. 다시 묶었습니다.', GRAIN:'양곡 창 환기 잘 되고 있습니다.', FOOD:'식료 창 환기 상태 좋습니다.', GENERAL:'잡화 결박 다시 확인했습니다.', REEFER:'냉장 온도 영하 18도 유지합니다.', OIL:'탱크 압력 정상입니다.' };
+    if (cg && CG[cg] && once('leg:cargo')) { talkSay(bosun, CG[cg]); return; }
+  }
+  // 3) 분위기 — 시각 해시로 고른다. 반쯤은 조용히 지나간다. 항구에서는 한 번 기항에 한 마디.
+  const h = raceHash('talk:' + Math.floor(sim.t / (3 * HOUR)));
+  if (h % 2) return;
+  if (!sea && !once(`call:${S.at}:${S.voyages}:${st.plan?.routeIdx ?? 0}`)) return;
+  const q = M?.q ?? (sea ? marineState().q : PORTS[S.at]);
+  const sun = subsolar(gameDate(sim.t)), alt = Math.asin(Math.sin(q.lat * D2R) * Math.sin(sun.dec * D2R) + Math.cos(q.lat * D2R) * Math.cos(sun.dec * D2R) * Math.cos((q.lon - sun.lon) * D2R)) / D2R;
+  const night = alt < -6, nearKR = q.lat > 33 && q.lon < 130.2 && q.lon > 124, nearJP = q.lon >= 129.5 && q.lat > 30;
+  const pool = sea ? [
+    [mate, '돌고래 떼가 선수에 붙었습니다.', !night && q.lat > 25],
+    [mate, '날치가 갑판으로 뛰어올랐습니다.', !night && q.lat < 30],
+    [bosun, '멀리 고깃배 불빛이 줄지어 있습니다. 오징어배 같습니다.', night],
+    [mate, '갈매기가 따라옵니다. 육지가 멀지 않습니다.', !night && !!navNearestLand(q) && navNearestLand(q).nm < 60],
+    [radio, '부산 방송이 잡힙니다. 가요가 나옵니다.', nearKR],
+    [radio, 'NHK 일기예보가 들립니다. 내일은 맑답니다.', nearJP],
+    [cook, '오늘 저녁은 김치찌개입니다.', !night],
+    [bosun, '비번 선원들이 선미에서 화투를 칩니다.', night],
+    [mate, '별이 잘 보입니다. 박명에 성측하겠습니다.', night && (marineState().w.vis > 15)],
+    [capN, tmp === 'bold' ? '바다가 좋다. 이런 날은 기름값이 아깝지 않지.' : '이런 날이 오래 가지 않는다. 방심하지 말자.', !night],
+  ] : [
+    [cook, '부식을 실었습니다. 이번엔 생선이 쌉니다.', true],
+    [bosun, '선창 청소 끝냈습니다. 다음 화물 받을 수 있습니다.', true],
+    [radio, '본사 전보 확인했습니다. 별다른 지시는 없습니다.', true],
+    [chief, '정박한 김에 보조기관 정비를 하겠습니다.', true],
+  ];
+  const ok = pool.filter(x => x[2]); if (!ok.length) return;
+  const pick = ok[(h >>> 3) % ok.length]; talkSay(pick[0], pick[1]);
+}
 function captainReports(M) {
   try { raceTick(); } catch (_) {}
+  try { talkTick(M ?? (st.phase === '항해' && st.leg ? marineState() : null)); } catch (e) { console.warn(e); }
   if (asking) return;
   if (st.phase === '항해') { if (M) capStormCall(M); capLaycanCall(); if (!asking) capRaceCall(); return; }
   if (st.phase === '적재' || st.phase === '양하') { capLaytimeCall(); return; }
