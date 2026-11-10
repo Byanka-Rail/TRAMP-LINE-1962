@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.17.0</title>
+<title>TRAMP LINE 1962 · v3.18.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,10 +492,13 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
-.sx-box{max-width:380px}#sx-c{display:block;width:100%;aspect-ratio:320/300;background:#0b1116;touch-action:none}
+.sx-box{max-width:380px}#bg-c{display:block;width:100%;aspect-ratio:320/300;background:#2d4650;touch-action:none}
+.bg-eng,.bg-rud{display:grid;gap:5px;padding:5px 10px}.bg-eng{grid-template-columns:repeat(5,1fr)}.bg-rud{grid-template-columns:1fr 1fr 1fr}
+.bg-eng button,.bg-rud button{min-height:46px;font-size:13px;padding:2px}.bg-rud small{display:block;font-size:10px;color:var(--ink2)}
+.bg-eng button.on{background:var(--ink);color:var(--paper)}.bg-rud button.on{background:var(--magenta);color:#fff}#sx-c{display:block;width:100%;aspect-ratio:320/300;background:#0b1116;touch-action:none}
 .sx-help{font-size:12px}.sx-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px;padding:6px 12px}
 .sx-ctl button{min-height:52px;font-size:18px}#sx-mark{background:var(--magenta);color:#fff;border-color:var(--magenta)}
-#sv-act,.nw-sextant{width:100%;margin:0;border:0;border-bottom:1px solid var(--line);background:#f3e6ee;color:var(--magenta);font-size:12px;padding:7px 8px;text-align:left}#sv-act[hidden]{display:none}
+#sv-act,#pa-act,.nw-sextant{width:100%;margin:0;border:0;border-bottom:1px solid var(--line);background:#f3e6ee;color:var(--magenta);font-size:12px;padding:7px 8px;text-align:left}#sv-act[hidden],#pa-act[hidden]{display:none}
 #sv-talk{padding:5px 8px;font-size:11px;line-height:1.4;color:var(--ink);border-bottom:1px solid var(--line);background:#efece2}#sv-talk.omen{color:var(--magenta)}#sv-talk[hidden]{display:none}
 #talk-toast{position:absolute;left:8px;bottom:10px;z-index:7;max-width:min(330px,84vw);padding:6px 9px;font-size:11.5px;line-height:1.4;background:rgba(241,237,224,.96);border:1px solid rgba(24,32,34,.88);box-shadow:0 3px 10px rgba(0,0,0,.25)}#talk-toast.omen{color:var(--magenta);border-color:var(--magenta)}#talk-toast[hidden]{display:none}
 #sea-show{position:absolute;left:8px;top:8px;z-index:6;min-height:30px;padding:0 10px}#sea-show[hidden]{display:none}
@@ -981,7 +984,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.17.0</div>
+      <div class="mm-version">CONTENT v3.18.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1052,6 +1055,7 @@ button[data-hold].nudge{animation:nudge .32s}
     <aside id="port-approach" aria-live="polite" aria-hidden="true">
       <div class="pa-head"><b id="pa-title">항만 접근</b><button id="pa-close" aria-label="항만 풍경 닫기">×</button></div>
       <canvas id="pa-canvas" width="200" height="112"></canvas>
+      <button id="pa-act" class="nw-sextant" hidden></button>
       <div class="pa-meta">
         <span id="pa-time">—</span><span id="pa-weather">—</span>
         <span id="pa-berth">—</span><span id="pa-note">—</span>
@@ -1229,7 +1233,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.17.0 · 직접 천측 — 육분의 미니게임</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.18.0 · 직접 접안 — 조선 미니게임</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1477,10 +1481,20 @@ button[data-hold].nudge{animation:nudge .32s}
     <div class="evfoot"><div class="btnrow"><button id="sx-x">1항사에게 맡긴다</button></div></div>
   </div>
 </div>
+<div id="berthing" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="bg-t">
+  <div class="sheetbox sx-box">
+    <header><h2><span id="bg-t">접안</span></h2><span class="stamp" id="bg-s">—</span></header>
+    <canvas id="bg-c" width="320" height="300"></canvas>
+    <div class="note sx-help" id="bg-help">자홍 표시 사이에 배를 세워 부두에 <b>살며시</b> 붙인다. 바람과 조류가 민다.</div>
+    <div class="bg-eng"><button data-e="-2">◀◀</button><button data-e="-1">◀ 후진</button><button data-e="0">■ 정지</button><button data-e="1">전진 ▶</button><button data-e="2">▶▶</button></div>
+    <div class="bg-rud"><button id="bg-port">◁ 좌타<small>부두 쪽</small></button><button id="bg-tug">예선<small id="bg-tug-s"></small></button><button id="bg-stbd">우타 ▷<small>바다 쪽</small></button></div>
+    <div class="evfoot"><div class="btnrow"><button id="bg-x">도선사에게 맡긴다</button></div></div>
+  </div>
+</div>
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.17.0';
+const TRAMP_LINE_CONTENT_VERSION='3.18.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -7798,12 +7812,160 @@ $('sx-c').addEventListener('pointerup', () => { sextant.drag = null; });
 function sextantPrompt() {   // 선교 창·당직 칸의 단추, 처음 열릴 때 1항사 한마디
   const o = sextantOpportunity(), b = $('sv-act');
   const label = o ? `☉ ${NAV_FIX[o.kind].name} — 직접 잰다 (${o.win})` : '';
-  if (b) { b.hidden = !o; if (o && b.textContent !== label) b.textContent = label; }
+  if (b) { b.hidden = !o; if (o) { b.dataset.act = 'sextant'; if (b.textContent !== label) b.textContent = label; } }
   if (o) { const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = `sx:${o.kind}:${Math.floor(sim.t / (6 * HOUR))}`;
     if (!T.said[k]) { T.said[k] = 1; try { talkSay(`1항사 ${crewName('mate')}`, o.kind === 'NOON' ? '남중이 가깝습니다. 직접 재 보시겠습니까?' : '박명입니다. 별이 섭니다. 직접 재 보시겠습니까?'); } catch (_) {} } }
   return o;
 }
-$('sv-act').onclick = sextantOpen;
+$('pa-act').onclick = () => { const o = berthOpportunity(); if (o) st.manualBerth = st.manualBerth === o.key ? null : o.key; };
+$('sv-act').onclick = () => {
+  if ($('sv-act').dataset.act === 'berth') { const o = berthOpportunity(); if (o) st.manualBerth = st.manualBerth === o.key ? null : o.key; return; }
+  sextantOpen(); };
+
+// ── 직접 접안 ─────────────────────────────────────────────────────
+// 도착 25해리 전부터 「⚓ 직접 접안한다」를 예약할 수 있다. 9해리에서 도선 절차 대신 이 놀이가 열린다.
+// 위에서 내려다본 부두. 기관(후진·정지·전진)과 키, 필요하면 예선으로 자홍 표시 사이에 살며시 붙인다.
+// 바람(부두 쪽/바다 쪽 성분)과 조류(부두와 나란한 성분)는 실제 그 항구 그 시각의 값이다.
+const berthing = { on:false };
+function berthOpportunity() {
+  if (st.phase !== '항해' || !st.leg || st.pilotIn) return null;
+  const left = Math.max(0, dist(...st.leg) - st.done);
+  if (left > 25 || left <= 9) return null;
+  return { port: st.leg[1], left, key: `${st.voyageStart || 0}:${st.leg.join('>')}` };
+}
+function berthingStart(port, done) {
+  const C = pilotContext(port, 'IN');
+  const rel = (deg) => ((deg - C.berth + 540) % 360) - 180;
+  // 바람은 불어오는 방향(windDeg). 부두가 선석 방향의 왼쪽(북쪽 화면 위)에 있다고 본다.
+  const wRel = rel(C.windDeg + 180) * D2R, cRel = rel(C.curDeg) * D2R;
+  const windLat = C.windU * 0.007 * Math.sin(wRel);           // + 면 부두 쪽으로 민다
+  const curAlong = C.curV * 0.514 * Math.cos(cRel);            // + 면 선석 방향(앞)으로
+  Object.assign(berthing, { on:true, C, done, port, x:-270, y:30, u:1.9, vl:0, psi:0, eng:1, rud:0, tug:0, tugUsed:0,
+    windLat, curAlong, tReal:0, last:null, prevPaused:st.paused, end:null, hold:0 });
+  st.paused = true;
+  $('bg-t').textContent = `${C.p.name} 접안 · 직접`;
+  $('bg-s').textContent = `${C.night ? '야간' : '주간'} · 풍 ${C.windU.toFixed(0)}m/s`;
+  $('bg-tug-s').textContent = C.tugsAvail ? `${won(TUG_FEE)}원 · 누르는 동안 부두로` : '이 항구엔 없다';
+  $('bg-tug').disabled = !C.tugsAvail;
+  $('berthing').classList.add('on');
+  berthingButtons();
+  requestAnimationFrame(berthingLoop);
+}
+function berthingButtons() {
+  for (const b of document.querySelectorAll('#berthing [data-e]')) b.classList.toggle('on', +b.dataset.e === berthing.eng);
+  $('bg-port').classList.toggle('on', berthing.rud > 0); $('bg-stbd').classList.toggle('on', berthing.rud < 0); $('bg-tug').classList.toggle('on', berthing.tug > 0);
+}
+function berthingPhysics(dt) {
+  const B = berthing;
+  const thrust = B.eng * 0.017, drag = 0.010 * B.u + 0.004 * B.u * Math.abs(B.u);
+  B.u += (thrust - drag) * dt;
+  const steer = B.rud * 0.03 * (Math.abs(B.u) + 0.7 * Math.max(0, B.eng)) * (B.u < -0.05 ? -0.4 : 1);
+  B.psi += (steer - B.psi * 0.02) * dt;
+  B.psi = Math.max(-0.5, Math.min(0.5, B.psi));
+  const tugA = B.tug ? -0.028 : 0;                    // 예선은 부두 쪽(y 감소)으로 민다
+  const target = -B.windLat;                           // 바람이 미는 옆 속도(y 방향)
+  B.vl += ((target - B.vl) * 0.06 + tugA) * dt;
+  B.x += (B.u * Math.cos(B.psi) + B.curAlong) * dt;
+  B.y += (-B.u * Math.sin(B.psi) + B.vl) * dt;
+}
+function berthingLoop(now) {
+  const B = berthing; if (!B.on) return;
+  const realDt = Math.min(0.05, (now - (B.last ?? now)) / 1000); B.last = now; B.tReal += realDt;
+  const SIM = 10; for (let i = 0; i < 8; i++) berthingPhysics(realDt * SIM / 8);
+  const ySpeed = -B.u * Math.sin(B.psi) + B.vl;
+  if (B.y <= 1.5) return berthingFinish('alongside', ySpeed);
+  if (B.x > 70) return berthingFinish('overshoot');
+  if (B.y > 140) return berthingFinish('drift');
+  if (B.tReal > 50) return berthingFinish('time');
+  berthingDraw(ySpeed);
+  requestAnimationFrame(berthingLoop);
+}
+function berthingDraw(ySpeed) {
+  const B = berthing, C = B.C, c = $('bg-c').getContext('2d'), W = 320, H = 300, k = 0.8;
+  const cx0 = Math.max(-150, Math.min(0, B.x + 40));    // 카메라는 배를 따라가다 선석에서 멈춘다
+  const X = (x) => W / 2 + (x - cx0) * k, Y = (y) => 70 + y * k * 1.6;
+  c.fillStyle = C.night ? '#0d1a20' : '#3d5d68'; c.fillRect(0, 0, W, H);
+  // 물결 (조류 방향으로 흐른다)
+  c.fillStyle = C.night ? 'rgba(120,150,160,.12)' : 'rgba(230,240,236,.16)';
+  for (let i = 0; i < 36; i++) { const h = raceHash('bw' + i), x0 = (h % 420) + B.tReal * B.curAlong * 6 * k - cx0 * k; c.fillRect(((x0 % 420) + 420) % 420 - 50, 80 + (h >>> 9) % 220, 8, 1); }
+  // 부두
+  c.fillStyle = C.night ? '#2a2f31' : '#8e8a7e'; c.fillRect(0, 0, W, Y(0) - 2);
+  c.fillStyle = C.night ? '#3a3f40' : '#b5b0a2'; c.fillRect(0, Y(0) - 6, W, 4);
+  for (let x = -400; x <= 200; x += 18) { c.fillStyle = '#1d2224'; c.fillRect(X(x) - 2, Y(0) - 3, 4, 4); }
+  // 이웃 배(좁은 항이면 가깝게)
+  const gap = C.tight ? 70 : 100;
+  for (const ox of [-gap - 85, gap]) { c.fillStyle = C.night ? '#1b2328' : '#4d4f4c'; c.fillRect(X(ox), Y(1.5), 85 * k, 13 * k * 1.6); }
+  // 선석 표시
+  c.fillStyle = '#c0185f'; c.fillRect(X(-20) - 1, Y(0) - 12, 3, 12); c.fillRect(X(20) - 1, Y(0) - 12, 3, 12);
+  if (C.night) { c.fillStyle = '#ffd98a'; for (let x = -300; x < 200; x += 60) c.fillRect(X(x), 8, 3, 3); }
+  // 우리 배: 길이 80m, 폭 12m
+  c.save(); c.translate(X(B.x), Y(B.y)); c.rotate(-B.psi);
+  c.fillStyle = C.night ? '#c9c3b1' : '#26292a'; c.beginPath(); c.moveTo(42 * k, 0); c.lineTo(28 * k, -6 * k * 1.6); c.lineTo(-40 * k, -6 * k * 1.6); c.lineTo(-40 * k, 6 * k * 1.6); c.lineTo(28 * k, 6 * k * 1.6); c.closePath(); c.fill();
+  c.fillStyle = '#c0185f'; c.fillRect(-30 * k, -3 * k, 10 * k, 6 * k);
+  if (B.eng) { c.fillStyle = 'rgba(240,244,240,.6)'; for (let i = 0; i < 5; i++) c.fillRect((-44 - i * 6) * k * Math.sign(B.eng || 1), (Math.random() - .5) * 8, 3, 1); }
+  c.restore();
+  if (B.tug) { c.fillStyle = '#e7b24a'; c.fillRect(X(B.x) - 6, Y(B.y) + 14, 12, 6); }
+  // 바람·조류 화살표
+  const arrow = (x, y, dx, dy, col, label) => { c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y); c.lineTo(x + dx, y + dy); c.stroke(); c.font = '10px ' + C_face(); c.fillText(label, x + dx + 3, y + dy + 3); };
+  arrow(20, H - 40, 0, Math.max(-22, Math.min(22, -B.windLat * 260)), '#e8e2cf', `바람 ${B.windLat > 0 ? '부두 쪽' : '바다 쪽'}`);
+  arrow(20, H - 14, Math.max(-28, Math.min(28, B.curAlong * 90)), 0, '#8fd0e0', `조류 ${B.curAlong >= 0 ? '앞' : '뒤'}`);
+  // 계기
+  c.fillStyle = '#f3efe2'; c.font = '11px ' + C_face();
+  c.fillText(`속력 ${(B.u / 0.514).toFixed(1)}kn`, W - 104, H - 44);
+  c.fillText(`선석까지 ${Math.round(-B.x)}m`, W - 104, H - 30);
+  c.fillText(`부두까지 ${Math.max(0, B.y).toFixed(0)}m · ${ySpeed < 0 ? '다가감' : '멀어짐'} ${Math.abs(ySpeed).toFixed(2)}`, W - 170, H - 16);
+  c.fillText(`${Math.max(0, 50 - B.tReal).toFixed(0)}초`, W - 34, 16);
+}
+function C_face() { return C('--face-num'); }
+function berthingFinish(kind, ySpeed = 0) {
+  const B = berthing; if (!B.on) return;
+  B.on = false; $('berthing').classList.remove('on'); st.paused = B.prevPaused;
+  const C = B.C, S = sim.ship, cost = (C.mandatory ? PILOT_FEE : 0) + B.tugUsed * TUG_FEE;
+  if (cost) { S.cash -= cost; st.acc.pilot += cost; }
+  let delayH = 0, note, cls = '';
+  const crew = playerCrew();
+  if (kind === 'alongside') {
+    const hit = Math.abs(ySpeed) > 0.35 || Math.abs(B.u) > 0.6 || Math.abs(B.psi) > 0.14, posErr = Math.abs(B.x);
+    if (hit) {
+      const dmg = Math.min(9, 2 + Math.max(Math.abs(ySpeed), Math.abs(B.u) * .5) * 9), fee = 1400 + Math.round(dmg * 720);
+      S.state.HULL = fleetClamp(S.state.HULL - dmg, 5, 100); S.cash -= fee; st.acc.repair += fee; delayH += 1.0;
+      sim.politics.reputation = Math.max(0, (sim.politics.reputation ?? 50) - 0.5);
+      note = `방충재에 선측을 세게 부딪쳤다 (선체 −${dmg.toFixed(0)} · ${won(fee)}원)`; cls = 'm';
+    } else if (posErr <= 20 && Math.abs(ySpeed) < 0.15 && Math.abs(B.u) < 0.25) {
+      delayH -= 2.0; note = '살며시 붙었다 — 예정보다 일찍 줄을 잡았다'; cls = 'b';
+      if (crew) crew.deck = fleetClamp(crew.deck + 0.6, 20, 95);
+      sim.politics.reputation = Math.min(100, (sim.politics.reputation ?? 50) + 0.4);
+    } else if (posErr <= 45) {
+      delayH += posErr > 20 ? 0.6 : 0; note = posErr > 20 ? `선석에서 ${Math.round(posErr)}m 어긋나 줄로 끌어 맞췄다` : '무난하게 붙었다';
+    } else { delayH += 1.6; note = `선석에서 ${Math.round(posErr)}m나 벗어나 다시 붙였다`; cls = 'm'; }
+  } else if (kind === 'time' && B.y < 8 && Math.abs(B.x) < 40) {
+    delayH += 0.6; note = '마지막 몇 미터는 줄을 던져 끌어 붙였다';
+  } else {
+    delayH += 2.2; cls = 'm';
+    note = kind === 'overshoot' ? '선석을 지나쳐 돌아와야 했다' : kind === 'drift' ? '바람에 밀려 나갔다가 다시 들어왔다' : '시간이 걸려 도선사가 넘겨받았다';
+  }
+  say(`직접 접안 — ${note}${Math.abs(delayH) > .2 ? ` · ${delayH > 0 ? '지연' : '단축'} ${Math.abs(delayH).toFixed(1)}시간` : ''}${cost ? ` · 도선·예선 ${won(cost)}원` : ' · 도선·예선 없이'}`, cls);
+  try { talkSay(`${playerCaptain()?.name ?? ''} 선장`.trim(), cls === 'b' ? '잘 붙이셨습니다. 줄잡이들이 놀랍니다.' : cls === 'm' ? '바다가 쉽지 않습니다. 다음엔 더 낫겠지요.' : '무난합니다.'); } catch (_) {}
+  B.done(delayH);
+}
+document.querySelectorAll('#berthing [data-e]').forEach(b => b.onclick = () => { berthing.eng = +b.dataset.e; try { soundscape.ui('telegraph'); } catch (_) {} berthingButtons(); });
+for (const [id, d] of [['bg-port', 1], ['bg-stbd', -1]]) { const b = $(id);
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); berthing.rud = d; berthingButtons(); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => { berthing.rud = 0; berthingButtons(); }); }
+$('bg-tug').addEventListener('pointerdown', (e) => { e.preventDefault(); if (!berthing.C?.tugsAvail) return; if (!berthing.tugUsed) berthing.tugUsed = 1; berthing.tug = 1; berthingButtons(); });
+for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) $('bg-tug').addEventListener(ev, () => { berthing.tug = 0; berthingButtons(); });
+$('bg-x').onclick = () => { const B = berthing; if (!B.on) return; B.on = false; $('berthing').classList.remove('on'); st.paused = B.prevPaused;
+  say('직접 접안을 그만두고 도선사에게 넘겼다', ''); pilotRun(B.port, 'IN', B.done); };
+function berthPrompt() {
+  const o = berthOpportunity(), b = $('sv-act'), pa = $('pa-act');
+  if (pa) { pa.hidden = !o; if (o) { const l = st.manualBerth === o.key ? '⚓ 직접 접안 예약됨 — 9해리에서 시작 (누르면 취소)' : '⚓ 직접 접안한다 — 도선·예선비를 아낄 수 있다'; if (pa.textContent !== l) pa.textContent = l; } }
+  if (!o || !b || sextantOpportunity()) return;
+  const booked = st.manualBerth === o.key;
+  const label = booked ? `⚓ ${PORTS[o.port].name} 직접 접안 예약됨 — 9해리에서 시작 (누르면 취소)` : `⚓ ${PORTS[o.port].name} — 직접 접안한다 (도선·예선비를 아낄 수 있다)`;
+  b.hidden = false; if (b.textContent !== label) b.textContent = label; b.dataset.act = 'berth';
+  const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = 'bg:' + o.key;
+  if (!T.said[k]) { T.said[k] = 1; try { talkSay(`${playerCaptain()?.name ?? ''} 선장`.trim(), `곧 ${PORTS[o.port].name}입니다. 직접 붙여 보시겠습니까?`); } catch (_) {} }
+}
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -10085,7 +10247,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.17.0 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.18.0 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -11080,6 +11242,8 @@ function pilotArrivalDelay(delayH) {
 function pilotMaybeApproach(left) {
   if (st.pilotIn || asking || left > 9 || !st.leg) return;
   st.pilotIn = 'RUN';
+  const key = `${st.voyageStart || 0}:${st.leg.join('>')}`;
+  if (st.manualBerth === key) { st.manualBerth = null; berthingStart(st.leg[1], (delayH) => { st.pilotIn = { delayH }; }); return; }
   pilotRun(st.leg[1], 'IN', (delayH) => { st.pilotIn = { delayH }; });
 }
 function pilotDeparture(port) {
@@ -11153,14 +11317,15 @@ function paintNavWatch() {
     `<div class="nw-top"><b>배 위치 ${grade} <small>±${n.err.toFixed(1)}해리</small></b><span>${cap} 당직</span></div>` +
     `<div class="nw-bar ${n.err > 6 ? 'warn' : ''}"><i style="width:${pct.toFixed(0)}%"></i></div>` +
     (pen >= 1 ? `<div class="nw-meta">돌아가는 길 때문에 항해가 약 ${pen.toFixed(1)}% 길어진다</div>` : '') +
-    (() => { const o = sextantOpportunity(); return o ? `<button class="nw-sextant" data-sx="1">☉ ${NAV_FIX[o.kind].name} — 직접 잰다 (${o.win})</button>` : ''; })() +
+    (() => { const o = sextantOpportunity(); if (o) return `<button class="nw-sextant" data-sx="1">☉ ${NAV_FIX[o.kind].name} — 직접 잰다 (${o.win})</button>`;
+      const b = berthOpportunity(); if (b) return `<button class="nw-sextant" data-bg="1">⚓ ${PORTS[b.port].name} ${st.manualBerth === b.key ? '직접 접안 예약됨 (누르면 취소)' : '— 직접 접안한다'}</button>`; return ''; })() +
     `<div class="nw-meta nw-detail" hidden>마지막 선위 ${since} · 이 항차 관측 ${n.legFixes}회<br>` +
     `편류 ${n.setKnown ? '보정됨' : '미보정'} · ${lost}<br>` +
     `선내시 ${navShipTime(M.q.lon, sim.t)} · 시정 ${M.w.vis.toFixed(1)}km` +
     `${sim.ship.loran && navLoranChain(M.q) ? ' · 로란 체인 안' : ''}</div>`;
   row.innerHTML = acts;
 }
-$('nav-watch').addEventListener('click', (e) => { if (e.target.closest('[data-sx]')) sextantOpen(); });
+$('nav-watch').addEventListener('click', (e) => { if (e.target.closest('[data-sx]')) sextantOpen(); if (e.target.closest('[data-bg]')) { const o = berthOpportunity(); if (o) st.manualBerth = st.manualBerth === o.key ? null : o.key; } });
 $('nav-actions').onclick = (e) => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
   const a = b.dataset.nav ?? '';
@@ -13311,7 +13476,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); } catch (_) {}
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); } catch (_) {}
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
@@ -13430,7 +13595,7 @@ if (!st.paused) {
 const cap = st.phase === '항해' ? st.speedTier : Math.min(86400, st.speedTier * 4);
 acc += real * cap;
 let guard = 0;
-while (acc >= DT && guard++ < 20000) { acc -= DT; step(); }
+while (acc >= DT && guard++ < 20000 && !st.paused) { acc -= DT; step(); }   // 판단창·미니게임이 뜨면 그 자리에서 멈춘다
 if (guard >= 20000) acc = 0;
 autoTick();
 if (guard) { checkUnlocks(); pollEvents(); pollRivals(); }
