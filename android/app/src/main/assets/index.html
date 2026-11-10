@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.16.0</title>
+<title>TRAMP LINE 1962 · v3.17.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,6 +492,10 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
+.sx-box{max-width:380px}#sx-c{display:block;width:100%;aspect-ratio:320/300;background:#0b1116;touch-action:none}
+.sx-help{font-size:12px}.sx-ctl{display:grid;grid-template-columns:1fr 2fr 1fr;gap:6px;padding:6px 12px}
+.sx-ctl button{min-height:52px;font-size:18px}#sx-mark{background:var(--magenta);color:#fff;border-color:var(--magenta)}
+#sv-act,.nw-sextant{width:100%;margin:0;border:0;border-bottom:1px solid var(--line);background:#f3e6ee;color:var(--magenta);font-size:12px;padding:7px 8px;text-align:left}#sv-act[hidden]{display:none}
 #sv-talk{padding:5px 8px;font-size:11px;line-height:1.4;color:var(--ink);border-bottom:1px solid var(--line);background:#efece2}#sv-talk.omen{color:var(--magenta)}#sv-talk[hidden]{display:none}
 #talk-toast{position:absolute;left:8px;bottom:10px;z-index:7;max-width:min(330px,84vw);padding:6px 9px;font-size:11.5px;line-height:1.4;background:rgba(241,237,224,.96);border:1px solid rgba(24,32,34,.88);box-shadow:0 3px 10px rgba(0,0,0,.25)}#talk-toast.omen{color:var(--magenta);border-color:var(--magenta)}#talk-toast[hidden]{display:none}
 #sea-show{position:absolute;left:8px;top:8px;z-index:6;min-height:30px;padding:0 10px}#sea-show[hidden]{display:none}
@@ -977,7 +981,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.16.0</div>
+      <div class="mm-version">CONTENT v3.17.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1056,6 +1060,7 @@ button[data-hold].nudge{animation:nudge .32s}
     <aside id="sea-view" aria-hidden="true">
       <div class="pa-head"><b id="sv-title">선교</b><span><button id="sv-big" aria-label="크게">⤢</button><button id="sv-close" aria-label="선교 창 닫기">×</button></span></div>
       <canvas id="sv-canvas" width="240" height="135"></canvas>
+      <button id="sv-act" hidden></button>
       <div id="sv-talk" hidden></div>
       <div class="pa-meta"><span id="sv-time">—</span><span id="sv-weather">—</span><span id="sv-race">—</span><span id="sv-left">—</span></div>
     </aside>
@@ -1224,7 +1229,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.16.0 · 선내 소식 — 선장·기관장의 한마디</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.17.0 · 직접 천측 — 육분의 미니게임</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1463,10 +1468,19 @@ button[data-hold].nudge{animation:nudge .32s}
     <div class="evfoot"><div class="btnrow" id="ak-btns"></div></div>
   </div>
 </div>
+<div id="sextant" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="sx-t">
+  <div class="sheetbox sx-box">
+    <header><h2><span id="sx-t">정오 천측</span></h2><span class="stamp" id="sx-n">0 / 3</span></header>
+    <canvas id="sx-c" width="320" height="300"></canvas>
+    <div class="note sx-help" id="sx-help">해의 <b>아랫가장자리</b>를 수평선에 맞추고, 닿는 순간 「잰다」. 배가 흔들려 계속 움직인다.</div>
+    <div class="sx-ctl"><button id="sx-dn" aria-label="내린다">▼</button><button id="sx-mark" class="primary">잰다</button><button id="sx-up" aria-label="올린다">▲</button></div>
+    <div class="evfoot"><div class="btnrow"><button id="sx-x">1항사에게 맡긴다</button></div></div>
+  </div>
+</div>
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.16.0';
+const TRAMP_LINE_CONTENT_VERSION='3.17.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -7687,6 +7701,109 @@ $('sv-close').onclick = () => { seaView.dismissed = svLegKey(); maybeSeaView(); 
 $('sea-show').onclick = () => { seaView.dismissed = null; maybeSeaView(); };
 $('sv-big').onclick = () => { seaView.big = !seaView.big; $('sea-view').classList.toggle('big', seaView.big); };
 svCanvas?.addEventListener('click', () => $('sv-big').click());
+
+// ── 직접 천측 (육분의) ───────────────────────────────────────────
+// 1항사에게 맡기면 navAutoWatch 가 한다. 원하면 사장이 직접 잰다 — 20초 남짓.
+// 해(성측이면 별)의 아랫가장자리를 흔들리는 수평선에 맞춰 세 번 잰다. 오차(분 ′)가 곧 선위 오차(해리).
+const sextant = { on:false };
+function sextantOpportunity() {
+  if (st.phase !== '항해' || !st.leg) return null;
+  try { const o = navOpportunities(marineState()).find(x => (x.kind === 'NOON' || x.kind === 'STAR') && x.ok); return o ?? null; } catch (_) { return null; }
+}
+function sextantOpen() {
+  const o = sextantOpportunity(); if (!o || sextant.on) return;
+  const M = marineState(), w = M.w;
+  Object.assign(sextant, { on:true, kind:o.kind, shots:[], need:3, idx:(Math.random() < .5 ? -1 : 1) * (22 + Math.random() * 20),
+    hold:0, t0:performance.now(), dur:30000, A:1.5 + w.hs * 2.2, vis:w.vis, hs:w.hs, prevPaused:st.paused, ph:Math.random() * 6, drag:null });
+  st.paused = true;
+  $('sx-t').textContent = o.kind === 'NOON' ? '정오 천측 · 육분의' : '박명 성측 · 육분의';
+  $('sx-help').innerHTML = o.kind === 'NOON' ? '해의 <b>아랫가장자리</b>를 수평선에 맞추고, 닿는 순간 「잰다」. 배가 흔들려 계속 움직인다.' : '별을 수평선 위에 정확히 얹고, 닿는 순간 「잰다」. 박명이라 수평선이 흐리다.';
+  $('sx-n').textContent = `0 / 3`;
+  $('sextant').classList.add('on');
+  requestAnimationFrame(sextantLoop);
+}
+function sextantRel(now) {   // 아랫가장자리(별)와 수평선 사이, 분(′)
+  const t = (now - sextant.t0) / 1000, A = sextant.A;
+  return sextant.idx + A * (.65 * Math.sin(2 * Math.PI * t / 3.1 + sextant.ph) + .35 * Math.sin(2 * Math.PI * t / 1.7 + 1.3 + sextant.ph));
+}
+function sextantLoop(now) {
+  if (!sextant.on) return;
+  const dt = Math.min(50, now - (sextant.lastF ?? now)); sextant.lastF = now;
+  if (sextant.hold) sextant.idx += sextant.hold * 7 * dt / 1000;
+  const c = $('sx-c').getContext('2d'), W = 320, H = 300, s = 1.6, star = sextant.kind === 'STAR';
+  const t = (now - sextant.t0) / 1000, bob = Math.sin(t * 2 * Math.PI / 6.2) * Math.min(26, sextant.hs * 6), roll = Math.sin(t * 2 * Math.PI / 9.5 + 1) * Math.min(6, sextant.hs * 1.3) * D2R;
+  const hy = H / 2 + bob, rel = sextantRel(now);
+  c.save(); c.fillStyle = '#0b1116'; c.fillRect(0, 0, W, H);
+  c.beginPath(); c.arc(W / 2, H / 2, 140, 0, Math.PI * 2); c.clip();
+  c.translate(W / 2, hy); c.rotate(roll); c.translate(-W / 2, -hy);
+  const sky = c.createLinearGradient(0, hy - 160, 0, hy); sky.addColorStop(0, star ? '#1d2840' : '#6f93ab'); sky.addColorStop(1, star ? '#5a5466' : '#c9d4cf');
+  c.fillStyle = sky; c.fillRect(-40, hy - 200, W + 80, 200);
+  c.fillStyle = star ? '#1a252c' : '#3f5a64'; c.fillRect(-40, hy, W + 80, 220);
+  // 수평선: 시정이 나쁘면 흐리다
+  const crisp = Math.max(.25, Math.min(1, (sextant.vis - 3) / 9)) * (star ? .7 : 1);
+  c.globalAlpha = crisp; c.fillStyle = star ? '#b9b5b0' : '#e9eee6'; c.fillRect(-40, hy - 1, W + 80, 2); c.globalAlpha = 1;
+  for (let i = 0; i < 30; i++) { const y = hy + 6 + i * i * .25, off = (t * (10 + i * 2)) % 40; c.fillStyle = 'rgba(230,236,230,.12)'; for (let x = -40 + off; x < W + 40; x += 40) c.fillRect(x, y, 10 + i, 1); }
+  // 거울 속 해·별 (반쪽 거울: 오른쪽 절반)
+  c.save(); c.beginPath(); c.rect(W / 2, -60, W, H + 120); c.clip();
+  c.fillStyle = 'rgba(40,60,70,.25)'; c.fillRect(W / 2, -60, W, H + 120);
+  if (star) { const y = hy - rel * s; c.fillStyle = '#fffbe8'; c.beginPath(); c.arc(W / 2 + 40, y, 2.6, 0, Math.PI * 2); c.fill(); c.globalAlpha = .3; c.beginPath(); c.arc(W / 2 + 40, y, 7, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; }
+  else { const r = 16 * s, y = hy - (rel + 16) * s; c.fillStyle = '#f6e7b4'; c.beginPath(); c.arc(W / 2 + 46, y, r, 0, Math.PI * 2); c.fill(); c.strokeStyle = '#d9a95a'; c.lineWidth = 1; c.stroke(); }
+  c.restore();
+  c.restore();
+  // 접안경 테두리·눈금
+  c.strokeStyle = '#2a3238'; c.lineWidth = 8; c.beginPath(); c.arc(W / 2, H / 2, 144, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = '#e8e2cf'; c.font = '12px ' + C('--face-num');
+  const left = Math.max(0, sextant.dur - (now - sextant.t0)) / 1000;
+  c.fillText(`${left.toFixed(0)}초`, 12, 20);
+  sextant.shots.forEach((v, i) => { c.fillStyle = Math.abs(v) < 2 ? '#7fd09a' : Math.abs(v) < 4.5 ? '#e8c46a' : '#e07a8a'; c.fillText(`${i + 1}회 ${Math.abs(v).toFixed(1)}′`, W - 78, 20 + i * 16); });
+  if (left <= 0) return sextantFinish();
+  requestAnimationFrame(sextantLoop);
+}
+function sextantMark() {
+  if (!sextant.on) return;
+  const v = sextantRel(performance.now()); sextant.shots.push(v);
+  $('sx-n').textContent = `${sextant.shots.length} / 3`;
+  try { soundscape.ui('telegraph'); } catch (_) {}
+  // 다음 관측: 거울을 다시 조금 벗어나게 — 매번 새로 맞춘다
+  sextant.idx += (Math.random() < .5 ? -1 : 1) * (8 + Math.random() * 10);
+  if (sextant.shots.length >= sextant.need) sextantFinish();
+}
+function sextantFinish(abort = false) {
+  if (!sextant.on) return;
+  sextant.on = false; $('sextant').classList.remove('on'); st.paused = sextant.prevPaused;
+  const F = NAV_FIX[sextant.kind];
+  if (abort || !sextant.shots.length) { say(`${F.name} — 1항사에게 맡겼다`, ''); return; }
+  const n = navState(), M = marineState(), deck = navDeckSkill();
+  const avg = sextant.shots.reduce((a, v) => a + Math.abs(v), 0) / sextant.shots.length;
+  const few = sextant.shots.length < 3 ? 1.35 : 1;
+  const seaF = 1 + Math.max(0, (M.w.hs ?? 0) - 2) * 0.10 + Math.max(0, 9 - (M.w.vis ?? 20)) * 0.035;
+  const res = Math.max(0.2, (sextant.kind === 'NOON' ? 0.35 + avg * 0.45 : 0.2 + avg * 0.3) * few);
+  const mate = F.floor * (1 - (deck - 50) / 210) * seaF;   // 1항사가 정측했으면 이 정도
+  const before = n.err;
+  if (res < n.err) n.err = res; else n.err = (n.err + res) / 2;   // 나쁜 관측을 반쯤 믿어 버린다
+  n.lastFixT = sim.t; n.lastKind = sextant.kind; n.legFixes++; n.fixes++; n.mateNext = sim.t + 3 * HOUR;
+  const verdict = res < mate * .85 ? '1항사보다 낫다' : res < mate * 1.15 ? '1항사만큼' : '1항사보다 못하다';
+  say(`직접 ${F.name} — ${sextant.shots.length}회 평균 오차 ${avg.toFixed(1)}′ · 선위 ±${res.toFixed(1)}해리 (1항사였으면 약 ±${mate.toFixed(1)}) · ${verdict}`, res < mate ? 'b' : 'm');
+  if (res > before) say('나쁜 관측을 믿는 바람에 추측위치가 오히려 흐려졌다', 'm');
+  try { talkSay(`1항사 ${crewName('mate')}`, res < mate * .85 ? '좋은 관측이었습니다. 위치선이 깔끔하게 섭니다.' : res < mate * 1.15 ? '쓸 만합니다. 해도에 넣겠습니다.' : '조금 벌어졌습니다. 다음 관측으로 다시 맞추겠습니다.'); } catch (_) {}
+}
+$('sx-mark').onclick = sextantMark;
+$('sx-x').onclick = () => sextantFinish(true);
+for (const [id, d] of [['sx-up', 1], ['sx-dn', -1]]) { const b = $(id);
+  b.addEventListener('pointerdown', (e) => { e.preventDefault(); sextant.hold = d; sextant.idx += d * .5; });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => { sextant.hold = 0; }); }
+$('sx-c').addEventListener('pointerdown', (e) => { sextant.drag = e.clientY; $('sx-c').setPointerCapture(e.pointerId); });
+$('sx-c').addEventListener('pointermove', (e) => { if (sextant.drag == null) return; sextant.idx += (sextant.drag - e.clientY) * .35; sextant.drag = e.clientY; });
+$('sx-c').addEventListener('pointerup', () => { sextant.drag = null; });
+function sextantPrompt() {   // 선교 창·당직 칸의 단추, 처음 열릴 때 1항사 한마디
+  const o = sextantOpportunity(), b = $('sv-act');
+  const label = o ? `☉ ${NAV_FIX[o.kind].name} — 직접 잰다 (${o.win})` : '';
+  if (b) { b.hidden = !o; if (o && b.textContent !== label) b.textContent = label; }
+  if (o) { const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = `sx:${o.kind}:${Math.floor(sim.t / (6 * HOUR))}`;
+    if (!T.said[k]) { T.said[k] = 1; try { talkSay(`1항사 ${crewName('mate')}`, o.kind === 'NOON' ? '남중이 가깝습니다. 직접 재 보시겠습니까?' : '박명입니다. 별이 섭니다. 직접 재 보시겠습니까?'); } catch (_) {} } }
+  return o;
+}
+$('sv-act').onclick = sextantOpen;
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -9968,7 +10085,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.16.0 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.17.0 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -11036,12 +11153,14 @@ function paintNavWatch() {
     `<div class="nw-top"><b>배 위치 ${grade} <small>±${n.err.toFixed(1)}해리</small></b><span>${cap} 당직</span></div>` +
     `<div class="nw-bar ${n.err > 6 ? 'warn' : ''}"><i style="width:${pct.toFixed(0)}%"></i></div>` +
     (pen >= 1 ? `<div class="nw-meta">돌아가는 길 때문에 항해가 약 ${pen.toFixed(1)}% 길어진다</div>` : '') +
+    (() => { const o = sextantOpportunity(); return o ? `<button class="nw-sextant" data-sx="1">☉ ${NAV_FIX[o.kind].name} — 직접 잰다 (${o.win})</button>` : ''; })() +
     `<div class="nw-meta nw-detail" hidden>마지막 선위 ${since} · 이 항차 관측 ${n.legFixes}회<br>` +
     `편류 ${n.setKnown ? '보정됨' : '미보정'} · ${lost}<br>` +
     `선내시 ${navShipTime(M.q.lon, sim.t)} · 시정 ${M.w.vis.toFixed(1)}km` +
     `${sim.ship.loran && navLoranChain(M.q) ? ' · 로란 체인 안' : ''}</div>`;
   row.innerHTML = acts;
 }
+$('nav-watch').addEventListener('click', (e) => { if (e.target.closest('[data-sx]')) sextantOpen(); });
 $('nav-actions').onclick = (e) => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
   const a = b.dataset.nav ?? '';
@@ -13192,7 +13311,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {}
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); } catch (_) {}
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
