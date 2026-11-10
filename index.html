@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.19.0</title>
+<title>TRAMP LINE 1962 · v3.20.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,8 +492,12 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
-.sx-box{max-width:380px}#cf-c{display:block;width:100%;aspect-ratio:320/300;background:#1d2427;touch-action:none}
-.cf-ctl{display:grid;grid-template-columns:1fr 1.4fr 1.6fr 1fr;gap:6px;padding:6px 12px}.cf-ctl button{min-height:50px;font-size:15px}.cf-ctl [data-cf=D]{background:var(--magenta);color:#fff;border-color:var(--magenta)}
+.sx-box{max-width:380px}#sp-c{display:block;width:100%;aspect-ratio:320/190;background:#e9e5d8;touch-action:none}
+.sp-cost{display:flex;align-items:baseline;gap:8px;padding:8px 12px 4px}.sp-cost span{font-size:11px;color:var(--ink2)}.sp-cost b{font-size:22px;font-family:var(--face-num)}.sp-cost small{font-size:12px}
+.sp-cost small.up{color:var(--magenta)}.sp-cost small.dn{color:#2f7a4b}
+.sp-g{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:2px 12px 4px;font-size:11px}.sp-g div{border-top:1px dotted var(--line);padding-top:3px}.sp-g b{display:block;font-size:12.5px}.sp-g .bad b{color:var(--magenta)}.sp-g .ok b{color:#2f7a4b}
+.sp-gm{grid-column:1/-1;position:relative;height:30px}.sp-gm i{position:absolute;left:0;right:0;top:15px;height:7px;background:linear-gradient(90deg,#d77 0 14%,#e8c46a 14% 24%,#8fc49a 24% 49%,#e8c46a 49% 68%,#d77 68%)}.sp-gm em{position:absolute;top:10px;width:3px;height:17px;background:var(--ink);transition:left .25s}
+.sp-ctl{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:6px;padding:4px 12px}.sp-ctl button{min-height:42px;font-size:13px}.sp-ctl button:disabled{opacity:.4}
 #craft-btn{position:absolute;right:8px;bottom:34px;z-index:9;box-shadow:0 3px 10px rgba(0,0,0,.25);min-height:34px;padding:0 12px;background:#f3e6ee;color:var(--magenta);border:1px solid var(--magenta)}#craft-btn[hidden]{display:none}#ty-c{display:block;width:100%;aspect-ratio:320/300;background:#2d4650;touch-action:none}
 .ty-wait{display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr;gap:4px;align-items:center;padding:4px 10px;font-size:11px}.ty-wait button{min-height:36px;font-size:12px;padding:0}.ty-wait button.on{background:var(--ink);color:var(--paper)}
 #ty-ok:disabled{opacity:.45}#bg-c{display:block;width:100%;aspect-ratio:320/300;background:#2d4650;touch-action:none}
@@ -988,7 +992,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.19.0</div>
+      <div class="mm-version">CONTENT v3.20.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1073,7 +1077,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="pa-meta"><span id="sv-time">—</span><span id="sv-weather">—</span><span id="sv-race">—</span><span id="sv-left">—</span></div>
     </aside>
     <button id="sea-show" hidden>선교 창</button>
-    <button id="craft-btn" hidden>🏗 직접 적재 감독</button>
+    <button id="craft-btn" hidden>📋 적부도 짜기</button>
     <div id="talk-toast" hidden></div>
   </main>
   <!-- ── 아래: 조작 독 ── -->
@@ -1238,7 +1242,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.19.0 · 적재 감독·태풍 항로 미니게임</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.20.0 · 적부도 · 선교 창 바다</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1505,19 +1509,21 @@ button[data-hold].nudge{animation:nudge .32s}
     <div class="evfoot"><div class="btnrow"><button id="ty-ok" class="primary">이 항로로 간다</button><button id="ty-x">선장에게 맡긴다</button></div></div>
   </div>
 </div>
-<div id="craft" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="cf-t">
+<div id="stowp" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="sp-t">
   <div class="sheetbox sx-box">
-    <header><h2><span id="cf-t">적재 감독</span></h2><span class="stamp" id="cf-s">—</span></header>
-    <canvas id="cf-c" width="320" height="300"></canvas>
-    <div class="note sx-help" id="cf-help">—</div>
-    <div class="cf-ctl" id="cf-ctl"><button data-cf="L">◀</button><button data-cf="R">⟳ 돌린다</button><button data-cf="D" class="primary">▼ 내린다</button><button data-cf="X">▶</button></div>
-    <div class="evfoot"><div class="btnrow"><button id="cf-x">갑판장에게 맡긴다</button></div></div>
+    <header><h2><span id="sp-t">적부도</span></h2><span class="stamp" id="sp-s">—</span></header>
+    <div class="sp-cost"><span>이 배치에 드는 돈</span><b id="sp-cost">—</b><small id="sp-delta">—</small></div>
+    <canvas id="sp-c" width="320" height="190"></canvas>
+    <div class="note sx-help" id="sp-help">화물을 누르고, 옮길 칸을 누른다.</div>
+    <div class="sp-g" id="sp-g"></div>
+    <div class="sp-ctl"><button id="sp-split">나눈다</button><button id="sp-merge">합친다</button><button id="sp-reset">갑판장 안으로</button></div>
+    <div class="evfoot"><div class="btnrow"><button id="sp-ok" class="primary">이 적부로 간다</button></div></div>
   </div>
 </div>
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.19.0';
+const TRAMP_LINE_CONTENT_VERSION='3.20.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -7662,21 +7668,9 @@ function svDraw() {
     c.beginPath(); c.moveTo(x - wid, hy); for (let i = 0; i <= 8; i++) c.lineTo(x - wid + i * wid / 4, hy - hgt * (.45 + .55 * (((h0 >>> i) & 7) / 7))); c.lineTo(x + wid, hy); c.fill();
     if (night && L.nm < 22 && Math.sin(now * 2 * Math.PI / 5 + h0) > .93) { c.fillStyle = '#fff3c8'; c.fillRect(x + ((h0 >>> 3) % 20) - 10, hy - hgt - 1, 2, 2); }
     if (night) { c.fillStyle = '#e3bd73'; for (let i = 0; i < 6; i++) if (((h0 >>> i) & 3) === 0) c.fillRect(x - wid / 2 + i * wid / 6, hy - 2, 1, 1); } }
-  // 바다
-  const seaTop = night ? '#0e1820' : svHex(svMix(skyHor, '#3d5862', .62)), seaBot = night ? '#0a1117' : svHex(svMix(skyTop, '#24363e', .72));
-  const g2 = c.createLinearGradient(0, hy, 0, Hh + 20); g2.addColorStop(0, seaTop); g2.addColorStop(1, seaBot);
-  c.fillStyle = g2; c.fillRect(-30, hy, W + 60, Hh - hy + 40);
-  if (S.sunX != null) { c.globalAlpha = .35 * (1 - grey); c.fillStyle = alt < 6 ? '#e9b47c' : '#eae6d2';
-    for (let y = hy + 2; y < Hh + 10; y += 3) { const wd = 2 + (y - hy) * .35; c.fillRect(S.sunX - wd / 2 + Math.sin(now * 3 + y) * 2, y, wd * (.4 + .6 * Math.abs(Math.sin(y * 1.7 + now * 2))), 1); } c.globalAlpha = 1; }
-  // 너울 줄: 원근으로 아래로 갈수록 굵고 빠르게
-  const amp = Math.min(1, .25 + w.hs / 4), lineC = night ? 'rgba(120,150,160,.22)' : 'rgba(235,240,230,.28)';
-  c.fillStyle = lineC;
-  for (let r = 0; r < 14; r++) { const z = r / 13, y = hy + 2 + Math.pow(z, 1.7) * (Hh - hy + 6), seg = 4 + z * 18, gap = 9 + z * 26;
-    const off = (now * (6 + z * 30) * (.6 + amp)) % (seg + gap);
-    for (let x = -seg - gap + off + (r % 2) * gap / 2; x < W + seg; x += seg + gap) c.fillRect(x, y + Math.sin(x * .05 + now * 1.4 + r) * amp * (1 + z * 3), seg * amp, 1 + Math.round(z)); }
-  // 흰 물마루
-  if (w.U > 8) { c.fillStyle = night ? 'rgba(200,210,210,.35)' : 'rgba(250,250,245,.8)'; const n = Math.min(40, (w.U - 8) * 5);
-    for (let i = 0; i < n; i++) { const h = raceHash('wc' + i + ':' + Math.floor(now * .7 + i * .13)), x = h % W, y = hy + 3 + ((h >>> 8) % (Hh - hy)); c.fillRect(x, y, 2 + (y - hy) / 20, 1); } }
+  // 바다 — 화소마다 내려다본 물(ETERNAL PATROL 잠망경 물 렌더러 방식)
+  try { const wv = svWater(W, Hh, hy, S, skyTop, skyHor, night, grey); c.imageSmoothingEnabled = false; c.drawImage(wv.cv, -30, hy - 4, wv.dw, wv.dh); }
+  catch (e) { c.fillStyle = night ? '#0e1820' : '#3d5862'; c.fillRect(-30, hy, W + 60, Hh - hy + 40); }
   // 다른 배
   for (const z of S.ships.sort((a, b) => b.nm - a.nm)) { if (Math.abs(z.rel) > 80) continue;
     const x = W / 2 + z.rel / 80 * W / 2, sc = Math.max(.35, Math.min(2.2, 6 / Math.max(1.5, z.nm))), y = hy + Math.min(10, 18 / Math.max(1, z.nm));
@@ -7719,6 +7713,74 @@ function svDraw() {
   const tk = $('sv-talk'), sh = st.talk?.shown; if (tk) { const on = sh && performance.now() - sh.at < 45000 && performance.now() >= sh.at; if (on && tk.textContent !== sh.line) { tk.textContent = sh.line; tk.classList.toggle('omen', !!sh.omen); } tk.hidden = !on; }
   const left = Math.max(0, dist(...st.leg) - st.done);
   $('sv-left').textContent = `${PORTS[st.leg[1]].name}까지 ${left.toFixed(0)}해리 · ${(st.curV ?? 0).toFixed(1)}kn`;
+}
+
+// ── 선교 창의 물 ─────────────────────────────────────────────────
+// 수평선 아래 화소마다: 내려본각 → 그 물까지 거리(눈높이/tan) → 세계 좌표(배 침로 기준 방위) →
+// 너울 넷 + 바람 물결 넷의 합으로 면 기울기 → 비친 하늘(프레넬) · 해 반짝임 · 가파른 마루의 거품 · 먼 물의 대기 빛.
+// 화소 하나가 덮는 바다 폭보다 짧은 물결은 흐린다(먼 물 줄무늬 방지). 파고·풍향·시정·해 위치는 실제 값.
+const SVW = { cv:null, x:null, img:null, bw:0, bh:0, s:0.75, cost:0 };
+function svRgb(h) { const v = parseInt(h.slice(1), 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255]; }
+function svWater(W, Hh, hy, S, skyTop, skyHor, night, grey) {
+  const t0 = performance.now(), w = S.w, d2r = D2R, E = 11;            // 1,600톤 화물선 선교 눈높이 약 11m
+  const ppd = (W / 2) / 75, s = SVW.s;
+  const bw = Math.ceil((W + 60) * s), bh = Math.ceil((Hh - hy + 48) * s);
+  if (!SVW.cv) { SVW.cv = document.createElement('canvas'); SVW.x = SVW.cv.getContext('2d'); }
+  if (SVW.bw !== bw || SVW.bh !== bh) { SVW.cv.width = bw; SVW.cv.height = bh; SVW.bw = bw; SVW.bh = bh; SVW.img = SVW.x.createImageData(bw, bh); }
+  const D = SVW.img.data, time = t0 / 1000;
+  const hs = Math.max(0.1, Math.min(9, w.hs)), L1 = 7 + hs * 17, dir = courseBearing(w.dir);   // 물결은 바람이 부는 쪽으로
+  const comps = [];
+  const add = (L, a, dg) => { const k = 2 * Math.PI / L; comps.push({ k, a, kx: k * Math.sin(dg * d2r), ky: k * Math.cos(dg * d2r), w: Math.sqrt(9.81 * k) }); };
+  add(L1, hs * 0.30, dir); add(L1 * 0.61, hs * 0.18, dir + 27); add(L1 * 0.37, hs * 0.10, dir - 17); add(L1 * 0.21, hs * 0.05, dir + 60);
+  const U = w.U ?? 5; add(3.1, 0.02 + U * 0.003, dir + 15); add(1.9, 0.012 + U * 0.002, dir + 45); add(1.15, 0.008 + U * 0.001, dir - 5); add(0.7, 0.005, dir + 30);
+  const NC = comps.length;
+  const top = svRgb(skyTop), hor = svRgb(skyHor), mixA = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+  const deep = night ? [3, 8, 12] : mixA([9, 24, 32], hor, 0.14), scatter = night ? [8, 18, 22] : mixA([22, 58, 66], hor, 0.3);
+  const visN = Math.max(0, Math.min(1, (w.vis - 2) / 18)), visD = Math.max(400, Math.min(30000, w.vis * 900));
+  const seaHaze = mixA(hor, mixA(deep, [0, 0, 0], 0.2), 0.3 + 0.32 * visN);
+  const sunOn = S.alt > -1.5 && grey < 0.75, se = Math.max(-2, S.alt) * d2r, sb = S.az * d2r;
+  const sdx = Math.sin(sb) * Math.cos(se), sdy = Math.cos(sb) * Math.cos(se), sdz = Math.sin(se);
+  const sunI = sunOn ? (1 - grey) : 0, sunC = S.alt < 6 ? [255, 176, 100] : [255, 244, 222], shin = 1400 - 1180 * Math.min(1, hs / 5);
+  const foamOn = hs >= 1.8 || U >= 9, foamT = 0.44 - Math.max(0, hs - 1.8) * 0.05;
+  const SX = 1.35, sm = (e0, e1, x) => { const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+  let p = 0;
+  for (let j = 0; j < bh; j++) {
+    const y = (j + 0.5) / s - 4, delDeg = y / ppd;
+    if (delDeg <= 0.004) { for (let i = 0; i < bw; i++, p += 4) D[p + 3] = 0; continue; }
+    const del = delDeg * d2r, sd = Math.sin(del), cd = Math.cos(del), dist = E / Math.tan(del);
+    const footH = dist * d2r / (ppd * s), foot = Math.max(footH, footH / Math.max(sd, 0.01) * 0.7);
+    const flat = sm(0.05, 0.004, sd), hz = 1 - Math.exp(-dist / visD), edgeK = 1 - (0.1 + 0.16 * visN) * (1 - sm(0, 0.025, sd));
+    const alpha = Math.max(0, Math.min(1, delDeg * ppd * s * 2.5)) * 255;
+    const atts = comps.map(o => { const kf = o.k * foot; return Math.exp(-kf * kf * 0.9); });
+    for (let i = 0; i < bw; i++, p += 4) {
+      const x = (i + 0.5) / s - 30;
+      const az = (S.hdg + (x - W / 2) / ppd) * d2r, sa = Math.sin(az), ca = Math.cos(az), X = sa * dist, Y = ca * dist;
+      let gx = 0, gy = 0, eta = 0;
+      for (let k = 0; k < NC; k++) { const att = atts[k]; if (att < 0.03) continue; const o = comps[k];
+        const th = o.kx * X + o.ky * Y - o.w * time, cs = Math.cos(th), am = o.a * att; gx += am * o.kx * cs; gy += am * o.ky * cs; eta += am * Math.sin(th); }
+      gx *= SX * (1 - flat * 0.85); gy *= SX * (1 - flat * 0.85);
+      let nx = -gx, ny = -gy, nz = 1; const nl = 1 / Math.sqrt(nx * nx + ny * ny + 1); nx *= nl; ny *= nl; nz *= nl;
+      const vx = -sa * cd, vy = -ca * cd, vz = sd;
+      let nv = nx * vx + ny * vy + nz * vz; if (nv < 0.02) nv = 0.02;
+      const rx = 2 * nv * nx - vx, ry = 2 * nv * ny - vy, rz = 2 * nv * nz - vz;
+      const kSky = sm(0, 0.42, Math.max(0, rz));
+      let cr = hor[0] + (top[0] - hor[0]) * kSky, cg = hor[1] + (top[1] - hor[1]) * kSky, cb = hor[2] + (top[2] - hor[2]) * kSky;
+      if (rz < 0.02) { const dk = 1 - 0.42 * sm(0.02, -0.12, rz); cr *= dk; cg *= dk; cb *= dk; }
+      const F = 0.02 + 0.76 * Math.pow(1 - nv, 5), sc = Math.max(0, Math.min(1, 0.25 + gx * 0.4 - gy * 0.2)) * 0.35;
+      let r = deep[0] + (scatter[0] - deep[0]) * sc, g = deep[1] + (scatter[1] - deep[1]) * sc, b = deep[2] + (scatter[2] - deep[2]) * sc;
+      r += (cr - r) * F; g += (cg - g) * F; b += (cb - b) * F;
+      if (sunI > 0) { const rs = rx * sdx + ry * sdy + rz * sdz; if (rs > 0.9) { const sp = Math.pow(rs, shin) * sunI * 3.2 * (0.35 + 0.65 * F); r += sunC[0] * sp; g += sunC[1] * sp; b += sunC[2] * sp; } }
+      if (foamOn) { const sl = Math.sqrt(gx * gx + gy * gy), f = sm(foamT, foamT + 0.22, eta / (hs + 0.01) * 0.55 + sl * 0.9);
+        if (f > 0) { const nz2 = 0.5 + 0.5 * Math.sin(X * 0.83 + Y * 1.21) * Math.sin(X * 1.9 - Y * 0.57), fa = f * (0.35 + 0.65 * nz2) * 0.85 * (night ? 0.35 : 1);
+          r += (214 - r) * fa; g += (224 - g) * fa; b += (226 - b) * fa; } }
+      r += (seaHaze[0] - r) * hz * 0.9; g += (seaHaze[1] - g) * hz * 0.9; b += (seaHaze[2] - b) * hz * 0.9;
+      D[p] = Math.min(255, r * edgeK); D[p + 1] = Math.min(255, g * edgeK); D[p + 2] = Math.min(255, b * edgeK); D[p + 3] = alpha;
+    }
+  }
+  SVW.x.putImageData(SVW.img, 0, 0);
+  const ms = performance.now() - t0; SVW.cost = SVW.cost * 0.9 + ms * 0.1;   // 느린 폰이면 해상도를 스스로 낮춘다
+  if (SVW.cost > 12 && SVW.s > 0.4) SVW.s = Math.max(0.4, SVW.s - 0.05); else if (SVW.cost < 4 && SVW.s < 1) SVW.s = Math.min(1, SVW.s + 0.02);
+  return { cv: SVW.cv, dw: bw / s, dh: bh / s };
 }
 function svLoop(ts) {
   if (!seaView.on) { seaView.raf = 0; return; }
@@ -8115,152 +8177,108 @@ $('ty-ok').onclick = () => {
   T.onDone?.(E);
 };
 
-// ── 직접 적재 감독 ─────────────────────────────────────────────
-// 선창 단면에 화물을 쌓는다. 덩어리 화물은 빈틈없이·무거운 것은 아래로, 벌크는 고르게(트리밍).
-// 하지 않으면 갑판장이 「무난」하게 한다. 잘하면 하역이 빠르고 화물 손상이 줄고, 망치면 그 반대.
-const CRAFT_W = 9, CRAFT_H = 7;
-const CRAFT_PIECES = {   // [가로, 세로, 무거움]
-  GENERAL: [[1,1,0],[2,1,0],[2,2,0],[1,2,0],[3,1,1],[2,1,1]],
-  STEEL:   [[4,1,1],[2,1,1],[1,1,1],[3,1,1]],
-  MACHINE: [[3,2,1],[2,2,1],[1,1,0],[2,1,0]],
-  TIMBER:  [[4,1,0],[3,1,0],[5,1,0],[2,1,0]],
-  FOOD:    [[2,1,0],[1,1,0],[2,2,0],[3,1,0],[2,1,1]],
-  REEFER:  [[2,1,0],[2,2,0],[1,1,0],[3,1,0]],
-};
-const CRAFT_BULK = new Set(['COAL','ORE','GRAIN']);
-const craft = { on:false };
-function craftKey() { return String(st.voyageStart || 0); }
-function craftCargo() {
-  const P = st.plan;
-  if (P?.active) { const x = (P.items ?? []).find(x => !x.loaded && !x.delivered && x.c.from === sim.ship.at); return x?.c?.cargo ?? null; }
-  return st.contract?.cargo ?? null;
+
+// ── 적부도 ───────────────────────────────────────────────────────
+// 1항사의 적부 판단을 크게 펼친다. 계산은 부두 화면과 같은 것(stowSnapshot·stowPrice):
+// 양하 순서(재취급), 복원성(GM), 칸별 하역 속도, 용적. 항차 계획을 짜는 동안 쓴다.
+const stowp = { on:false, sel:-1 };
+function stowCost(items) { try { return stowPrice(stowSnapshot(items)).total; } catch (_) { return 0; } }
+function stowBosunCost() { return stowCost(draftPlan.map(x => ({ c:x.c, tons:x.tons, hold:x.hold }))); }
+function stowPrompt() {
+  const b = $('craft-btn'); if (!b) return;
+  const on = wharfDrafting() && !document.querySelector('.sheetwrap.on') && !$('market')?.classList.contains('on');
+  b.hidden = !on; if (!on) return;
+  const c = stowCost(draftPlan), lbl = `📋 적부도 짜기 · 지금 배치 ${won(c)}원`;
+  if (b.textContent !== lbl) b.textContent = lbl;
+  const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = 'sp:' + draftPlan.map(x => x.c.id).join(',');
+  if (draftPlan.length >= 2 && c > 500 && !T.said[k]) { T.said[k] = 1; try { talkSay(`1항사 ${crewName('mate')}`, `이대로 실으면 적부에서 ${won(c)}원쯤 샙니다. 적부도를 같이 보시겠습니까?`); } catch (_) {} }
 }
-function craftOpportunity() {
-  if (st.leg || !(st.phase === '적재' || st.phase === '적재 대기')) return null;
-  if (st.craft?.key === craftKey()) return null;
-  const cg = craftCargo(); if (!cg || !(CRAFT_BULK.has(cg) || CRAFT_PIECES[cg])) return null;
-  return { cargo: cg };
+function stowpOpen() {
+  if (!wharfDrafting()) return;
+  Object.assign(stowp, { on:true, sel:-1, base: stowCost(draftPlan), bosun: stowBosunCost(), prevPaused: st.paused });
+  st.paused = true; $('stowp').classList.add('on'); stowpPaint();
 }
-function craftBlocked(x, y) { return y === CRAFT_H - 1 && (x === 0 || x === CRAFT_W - 1); }
-function craftOpen() {
-  const o = craftOpportunity(); if (!o || craft.on) return;
-  const bulk = CRAFT_BULK.has(o.cargo);
-  Object.assign(craft, { on:true, cargo:o.cargo, bulk, t0:performance.now(), dur: bulk ? 25000 : 40000, prevPaused:st.paused,
-    grid: Array.from({ length:CRAFT_H }, () => Array(CRAFT_W).fill(null)), heights: Array(CRAFT_W).fill(0), pours: 0, needPours: 26,
-    queue: [], cur: null, cx: 3, unplaced: 0 });
-  if (!bulk) { const kinds = CRAFT_PIECES[o.cargo]; let cells = 0, i = 0;
-    while (cells < 52) { const k = kinds[Math.floor(Math.random() * kinds.length)]; craft.queue.push({ w:k[0], h:k[1], heavy:!!k[2], id:i++ }); cells += k[0] * k[1]; }
-    craftNext(); }
-  st.paused = true;
-  $('cf-t').textContent = `${CARGO[o.cargo].name} 적재 감독`;
-  $('cf-s').textContent = bulk ? '트리밍' : '고박·쌓기';
-  $('cf-help').innerHTML = bulk ? '칸을 눌러 그 자리에 붓는다. 산처럼 쌓이면 배가 기운다 — <b>평평하게</b> 고른다.' : '◀ ▶로 옮기고 ⟳로 돌려 「내린다」. <b>빈틈 없이</b>, <b>무거운 것(짙은색)은 아래</b>에.';
-  $('cf-ctl').style.display = bulk ? 'none' : '';
-  $('craft').classList.add('on');
-  requestAnimationFrame(craftLoop);
+function stowpLayout() {   // 칸 사각형 — 왼쪽이 1번(선수 쪽), 위가 상갑판창
+  const R = {}, x0 = 34, w = 124, gap = 8, yT = 30, hT = 62, yL = 96, hL = 74;
+  R['1T'] = { x:x0, y:yT, w, h:hT }; R['2T'] = { x:x0 + w + gap, y:yT, w, h:hT };
+  R['1L'] = { x:x0, y:yL, w, h:hL }; R['2L'] = { x:x0 + w + gap, y:yL, w, h:hL };
+  return R;
 }
-function craftNext() { craft.cur = craft.queue.shift() ?? null; if (craft.cur) craft.cx = Math.max(0, Math.min(CRAFT_W - craft.cur.w, craft.cx)); }
-function craftFits(pc, x, y) {
-  for (let dy = 0; dy < pc.h; dy++) for (let dx = 0; dx < pc.w; dx++) { const gx = x + dx, gy = y + dy;
-    if (gx < 0 || gx >= CRAFT_W || gy >= CRAFT_H) return false; if (gy < 0) continue;
-    if (craftBlocked(gx, gy) || craft.grid[gy][gx]) return false; }
-  return true;
-}
-function craftDrop() {
-  const pc = craft.cur; if (!pc) return;
-  let y = -pc.h; if (!craftFits(pc, craft.cx, 0)) { craft.unplaced++; craftNext(); if (!craft.cur) craftFinish(); return; }
-  while (craftFits(pc, craft.cx, y + 1)) y++;
-  if (y < 0) { craft.unplaced++; } else for (let dy = 0; dy < pc.h; dy++) for (let dx = 0; dx < pc.w; dx++) craft.grid[y + dy][craft.cx + dx] = { heavy: pc.heavy, id: pc.id };
-  try { soundscape.ui('telegraph'); } catch (_) {}
-  craftNext(); if (!craft.cur) craftFinish();
-}
-function craftPour(col) {   // 벌크: 붓고, 안식각(이웃과 2칸 이상 차)이면 흘러내린다
-  if (craft.pours >= craft.needPours) return;
-  const H = craft.heights, cap = (x) => CRAFT_H - (craftBlocked(x, CRAFT_H - 1) ? 1 : 0);
-  if (H[col] >= cap(col) + 2) return;
-  H[col] += 1; craft.pours++;
-  for (let it = 0; it < 60; it++) { let moved = false;
-    for (let x = 0; x < CRAFT_W; x++) for (const n of [x - 1, x + 1]) { if (n < 0 || n >= CRAFT_W) continue;
-      if (H[x] - H[n] >= 2) { H[x]--; H[n]++; moved = true; } }
-    if (!moved) break; }
-  if (craft.pours >= craft.needPours) craftFinish();
-}
-function craftScore() {
-  if (craft.bulk) { const H = craft.heights.map((h, x) => h + (craftBlocked(x, CRAFT_H - 1) ? 1 : 0)); const inner = H.slice(1, -1);
-    const spread = Math.max(...inner) - Math.min(...inner);
-    return { spread, tier: craft.pours < craft.needPours * .85 ? 'poor' : spread <= 1 ? 'best' : spread <= 2 ? 'ok' : 'poor' }; }
-  let filled = 0, holes = 0, crush = 0;
-  for (let x = 0; x < CRAFT_W; x++) { let seen = false;
-    for (let y = 0; y < CRAFT_H; y++) { const c = craft.grid[y][x]; if (c) { filled++; seen = true;
-        const below = craft.grid[y + 1]?.[x]; if (c.heavy && below && !below.heavy && below.id !== c.id) crush++; }
-      else if (seen && !craftBlocked(x, y)) holes++; } }
-  const gap = holes / Math.max(1, filled);
-  const tier = gap <= .06 && crush === 0 && craft.unplaced === 0 ? 'best' : gap <= .18 && crush <= 2 && craft.unplaced <= 1 ? 'ok' : 'poor';
-  return { filled, holes, crush, gap, tier };
-}
-function craftLoop(now) {
-  if (!craft.on) return;
-  const c = $('cf-c').getContext('2d'), W = 320, H = 300, cs = 30, ox = (W - CRAFT_W * cs) / 2, oy = 70;
-  c.fillStyle = '#1d2427'; c.fillRect(0, 0, W, H);
-  // 선창 단면
-  c.fillStyle = '#3a3f3c'; c.fillRect(ox - 6, oy - 4, CRAFT_W * cs + 12, CRAFT_H * cs + 10);
-  for (let y = 0; y < CRAFT_H; y++) for (let x = 0; x < CRAFT_W; x++) { const X = ox + x * cs, Y = oy + y * cs;
-    if (craftBlocked(x, y)) { c.fillStyle = '#3a3f3c'; c.fillRect(X, Y, cs, cs); continue; }
-    c.fillStyle = '#0f1416'; c.fillRect(X + 1, Y + 1, cs - 2, cs - 2); }
-  const col = craft.bulk ? svHex(svMix(WHARF_COLOR[craft.cargo] ?? '#8a8574', '#c9c2ad', .45)) : (WHARF_COLOR[craft.cargo] ?? '#8a8574');
-  if (craft.bulk) {
-    craft.heights.forEach((h, x) => { const base = craftBlocked(x, CRAFT_H - 1) ? 1 : 0;
-      for (let k = 0; k < h; k++) { const y = CRAFT_H - 1 - base - k; if (y < 0) { c.fillStyle = '#c0185f'; c.fillRect(ox + x * cs + 2, oy - 8, cs - 4, 4); continue; }
-        c.fillStyle = col; c.fillRect(ox + x * cs + 1, oy + y * cs + 1, cs - 2, cs - 2); c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(ox + x * cs + 3, oy + y * cs + 4, cs - 8, 2); } });
-    // 해치 위 그랩
-    c.fillStyle = '#e8e2cf'; c.font = '12px ' + C('--face-num'); c.fillText(`붓기 ${craft.pours} / ${craft.needPours}`, 10, 20);
-  } else {
-    for (let y = 0; y < CRAFT_H; y++) for (let x = 0; x < CRAFT_W; x++) { const g = craft.grid[y][x]; if (!g) continue;
-      c.fillStyle = g.heavy ? '#4b4f53' : col; c.fillRect(ox + x * cs + 1, oy + y * cs + 1, cs - 2, cs - 2);
-      c.strokeStyle = 'rgba(0,0,0,.4)'; c.strokeRect(ox + x * cs + 1.5, oy + y * cs + 1.5, cs - 3, cs - 3); }
-    const pc = craft.cur;
-    if (pc) { c.globalAlpha = .85; c.fillStyle = pc.heavy ? '#5e6368' : col; c.fillRect(ox + craft.cx * cs + 1, 22, pc.w * cs - 2, Math.min(2, pc.h) * 18 - 2);
-      c.globalAlpha = 1; c.fillStyle = '#e8e2cf'; c.font = '11px ' + C('--face-num'); c.fillText(pc.heavy ? '무거움' : '가벼움', ox + craft.cx * cs + 3, 16);
-      // 떨어질 자리 그림자
-      let y = -pc.h; if (craftFits(pc, craft.cx, 0)) { while (craftFits(pc, craft.cx, y + 1)) y++; c.strokeStyle = 'rgba(232,226,207,.55)'; c.setLineDash([3, 3]); c.strokeRect(ox + craft.cx * cs + 2, oy + y * cs + 2, pc.w * cs - 4, pc.h * cs - 4); c.setLineDash([]); } }
-    c.fillStyle = '#e8e2cf'; c.font = '11px ' + C('--face-num'); c.fillText(`남은 화물 ${craft.queue.length + (pc ? 1 : 0)}`, W - 90, 16);
+function stowpPaint() {
+  const c = $('sp-c').getContext('2d'), W = 320, H = 190, R = stowpLayout();
+  const S = stowSnapshot(draftPlan), P = stowPrice(S); stowp.hits = [];
+  c.fillStyle = '#e9e5d8'; c.fillRect(0, 0, W, H);
+  // 선체
+  c.strokeStyle = '#2c3133'; c.lineWidth = 2; c.beginPath();
+  c.moveTo(10, 26); c.lineTo(300, 26); c.lineTo(312, 40); c.lineTo(300, 176); c.lineTo(40, 176); c.quadraticCurveTo(14, 170, 10, 120); c.closePath(); c.stroke();
+  c.fillStyle = '#2c3133'; c.font = '10px ' + C('--face-num'); c.fillText('선수 ▸', 270, 20); c.fillText('◂ 선미 · 기관실', 8, 20);
+  for (const sl of SLOTS) {
+    const r = R[sl.id], b = S.map[sl.id], pct = Math.min(1.2, b.used / sl.cap);
+    c.fillStyle = b.over ? '#f3d6dd' : '#f6f3ea'; c.fillRect(r.x, r.y, r.w, r.h);
+    c.strokeStyle = b.over ? '#c0185f' : '#6b6f6c'; c.lineWidth = stowp.sel >= 0 ? 1.5 : 1; c.strokeRect(r.x, r.y, r.w, r.h);
+    c.fillStyle = '#6b6f6c'; c.font = '9.5px ' + C('--face-num'); c.fillText(`${sl.short} ${Math.round(b.used)}/${sl.cap}㎥`, r.x + 3, r.y + 10);
+    // 쌓인 화물 — 아래부터
+    let yy = r.y + r.h;
+    b.stack.forEach((it) => {
+      const vol = it.tons * CARGO[it.c.cargo].sf, h = Math.max(10, vol / sl.cap * (r.h - 12)), idx = draftPlan.indexOf(it);
+      yy -= h; const sel = idx === stowp.sel;
+      c.fillStyle = WHARF_COLOR[it.c.cargo] ?? '#8a8574'; c.fillRect(r.x + 2, Math.max(r.y + 12, yy), r.w - 4, h - 1);
+      if (sel) { c.strokeStyle = '#c0185f'; c.lineWidth = 3; c.strokeRect(r.x + 2, Math.max(r.y + 12, yy), r.w - 4, h - 1); }
+      c.fillStyle = '#f3efe2'; c.font = '10px ' + C('--face-name');
+      if (h >= 11) c.fillText(`${CARGO[it.c.cargo].name} ${it.tons}t → ${PORTS[it.c.to].name}`, r.x + 5, Math.max(r.y + 21, yy + Math.min(h - 3, 12)));
+      (stowp.hits ??= []).push({ idx, x:r.x, y:Math.max(r.y + 12, yy), w:r.w, h });
+    });
   }
-  const left = Math.max(0, craft.dur - (now - craft.t0)) / 1000;
-  c.fillStyle = '#e8e2cf'; c.font = '12px ' + C('--face-num'); c.fillText(`${left.toFixed(0)}초`, W - 40, H - 10);
-  if (left <= 0) return craftFinish();
-  requestAnimationFrame(craftLoop);
+  // 바늘·지표
+  const gm = S.stab.gm, gx = Math.max(0, Math.min(1, (gm - 0.1) / 1.7)) * 100;
+  const shiftLv = S.shift.tons ? 'bad' : 'ok', rateLv = S.rate >= 1.05 ? 'ok' : S.rate <= 0.92 ? 'bad' : '';
+  $('sp-g').innerHTML =
+    `<div class="sp-gm"><span>복원성 GM ${gm.toFixed(2)}m — ${S.stab.note}</span><i></i><em style="left:calc(${gx.toFixed(1)}% - 1px)"></em></div>` +
+    `<div class="${shiftLv}"><span>재취급</span><b>${S.shift.tons ? `${S.shift.tons}t · ${won(S.shift.cost)}원` : '없다'}</b>${S.shift.rows[0] ? `<small>${S.shift.rows[0].why}</small>` : ''}</div>` +
+    `<div class="${rateLv}"><span>하역 속도</span><b>×${S.rate.toFixed(2)}</b><small>${S.rate >= 1.05 ? '상갑판창은 빨리 푼다' : S.rate <= 0.92 ? '하창은 느리다' : '보통'}</small></div>` +
+    (S.over.length ? `<div class="bad" style="grid-column:1/-1"><b>${S.over.map(b => b.name).join(', ')} 용적이 넘친다 — 나누거나 옮긴다</b></div>` : '');
+  $('sp-cost').textContent = `${won(P.total)}원`;
+  const d = P.total - stowp.bosun, el = $('sp-delta');
+  el.textContent = Math.abs(d) < 50 ? '갑판장 안과 같다' : d < 0 ? `갑판장 안보다 ${won(-d)}원 아낀다` : `갑판장 안보다 ${won(d)}원 더 든다`;
+  el.className = Math.abs(d) < 50 ? '' : d < 0 ? 'dn' : 'up';
+  $('sp-s').textContent = `${draftPlan.length}몫`;
+  const it = draftPlan[stowp.sel];
+  $('sp-help').textContent = it ? `${CARGO[it.c.cargo].name} ${it.tons}t → ${PORTS[it.c.to].name}: 옮길 칸을 누른다${LOWER_ONLY.has(it.c.cargo) ? ' (중량물이라 하창만)' : ''}` : '화물을 누르고, 옮길 칸을 누른다. 먼저 내릴 짐이 위에 있어야 한다.';
+  $('sp-split').disabled = !it || it.tons < 200 || draftPlan.length >= PLAN_MAX_FIXTURES;
+  $('sp-merge').disabled = !it || wharfSiblings(it).length < 2;
 }
-function craftFinish(abort = false) {
-  if (!craft.on) return;
-  craft.on = false; $('craft').classList.remove('on'); st.paused = craft.prevPaused;
-  if (abort) { st.craft = { key: craftKey(), tier:'ok', rate:1, dmg:1, speed:0 }; say('적재 감독을 갑판장에게 맡겼다', ''); return; }
-  if (craft.bulk) while (craft.pours < craft.needPours) craftPour(Math.floor(CRAFT_W / 2));   // 남은 것은 가운데로 쏟는다
-  if (!craft.bulk) craft.unplaced += craft.queue.length + (craft.cur ? 1 : 0);
-  const R = craftScore(), bulk = craft.bulk;
-  const E = { best: { rate:1.12, dmg:.5, speed:0 }, ok: { rate:1, dmg:1, speed:0 }, poor: bulk ? { rate:1, dmg:1.2, speed:.35 } : { rate:.95, dmg:1.6, speed:0 } }[R.tier];
-  st.craft = { key: craftKey(), tier: R.tier, ...E };
-  const what = bulk ? `표면 높낮이 ${R.spread}칸` : `빈틈 ${R.holes}칸 · 눌림 ${R.crush}곳${craft.unplaced ? ` · 못 실은 짐 ${craft.unplaced}` : ''}`;
-  const eff = R.tier === 'best' ? '하역 12% 빠르고 화물 손상 위험이 절반' : R.tier === 'ok' ? '갑판장이 한 것과 같다' : bulk ? '배가 기울어 항해 중 속력이 0.35kn 준다' : '하역 5% 느리고 화물 손상 위험이 커진다';
-  say(`직접 적재 감독 — ${what} · ${eff}`, R.tier === 'best' ? 'b' : R.tier === 'poor' ? 'm' : '');
-  try { talkSay(`갑판장 ${crewName('bosun')}`, R.tier === 'best' ? '이렇게 실으면 바다에서 걱정이 없습니다.' : R.tier === 'ok' ? '쓸 만합니다. 고박은 제가 마무리하겠습니다.' : bulk ? '한쪽으로 쏠렸습니다. 항해 중에 손을 좀 보겠습니다.' : '틈이 많습니다. 흔들리면 짐이 상하겠습니다.'); } catch (_) {}
-}
-document.querySelectorAll('#craft [data-cf]').forEach(b => b.onclick = () => { if (!craft.on || craft.bulk || !craft.cur) return; const k = b.dataset.cf, pc = craft.cur;
-  if (k === 'L') craft.cx = Math.max(0, craft.cx - 1);
-  if (k === 'X') craft.cx = Math.min(CRAFT_W - pc.w, craft.cx + 1);
-  if (k === 'R') { [pc.w, pc.h] = [pc.h, pc.w]; craft.cx = Math.max(0, Math.min(CRAFT_W - pc.w, craft.cx)); }
-  if (k === 'D') craftDrop(); });
-$('cf-c').addEventListener('pointerdown', (e) => { if (!craft.on) return; const r = $('cf-c').getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 320, col = Math.floor((x - (320 - CRAFT_W * 30) / 2) / 30);
-  if (col < 0 || col >= CRAFT_W) return;
-  if (craft.bulk) craftPour(col); else if (craft.cur) { const nx = Math.max(0, Math.min(CRAFT_W - craft.cur.w, col)); if (nx === craft.cx) craftDrop(); else craft.cx = nx; } });
-$('cf-x').onclick = () => craftFinish(true);
-$('craft-btn').onclick = craftOpen;
-function craftPrompt() {
-  const o = craftOpportunity(), b = $('craft-btn');
-  if (b) { b.hidden = !o || !!document.querySelector('.sheetwrap.on'); if (o) b.textContent = `🏗 ${CARGO[o.cargo].name} 직접 적재 감독`; }
-  if (o) { const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = 'cf:' + craftKey() + ':' + sim.ship.at;
-    if (!T.said[k]) { T.said[k] = 1; try { talkSay(`갑판장 ${crewName('bosun')}`, CRAFT_BULK.has(o.cargo) ? `${CARGO[o.cargo].name} 받습니다. 트리밍 직접 보시겠습니까?` : `${CARGO[o.cargo].name} 싣습니다. 쌓는 것 직접 보시겠습니까?`); } catch (_) {} } }
-}
-function craftLive() { const k = st.craft; return k && k.key === craftKey() ? k : null; }
+$('sp-c').addEventListener('pointerdown', (e) => {
+  if (!stowp.on) return;
+  const r = $('sp-c').getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 320, y = (e.clientY - r.top) / r.height * 190;
+  const hits = stowp.hits ?? [];
+  const hit = hits.find(h => x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h);
+  const L = stowpLayout(), slot = Object.keys(L).find(k => x >= L[k].x && x <= L[k].x + L[k].w && y >= L[k].y && y <= L[k].y + L[k].h);
+  if (stowp.sel >= 0 && slot && (!hit || hit.idx !== stowp.sel)) {
+    const it = draftPlan[stowp.sel];
+    if (it && slotOf(it) !== slot) { if (!slotSet(it, slot)) say('중량물은 상갑판창 해치로 들어가지 않는다', 'm'); else { renderDraftPlan(); try { soundscape.ui('telegraph'); } catch (_) {} } }
+    stowp.sel = -1;
+  } else if (hit) stowp.sel = hit.idx === stowp.sel ? -1 : hit.idx;
+  else stowp.sel = -1;
+  stowpPaint();
+});
+$('sp-split').onclick = () => { const it = draftPlan[stowp.sel]; if (!it) return;
+  const half = Math.max(PLAN_MIN_TONS, Math.round(it.tons / 2 / 50) * 50), rest = it.tons - half; if (rest < PLAN_MIN_TONS) return;
+  const now = stowState(draftPlan), spare = SLOTS.filter(sl => !(LOWER_ONLY.has(it.c.cargo) && sl.deck === 'TWEEN') && sl.id !== slotOf(it)).map(sl => ({ sl, free: sl.cap - (now[sl.id]?.used ?? 0) })).sort((a, b) => b.free - a.free)[0];
+  const part = { c:it.c, tons:rest, hold:it.hold, slot: spare ? spare.sl.id : slotOf(it) }; part.hold = SLOT_BY_ID[part.slot].no; it.tons = half;
+  draftPlan.splice(stowp.sel + 1, 0, part); stowp.sel = -1; renderDraftPlan(); stowpPaint(); };
+$('sp-merge').onclick = () => { const it = draftPlan[stowp.sel]; if (!it) return; const sibs = wharfSiblings(it); if (sibs.length < 2) return;
+  const keep = sibs[0]; keep.tons = sibs.reduce((a, x) => a + x.tons, 0);
+  for (let k = draftPlan.length - 1; k >= 0; k--) if (draftPlan[k] !== keep && draftPlan[k].c.id === it.c.id) draftPlan.splice(k, 1);
+  stowp.sel = -1; renderDraftPlan(); stowpPaint(); };
+$('sp-reset').onclick = () => {   // 갑판장 안: 같은 화물은 합치고 칸은 밀도대로
+  const seen = new Map(); for (const x of draftPlan) { const k = x.c.id; if (seen.has(k)) seen.get(k).tons += x.tons; else seen.set(k, { c:x.c, tons:x.tons, hold:x.hold }); }
+  draftPlan.length = 0; for (const v of seen.values()) { delete v.slot; draftPlan.push(v); }
+  stowp.sel = -1; renderDraftPlan(); stowpPaint(); };
+$('sp-ok').onclick = () => { stowp.on = false; $('stowp').classList.remove('on'); st.paused = stowp.prevPaused;
+  const P = stowCost(draftPlan), d = P - stowp.bosun;
+  say(`적부도 — 배치 ${won(P)}원${Math.abs(d) >= 50 ? ` · 갑판장 안보다 ${won(Math.abs(d))}원 ${d < 0 ? '아낀다' : '더 든다'}` : ''}`, d < -50 ? 'b' : '');
+  try { wharfPaint(); } catch (_) {} };
+$('craft-btn').onclick = stowpOpen;
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -10542,7 +10560,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.19.0 · 적재 감독 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.20.0 · 적부도 · 선교 창 바다 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -12097,12 +12115,11 @@ function stowCurrent() {
 }
 function stowSpeedPenalty() {           // 항해 중 대지속력 손실 (kn)
   if (!stowLive().length) return 0;
-  return stowCurrent().stab.speed + (craftLive()?.speed ?? 0);
+  return stowCurrent().stab.speed;
 }
 function stowDamageBonus() {            // 화물 클레임 확률 가산
   if (!stowLive().length) return 0;
-  const k = craftLive()?.dmg ?? 1;
-  return stowCurrent().stab.damage * k + (k > 1 ? 0.01 * (k - 1) : k < 1 ? -0.006 : 0);   // 직접 감독 결과
+  return stowCurrent().stab.damage;
 }
 function stowFatigueBonus() {           // 항해 중 하루당 피로 가산
   if (!stowLive().length) return 0;
@@ -12114,7 +12131,7 @@ function stowRateFactor() {             // 하역 속도 배수
   if (P?.active) items = (P.items ?? []).filter(x => !x.delivered);
   else if (st.contract) items = [{ c:st.contract, tons:st.tons, hold:1, slot:st.stowSolo ?? '1L' }];
   if (!items.length) return 1;
-  return stowWorkRate(items) * (craftLive()?.rate ?? 1);
+  return stowWorkRate(items);
 }
 // 양하를 시작할 때, 덮고 있던 화물을 들어낸 값을 치른다
 function stowPayShifting(port) {
@@ -13774,7 +13791,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); craftPrompt(); } catch (_) {}
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {}
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
