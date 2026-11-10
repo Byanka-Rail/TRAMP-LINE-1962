@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.20.0</title>
+<title>TRAMP LINE 1962 · v3.21.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,6 +492,7 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
+.st-who{font-family:var(--face-title);font-size:13px;letter-spacing:.06em;color:var(--magenta);margin-bottom:6px}.st-body{font-size:14px;line-height:1.6}.st-body small{display:block;margin-top:8px;color:var(--ink2);font-size:12.5px;line-height:1.5}.st-learn{margin-top:10px;padding-top:8px;border-top:1px dotted var(--line);font-size:12px;color:var(--ink2)}
 .sx-box{max-width:380px}#sp-c{display:block;width:100%;aspect-ratio:320/190;background:#e9e5d8;touch-action:none}
 .sp-cost{display:flex;align-items:baseline;gap:8px;padding:8px 12px 4px}.sp-cost span{font-size:11px;color:var(--ink2)}.sp-cost b{font-size:22px;font-family:var(--face-num)}.sp-cost small{font-size:12px}
 .sp-cost small.up{color:var(--magenta)}.sp-cost small.dn{color:#2f7a4b}
@@ -992,7 +993,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.20.0</div>
+      <div class="mm-version">CONTENT v3.21.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1242,7 +1243,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.20.0 · 적부도 · 선교 창 바다</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.21.0 · 1장 이야기 항차</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1523,7 +1524,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.20.0';
+const TRAMP_LINE_CONTENT_VERSION='3.21.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -7898,7 +7899,7 @@ function sextantPrompt() {   // 선교 창·당직 칸의 단추, 처음 열릴 
   const o = sextantOpportunity(), b = $('sv-act');
   const label = o ? `☉ ${NAV_FIX[o.kind].name} — 직접 잰다 (${o.win})` : '';
   if (b) { b.hidden = !o; if (o) { b.dataset.act = 'sextant'; if (b.textContent !== label) b.textContent = label; } }
-  if (o) { const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = `sx:${o.kind}:${Math.floor(sim.t / (6 * HOUR))}`;
+  if (o) { const T = st.talk ??= { last: -1e12, said: {}, leg: null, chk: -1e12 }, k = `sx:${o.kind}:${Math.floor(sim.t / DAY)}:${hourOfDay(sim.t) < 12 ? 'a' : 'p'}`;
     if (!T.said[k]) { T.said[k] = 1; try { talkSay(`1항사 ${crewName('mate')}`, o.kind === 'NOON' ? '남중이 가깝습니다. 직접 재 보시겠습니까?' : '박명입니다. 별이 섭니다. 직접 재 보시겠습니까?'); } catch (_) {} } }
   return o;
 }
@@ -8279,6 +8280,160 @@ $('sp-ok').onclick = () => { stowp.on = false; $('stowp').classList.remove('on')
   say(`적부도 — 배치 ${won(P)}원${Math.abs(d) >= 50 ? ` · 갑판장 안보다 ${won(Math.abs(d))}원 ${d < 0 ? '아낀다' : '더 든다'}` : ''}`, d < -50 ? 'b' : '');
   try { wharfPaint(); } catch (_) {} };
 $('craft-btn').onclick = stowpOpen;
+
+// ── 1장 이야기 항차 ───────────────────────────────────────────────
+// 새 게임의 첫 여덟 항차는 레일이다. 항차마다 사람 하나가 사정을 말하고, 후보는 1~3건뿐이며,
+// 새로 배우는 것은 하나다. 여덟 항차가 끝나면 시장이 열린다. 옛 저장본에는 st.story 가 없어 꺼져 있다.
+const STORY_SEEN_KEY = 'TRAMP_LINE_1962_STORY_SEEN';
+const STORY_LEN = 8;
+function storyOn() { return !!st.story?.on && (sim.ship.voyages ?? 0) < STORY_LEN; }
+function storyRivalName() { return (sim.rivals ?? []).find(r => r.id === 'HYUPSIN' && r.alive)?.name ?? (sim.rivals ?? []).find(r => r.alive)?.name ?? '협신해운'; }
+function storyPorts(at) { return Object.keys(PORTS).filter(k => k !== at && portOpenId(k) && dist(at, k) >= 45 && dist(at, k) <= 420).sort((a, b) => dist(at, a) - dist(at, b)); }
+function storyMk(b, tag, from, to, cargo, tons, o = {}) {
+  const t = sim.t, H = HOUR, d = dist(from, to);
+  const workH = (p) => tons / Math.max(1, dischargeRate(p, cargo, 100, 0, 0)) / 16 * 24;
+  const perTon = o.perTon ?? freightBase(Math.max(40, d), cargo) * (o.rate ?? 1.05) * 1.6;
+  const freight = Math.round(perTon * tons), layH = o.layH ?? Math.max(36, (workH(from) + workH(to)) * 1.35 + 10);
+  return { id:`ST${b}-${tag}-${from}`, from, to, cargo, tons, d, perTon: freight / tons, freight, posted:t, expires:t + (o.expiresH ?? 120) * H,
+    laycanStart:t + (o.startH ?? 1) * H, laycanEnd:t + (o.endH ?? 72) * H, laytime:layH * H, slack:1.24, wibon:false,
+    demurrage:Math.round(freight * DEMURRAGE_RATE), despatch:0, credit:82, heldBy:'PLAYER', storyTag:tag, hint:o.hint ?? '' };
+}
+// 운임을 「이 화물 하나로 항차를 뛰면 남는 돈」에 맞춘다 — 계획표와 같은 계산으로. base 가 있으면 그 화물에 얹었을 때 더 남는 돈.
+function storyTune(c, target, base = null) {
+  try { for (let i = 0; i < 4; i++) {
+      const items = []; let b0 = 0;
+      if (base) { const bt = mapSuggestTons(base, []); items.push({ c:base, tons:bt, hold:bestHoldFor(base, bt, [], sim.ship.at) }); const E0 = planEvaluation(items.slice()); if (!E0?.ok) return c; b0 = E0.estNet; }
+      const tons = base ? Math.min(c.tons, loadableTons(c.cargo, c.tons)) : mapSuggestTons(c, []); if (tons < PLAN_MIN_TONS) return c;
+      items.push({ c, tons, hold:bestHoldFor(c, tons, items, sim.ship.at) });
+      const E = planEvaluation(items); if (!E?.ok) return c;
+      const gap = target - (E.estNet - b0); if (Math.abs(gap) < 150) break;
+      c.perTon = Math.max(2, c.perTon + gap / tons * 1.04); c.freight = Math.round(c.perTon * c.tons); c.demurrage = Math.round(c.freight * DEMURRAGE_RATE);
+  } } catch (_) {}
+  return c;
+}
+// 항차마다: 누가, 무슨 말, 어떤 화물. at 은 지금 배가 있는 항구 — 어디에 있든 이야기가 이어지게 목적항은 가까운 순으로 고른다.
+function storyBeat(b, at) {
+  const P = storyPorts(at), nm = (k) => PORTS[k].name, here = PORTS[at].name;
+  const near = P[0], mid = P[Math.min(1, P.length - 1)], far = P[Math.min(3, P.length - 1)], home = at === 'BUSAN' ? near : 'BUSAN';
+  const other = (...ex) => P.find(k => !ex.includes(k)) ?? near;
+  const cap = playerCaptain()?.name ? `${playerCaptain().name} 선장` : '선장', rv = storyRivalName();
+  const D = (() => { try { return debtDue(sim.company, sim.t); } catch (_) { return { due:0, days:0 }; } })();
+  switch (b) {
+  case 0: { const to = at === 'BUSAN' && portOpenId('HAKATA') ? 'HAKATA' : near;
+    return { who:'산업은행 윤 대리', title:'첫 화물을 주선했습니다',
+      body:`사장님, 금하호 인수를 축하드립니다. 첫 화물을 하나 주선해 두었습니다 — <b>${nm(to)}행 석탄 1,000톤</b>입니다.<br>오늘은 일요일이라 부두가 쉽니다. 내일 아침부터 싣습니다.<br>첫 상환은 ${Math.max(1, Math.ceil(D.days))}일 뒤 ${won(D.due)}원입니다. 잊지 마십시오.`,
+      learn:'「항차를 짠다」 → 해도의 선을 눌러 계획에 넣고 → 아래 단추를 길게 눌러 출항',
+      lots:[storyTune(storyMk(b, 'COAL', at, to, 'COAL', 1000, { rate:1.1, hint:'윤 대리가 주선한 첫 화물' }), 2500)] }; }
+  case 1: { const det = other(home);
+    return { who:cap, title:`${here}에는 돌아갈 짐이 마땅치 않습니다`,
+      body:`젊은 사장, ${here}에는 ${nm(home)}로 가는 짐이 조금밖에 없습니다.<br>작은 짐이라도 싣고 <b>곧장 ${nm(home)}로</b> 가거나, <b>${nm(det)}에 들러</b> 제대로 된 짐을 싣는 길이 있습니다.<br>배는 짐이 있는 곳에 있어야 돈을 법니다.`,
+      learn:'운임만이 아니라 걸리는 날수와 다음에 배가 서 있을 자리를 같이 본다',
+      lots:[storyTune(storyMk(b, 'HOME', at, home, 'GENERAL', 350, { rate:.9, hint:`작은 짐을 싣고 곧장 ${nm(home)}로` }), 1500),
+            storyTune(storyMk(b, 'DETOUR', at, det, 'GENERAL', 750, { rate:1.08, hint:`${nm(det)}에 들른다 — 짐이 두 배` }), 4500)] }; }
+  case 2: { const to = far !== near ? far : mid, via = other(to);
+    return { who:'삼화상사 박 사장', title:'급한 강재가 있소',
+      body:`금하해운이라 했소? ${here} 창고의 <b>강재 1,100톤</b>을 ${nm(to)}까지 급히 보내야 하오. <b>내일 저녁까지 싣기 시작</b>해 주면 운임은 넉넉히 치르겠소.<br>약속을 지키는 선주라면 앞으로도 짐을 맡기겠소.<br><small>${cap}: ${nm(via)}행 석탄 250톤도 같이 실을 수 있습니다. 다만 먼저 내릴 짐이 위에 있어야 합니다 — 적부도를 보십시오.</small>`,
+      learn:'화물을 둘 실으면 「📋 적부도 짜기」로 어느 칸에 넣을지 정한다. 먼저 내릴 짐이 아래 깔리면 돈이 샌다',
+      lots:(() => { const park = storyTune(storyMk(b, 'PARK', at, to, 'STEEL', 1100, { rate:1.25, endH:34, expiresH:40, hint:'박 사장의 급한 강재 — 내일 저녁까지 선적 시작' }), 7000);
+        return [park, storyTune(storyMk(b, 'ADD', at, via, 'COAL', 250, { rate:1.12, hint:'같이 실을 수 있는 석탄 — 적부를 잘 짜야 남는다' }), 2500, park)]; })() }; }
+  case 3: { const a = mid, c = other(a);
+    return { who:'부두 소식', title:`${rv} 배도 같은 길을 간다`,
+      body:`${rv} 최 전무의 배가 오늘 ${here}에서 짐을 싣는다. 어느 항구로 가든 <b>먼저 닿는 배가 선석을 먼저 받는다.</b><br><small>${cap}: 바다에서 따라잡을 수 있으면 여쭙겠습니다. 기름을 더 쓸지, 줄을 설지는 사장이 정하십시오.</small>`,
+      learn:'항해 중 해도에 경쟁선과 시간 차가 뜬다. 지면 선석을 기다리는 시간만큼 돈이 나간다',
+      lots:[storyTune(storyMk(b, 'RACE', at, a, 'GENERAL', 800, { rate:1.12, hint:`${rv}와 같은 항구 — 먼저 닿아야 한다` }), 5000),
+            storyTune(storyMk(b, 'ALT', at, c, 'COAL', 900, { rate:.98, hint:'다른 항구 — 운임은 평범하다' }), 3500)] }; }
+  case 4: { const a = near, c = far !== near ? far : mid;
+    return { who:cap, title:'이번엔 직접 별을 재 보시겠습니까',
+      body:`젊은 사장, 배를 가진 사람이면 육분의는 한 번 잡아 봐야 합니다. 정오나 해 뜰 녘·질 녘에 「☉ 직접 잰다」가 뜨면 눌러 보십시오. 위치를 잘 잡으면 길이 곧아집니다.<br>그리고 기관장이 <b>주기관 소리</b>를 걱정합니다. 바다에서 무슨 말을 하는지 들어 두십시오.`,
+      learn:'선원들의 말은 배의 실제 상태에서 나온다. 기관장이 걱정하면 항구에서 「정비」 단추를 본다 (자홍색 말은 급하다)',
+      lots:[storyTune(storyMk(b, 'NEAR', at, a, 'MACHINE', 500, { rate:1.15, hint:'가까운 항구 — 기계 500톤' }), 4000),
+            storyTune(storyMk(b, 'FAR', at, c, 'STEEL', 800, { rate:1.06, hint:'먼 항구 — 강재 800톤' }), 5500)] }; }
+  case 5: { const a = far !== near ? far : mid, c = near;
+    return { who:`통신장 ${crewName('radio')}`, title:'태풍이 올라옵니다',
+      body:`중앙관상대 방송입니다. <b>태풍이 북상 중</b>이고 며칠 안에 이 바다를 지납니다.${(sim.ship.state.ENGINE ?? 100) < 78 ? '<br>기관장은 나가기 전에 주기관을 봐 두자고 합니다 — 「정비」 단추에 값과 날수가 나옵니다. 할지 말지는 사장이 정하십시오.' : ''}<br><small>${cap}: 바다에서 만나면 여쭙겠습니다. 피할지, 돌아갈지, 뚫을지. 「직접 항로를 긋는다」로 해도에서 길을 휘게 할 수도 있습니다.</small>`,
+      learn:'태풍 판단창에서 「직접 항로를 긋는다」 — 돌아가는 길과 기다리는 시간을 파고와 저울질한다',
+      lots:[storyTune(storyMk(b, 'FAR', at, a, 'MACHINE', 650, { rate:1.22, layH:70, hint:'먼 항구 — 운임이 좋지만 태풍 길목' }), 8000),
+            storyTune(storyMk(b, 'NEAR', at, c, 'GENERAL', 750, { rate:1.0, hint:'가까운 항구 — 바다에 있는 시간이 짧다' }), 3500)] }; }
+  case 6: { const a = mid, c = other(a);
+    return { who:'삼화상사 박 사장', title:`${rv}에 짐을 뺏겼소`,
+      body:`${rv} 최 전무가 내 짐을 싼값에 채 갔다가 배가 모자라 반을 두고 갔소. <b>남은 강재 900톤</b>, 운임은 제값을 못 드리오. 그래도 실어 주겠소?<br><small>${cap}: 부두에는 운임 좋은 기계 화물도 나와 있습니다. 의리냐 돈이냐, 사장이 정하십시오. 박 사장은 오래 기억하는 사람입니다.</small>`,
+      learn:'화주와의 관계도 자산이다. 이 선택은 나중에 돌아온다',
+      lots:[storyTune(storyMk(b, 'PARK', at, a, 'STEEL', 900, { rate:.80, hint:'박 사장의 남은 강재 — 운임은 박하다 (의리)' }), 800),
+            storyTune(storyMk(b, 'RICH', at, c, 'MACHINE', 600, { rate:1.32, hint:'다른 화주의 기계 — 운임이 좋다' }), 7500)] }; }
+  case 7: { const a = far !== near ? far : mid, c = near, short = sim.ship.cash < D.due;
+    return { who:'산업은행 윤 대리', title:`상환일이 ${Math.max(0, Math.ceil(D.days))}일 남았습니다`,
+      body:`사장님, 이번 달 상환액은 <b>${won(D.due)}원</b>입니다. 지금 현금은 ${won(Math.round(sim.ship.cash))}원${short ? ' — <b>모자랍니다.</b><br>두 달 밀리면 금하호는 은행 배가 됩니다. 한 항차 더 뛸 시간은 있습니다.' : `이니 이번 달은 걱정 없으시겠습니다.<br>다만 남은 빚 ${won(Math.round(financeDebt(sim.company)))}원에는 달마다 이자가 붙습니다. 여유가 생기면 「회사」 탭에서 미리 갚는 길도 보십시오.`}<br><small>${cap}: 급한 화물은 운임이 좋지만 오늘 밤까지 싣기 시작해야 합니다. 안전한 석탄도 있습니다.</small>`,
+      learn:'위 띠의 「○일 뒤 ○원 갚음」이 자홍이면 현금이 모자란다는 뜻이다. 빚을 다 갚으면 1장이 끝난다',
+      lots:[storyTune(storyMk(b, 'RUSH', at, a, 'MACHINE', 650, { rate:1.38, endH:14, expiresH:18, hint:'급한 기계 — 오늘 밤까지 선적 시작, 운임이 좋다' }), 9000),
+            storyTune(storyMk(b, 'SAFE', at, c, 'COAL', 900, { rate:1.0, hint:'안전한 석탄 — 가깝고 여유 있다' }), 3000)] }; }
+  }
+  return null;
+}
+// 이 항구의 게시 계약을 이야기 화물로 바꾼다 (장 물량은 남긴다)
+function storyPost(at) {
+  const S = st.story, b = sim.ship.voyages ?? 0, key = `${b}:${at}`;
+  S.lots ??= {};
+  // 적기가 지나 버린 화물(정비·대기로 며칠 보낸 뒤)은 새로 낸다
+  if (S.lots[key] && S.lots[key].some(c => c.laycanEnd < sim.t + 6 * HOUR)) delete S.lots[key];
+  if (!S.lots[key]) { const B = storyBeat(b, at); S.lots[key] = B ? B.lots : []; }
+  const keep = (sim.market.posted[at] ?? []).filter(c => c.coaId);
+  sim.market.posted[at] = [...S.lots[key].filter(c => c.expires > sim.t || (c.expires = sim.t + 48 * HOUR)), ...keep];
+}
+function storyShow(b) {
+  const S = st.story, at = sim.ship.at, B = storyBeat(b, at); if (!B) return;
+  S.shown = b; storyPost(at);
+  try { const f = sim.market.flow ?? (sim.market.flow = { lastMonth:-1, events:[] });
+    f.wires = [...(f.wires ?? []), { id:`W-story-${b}`, t:sim.t, kind:'story', src:B.who, title:B.title, body:B.body.replace(/<br>/g, ' ').replace(/<[^>]+>/g, ''), up:true, read:true }].slice(-40); } catch (_) {}
+  say(`【${B.who}】 ${B.title}`, 'b');
+  const seen = (() => { try { return localStorage.getItem(STORY_SEEN_KEY) === '1'; } catch (_) { return false; } })();
+  const body = `<div class="st-who">${B.who}</div><div class="st-body">${B.body}</div><div class="st-learn">이번 항차 · ${B.learn}</div>`;
+  const go = { label:'항차를 짠다', sub:`후보 ${B.lots.length}건`, run:() => { try { if (!mapPlanMode) mapPlanOpen(); } catch (_) {} } };
+  const choices = [go];
+  if (b === 0 && seen) choices.push({ label:'이야기 없이 시작한다', sub:'자유 시장 · 처음부터 모든 계약', run:() => { st.story.on = false; tut.forced.market = false; delete tut.done.OPEN; say('이야기 없이 시작한다 — 시장이 열려 있다', ''); coach('start'); } });
+  ask.head = B.title; ask(`1장 · ${b + 1}/${STORY_LEN}`, body, choices);
+}
+function storyEnd() {
+  const S = st.story; S.on = false; S.ended = true;
+  try { localStorage.setItem(STORY_SEEN_KEY, '1'); } catch (_) {}
+  const debt = (() => { try { return financeDebt(sim.company); } catch (_) { return 0; } })(), rv = storyRivalName();
+  let tail;
+  if (S.flags?.loyal) { sim.politics.reputation = Math.min(100, (sim.politics.reputation ?? 50) + 5);
+    tail = `<br><br><b>삼화상사 박 사장</b> — 지난번 일은 잊지 않았소. 상공부 사람들에게 금하해운 이야기를 해 두겠소. <small>(평판 +5 — 장(章) 입찰에서 유리하다)</small>`; }
+  else tail = `<br><br><b>${rv} 최 전무</b> — 장사는 장사지요. 금하해운이 셈이 빠른 줄 알았습니다. 언제 한번 같이 일합시다.`;
+  const body = `<div class="st-who">산업은행 윤 대리</div><div class="st-body">사장님, 첫 달을 넘기셨습니다. 이제 금하호는 사장님이 굴리는 배입니다.<br>남은 빚은 <b>${won(Math.round(debt))}원</b>입니다. 다 갚는 날 다시 뵙겠습니다.${tail}</div>` +
+    `<div class="st-learn">이제부터 시장이 열린다 — 모든 계약과 전보를 보고 직접 고른다. 위 띠의 ◆ 목표가 다음 장을 알려 준다.</div>`;
+  say('1장 이야기 항차가 끝났다 — 이제 시장이 열린다', 'b');
+  ask.head = '금하호, 첫 달'; ask('1장', body, [{ label:'알겠다', run:() => {} }]);
+}
+function storyTick() {
+  const S = st.story; if (!S?.on) return;
+  if ($('main-menu')?.classList.contains('on')) return;
+  const b = sim.ship.voyages ?? 0, busy = asking || document.querySelector('.sheetwrap.on') || $('ask')?.classList.contains('on');
+  const idle = !st.leg && !st.contract && !st.plan?.active;
+  if (b >= STORY_LEN) { if (idle && !busy) storyEnd(); return; }
+  if (b >= 1) { try { localStorage.setItem(STORY_SEEN_KEY, '1'); } catch (_) {} }
+  if (idle) { if (S.shown !== b && !busy) storyShow(b); return; }
+  // 떠났다 — 무엇을 골랐는지 적어 둔다
+  S.taken ??= {};
+  if (!S.taken[b]) { const ids = [...(st.plan?.items ?? []).map(x => x.c), st.contract].filter(Boolean).map(c => c.storyTag).filter(Boolean);
+    if (ids.length) { S.taken[b] = ids; S.flags ??= {};
+      if (b === 6) S.flags.loyal = ids.includes('PARK');
+      if (b === 2 && ids.includes('PARK')) S.flags.park = true; } }
+  if (st.phase !== '항해' || !st.leg) return;
+  const D = dist(...st.leg), f = st.done / Math.max(1, D), hk = `${b}:${st.leg.join('>')}`; S.fired ??= {};
+  // 4항차: 최 전무의 배가 조금 앞서 간다 — 전속이면 따라잡을 만큼
+  if (b === 3 && f > .15 && f < .6 && !S.fired.race) { S.fired.race = hk;
+    const q = sim.queues[st.leg[1]], left = D - st.done, v = Math.max(5, st.curV || SHIP.serviceSpeed), ours = sim.t + left / v * HOUR;
+    const gainH = Math.max(.5, left / v - left / SHIP.fullSpeed);
+    if (q?.genTo) { q.genTo(ours + 8 * HOUR); q.ahead.push({ at: ours - gainH * .55 * HOUR, svc: 11 * HOUR, name:`${storyRivalName().replace(/해운|상선|기선/, '')} 3호`, company:storyRivalName() }); q.ahead.sort((x, y) => x.at - y.at); if (st.race) st.race.scanT = -1e12; } }
+  // 5항차: 주기관이 닳았다 — 기관장이 말한다
+  if (b === 4 && f > .3 && !S.fired.engine) { S.fired.engine = hk; sim.ship.state.ENGINE = Math.min(sim.ship.state.ENGINE, 77); if (st.talk) st.talk.chk = -1e12; }
+  // 6항차: 태풍이 길목으로 올라온다
+  if (b === 5 && f > .2 && f < .7 && !S.fired.typhoon) { S.fired.typhoon = hk;
+    const q = posOnLeg(st.leg[0], st.leg[1], Math.min(.95, f + .35)), pr = project(q.lat, q.lon);
+    sim.weather.systems.push({ x: pr.x - 40, y: pr.y - 240, p: 968, R: 300, vx: 3, vy: 13, born: sim.t, life: 4 * DAY, typhoon: true });
+    st.capStorm = false; }
+}
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -8507,6 +8662,7 @@ let asking = null;
 const costTxt = (v) => (Math.abs(v) < 50 ? '없음' : `−${won(Math.abs(v))}원`);
 function ask(tag, body, choices) {
 asking = true;
+$('ak-h').textContent = ask.head ?? '판단이 필요합니다'; ask.head = null;
 $('ak-tag').textContent = tag;
 $('ak-b').innerHTML = body;
 $('ak-btns').innerHTML = '';
@@ -8532,7 +8688,8 @@ st.paused = true;
 }
 function candidates() {
 const at = sim.ship.at;
-if (tut.on && !tut.forced.market) { tut.forced.market = true; sim.market.posted[at] = tutorialContracts(sim.t); }
+if (storyOn()) storyPost(at);
+else if (tut.on && !tut.forced.market) { tut.forced.market = true; sim.market.posted[at] = tutorialContracts(sim.t); }
 else { updateReach(); sim.market.generate(at, sim.t, sim.reach, portOpenId); }
 const boon = freightBoon(sim.politics, sim.t);
 const out = [];
@@ -9009,6 +9166,16 @@ $('tip').classList.remove('on'); tipFor = null;
 // ── 항차 계획 · 계약 시장 ────────────────────────────────────────
 let draftPlan = [];
 let lastPlanEval = null;
+// 그 항구에 아무 때나 닿았을 때 평균적으로 기다리는 시간. 대기열 모형(선석 c개, 입항률 occ·c/42h, 하역 0.5~1.8×42h)의 정상상태 평균.
+const _typWait = {};
+function portTypicalWaitH(p) {
+  if (_typWait[p] != null) return _typWait[p];
+  const P = PORTS[p], c = Math.max(1, P.berths ?? 1), S = 1.15 * NPC_SERVICE, a = (P.occ ?? .4) * c * 1.15, rho = a / c;
+  if (rho >= .97) return (_typWait[p] = 48);
+  let sum = 0, term = 1; for (let k = 0; k < c; k++) { if (k) term *= a / k; sum += term; }
+  const top = term * a / c, pw = top / ((1 - rho) * sum + top);
+  return (_typWait[p] = Math.min(48, pw * S / (c * (1 - rho)) * 0.553));
+}
 function planWaitEstimate(at, when = sim.t) {
 const q=sim.queues[at],start=q.previewWindow(sim.t,0,when,portOpsPriority(sim.company,at)).start;
 return Math.max(0,(start-when)/HOUR);
@@ -9026,7 +9193,7 @@ berthWaitH: planWaitEstimate(at),
 bunkerMarket:true,
 waitByPort: (p, when) => {
 const observed = planWaitEstimate(p, when);
-const typical = p === at ? 0 : (PORTS[p].occ ?? 0.4) * 6;
+const typical = p === at ? 0 : portTypicalWaitH(p) * (1 - Math.min(.7, portOpsPriority(sim.company, p)));
 return Math.max(observed, typical);
 },
 });
@@ -9143,7 +9310,8 @@ editDraft(+card.dataset.pi, b.dataset.plan);
 function directOperationalReach(){const perDay=SHIP.propFuelAtService+SHIP.auxFuel,nmDay=SHIP.serviceSpeed*24,reserve=.82;return Math.max(NEARSEA,Math.floor((SHIP.bunkerMax/Math.max(.1,perDay))*nmDay*reserve/50)*50)}
 function contractRemainder(c,taken,tSec){const rem=Math.round(((c?.tons??0)-taken)/10)*10;if(!(rem>=PLAN_MIN_TONS)||c?.warehouseHold)return null;const x={...c,id:`${c.id}-R${Math.floor(tSec)}-${rem}`,tons:rem,freight:Math.round(c.perTon*rem),residualOf:c.residualOf??c.id,posted:tSec};delete x.__directOriginal;x.demurrage=x.freight*DEMURRAGE_RATE;x.despatch=(c.despatch??0)>0?x.freight*DEMURRAGE_RATE*.5:0;x.laytime=Math.max(4*HOUR,(c.laytime??12*HOUR)*(rem/Math.max(1,c.tons)));return x}
 function marketContractsFor(origin) {
-if (tut.on && origin === sim.ship.at) {
+if (storyOn() && origin === sim.ship.at) { storyPost(origin); }
+else if (tut.on && origin === sim.ship.at) {
 if (!tut.forced.market) {
   tut.forced.market = true;
   sim.market.posted[origin] = [...tutorialContracts(sim.t), ...(sim.market.posted[origin] ?? []).filter(c => c.coaId)];
@@ -10560,7 +10728,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.20.0 · 적부도 · 선교 창 바다 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.21.0 · 1장 이야기 항차 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -13495,7 +13663,7 @@ function raceNpc(port, w) {
   const name = P.dom ? `${base} ${1 + (h >>> 8) % 9}호` : jp ? `${base} 마루` : `${base} ${['스타','프린스','벤처','트레이더'][(h >>> 8) % 4]}`;
   const near = Object.keys(PORTS).filter(k => k !== port && portOpenId(k) && dist(k, port) > 40 && dist(k, port) < 520);
   const origin = near.length ? near[(h >>> 4) % near.length] : port;
-  return { npc: true, sid: 'n' + Math.round(w.at), name, company: P.dom ? '국내선' : jp ? '일본선' : '외국선', origin, eta: w.at, svcH: w.svc / HOUR, joined: false };
+  return { npc: true, sid: 'n' + Math.round(w.at), name: w.name ?? name, company: w.company ?? (P.dom ? '국내선' : jp ? '일본선' : '외국선'), origin, eta: w.at, svcH: w.svc / HOUR, joined: false };
 }
 function raceNpcPos(x, port) {
   if (x.origin === port) return null;
@@ -13791,7 +13959,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {}
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {} try { storyTick(); } catch (e) { console.warn(e); }
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
@@ -14088,6 +14256,7 @@ navState, navLegReset, navTick, navOpportunities, navDoFix, navProgressFactor, n
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
 say('금하호 · 1,600 재화중량톤 · 부산 정박 중', 'b');
 say('항차 계획에서 화물과 시간을 맞춰 첫 항차를 짜십시오.');
+st.story = { on:true, shown:-1, lots:{}, taken:{}, flags:{}, fired:{} }; tut.forced.market = true; tut.done.OPEN = true;   // 1장 이야기 항차 (불러온 옛 저장본에는 없다)
 coach('start');
 try{if(localStorage.getItem('TRAMP_LINE_1962_BOOT_NEW')==='1'){localStorage.removeItem('TRAMP_LINE_1962_BOOT_NEW');mainMenuSessionActive=true;$('main-menu').classList.remove('on');}}catch(_){}
 renderSaveSlots();
