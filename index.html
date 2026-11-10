@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.13.3</title>
+<title>TRAMP LINE 1962 · v3.14.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -966,7 +966,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.13.3</div>
+      <div class="mm-version">CONTENT v3.14.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1205,7 +1205,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.13.3 · 계획표가 일요일 휴무를 센다</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.14.0 · 경주 — 같은 항구로 드는 배와 선석 다툼</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1447,7 +1447,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.13.3';
+const TRAMP_LINE_CONTENT_VERSION='3.14.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -2632,13 +2632,16 @@ this.lambda = P.occ * P.berths / NPC_SERVICE;
 }
 save() {
 return { berths:[...this.berths], waiting:this.waiting.map(w=>({...w})),
-lastT:this.lastT, events:this.events.map(e=>({...e})) };
+lastT:this.lastT, events:this.events.map(e=>({...e})),
+ahead:(this.ahead??[]).map(w=>({...w})), genT:this.genT ?? this.lastT };
 }
 load(o) {
 this.berths = [...o.berths];
 this.waiting = o.waiting.map(w=>({...w}));
 this.lastT = o.lastT;
 this.events = o.events.map(e=>({...e}));
+this.ahead = (o.ahead ?? []).map(w=>({...w}));
+this.genT = o.genT ?? o.lastT;
 }
 seed(t) {
 const r = this.rng.port;
@@ -2646,18 +2649,29 @@ this.lastT = t;
 for (let i = 0; i < this.berths.length; i++)
 this.berths[i] = r.chance(PORTS[this.id].occ) ? t + r.range(1, NPC_SERVICE) * HOUR : t;
 }
-advance(t) {
+// 입항선을 미리 뽑아 둔다(ahead). 뽑는 순서와 분포는 예전 advance 와 같다 —
+// 앞당겨 뽑을 뿐, 대기열에 드는 것은 그 배가 실제로 닿는 시각이다. 경주 화면이 이 배들을 보여준다.
+genTo(t) {
 const r = this.rng.port;
-let cur = this.lastT;
+this.ahead ??= []; let cur = this.genT ?? this.lastT;
+if (cur >= t) return;
 while (cur < t) {
 const gap = -Math.log(Math.max(1e-9, r.next())) / this.lambda * HOUR;
 cur += gap;
 if (cur >= t) break;
-this.waiting.push({ at: cur, svc: r.range(0.5, 1.8) * NPC_SERVICE * HOUR });
-this.drain(cur);
+this.ahead.push({ at: cur, svc: r.range(0.5, 1.8) * NPC_SERVICE * HOUR });
+}
+this.genT = t;
+}
+advance(t) {
+this.genTo(t);
+while (this.ahead.length && this.ahead[0].at < t) {
+const w = this.ahead.shift();
+this.waiting.push(w); this.waiting.sort((a, b) => a.at - b.at);
+this.drain(w.at);
 }
 this.drain(t);
-this.lastT = t;
+this.lastT = Math.max(this.lastT, t);
 }
 drain(t) {
 let moved = true;
@@ -6638,7 +6652,7 @@ for (const p of PORT_IDS) {
 if (body.queues?.[p]) s.queues[p].load(body.queues[p]);
 else {
 s.queues[p].berths = Array.from({length:PORTS[p].berths},()=>s.t);
-s.queues[p].waiting = []; s.queues[p].events = []; s.queues[p].lastT = s.t;
+s.queues[p].waiting = []; s.queues[p].events = []; s.queues[p].lastT = s.t; s.queues[p].ahead = []; s.queues[p].genT = s.t;
 }
 }
 s.ship = JSON.parse(JSON.stringify(body.ship));
@@ -7609,7 +7623,7 @@ fit(); drawSea(); drawGraticule();
 LON_OFF = 0; drawMarineWeather();
 for (const o of wraps()) {
 LON_OFF = o;
-drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); drawTrack(st); drawMarketSignals(); drawChapterMarks(); drawFleetMarks(); drawPlanLines();
+drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); try { drawRace(); } catch (_) {} drawTrack(st); drawMarketSignals(); drawChapterMarks(); drawFleetMarks(); drawPlanLines();
 }
 LON_OFF = 0;
 drawNight(); drawNightLights(); drawRose(); drawScaleBar();
@@ -9788,7 +9802,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.13.3 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.14.0 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -10921,6 +10935,9 @@ function uiSituation() {
   try {
     if (ph === '항해' && st.leg) {
       const left = Math.max(0, dist(...st.leg) - st.done);
+      const RQ = st.race, rv = RQ && !RQ.done ? RQ.racers.filter(x => !x.joined).sort((a, b) => a.eta - b.eta)[0] : null;
+      if (rv) { const d = (rv.eta - raceOurEta()) / HOUR;
+        return `${PORTS[st.leg[1]].name}까지 ${left.toFixed(0)}해리 · ${rv.name}와 경주 — ${d < 0 ? `${(-d).toFixed(1)}시간 뒤진다` : `${d.toFixed(1)}시간 앞선다`}`; }
       return `${PORTS[st.leg[1]].name}까지 ${left.toFixed(0)}해리 · 대지 ${(st.curV ?? 0).toFixed(1)}kn` +
              (st.destEta ? ` · 선석 ${clock(st.destEta)}` : '');
     }
@@ -12692,9 +12709,159 @@ function capLaycanCall() {
         cost: lateP(slack - loseH) * cut - fuelEco, run:() => setEot('ECO') },
     ]);
 }
+
+// ── 경주 ─────────────────────────────────────────────────────────
+// 같은 항구로 향하는 경쟁선이 있으면 해도에 나란히 띄운다. 먼저 닿는 배가 먼저 선석을 받는다.
+// 경쟁선 위치는 그림(항차 시작~끝을 고르게)이지만, 이 경주에 한해서는 그 그림대로 닿는 순간
+// 실제로 그 항구 대기열(PortQueue.waiting)에 들어간다. 난수는 쓰지 않는다.
+// 이름 없는 입항선(대기열이 미리 뽑아 둔 배)에 이름과 출발항을 붙인다. 같은 배는 늘 같은 이름.
+function josaRo(w) { const c = w.charCodeAt(w.length - 1) - 0xAC00; if (c < 0 || c > 11171) return w + '로'; const j = c % 28; return w + (j === 0 || j === 8 ? '로' : '으로'); }
+function raceHash(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+const RACE_NAMES = {
+  KR: ['동방','해양','동해','신흥','삼양','남성','고려','한성','대한','부흥','화신','태평'],
+  JP: ['다이요','후지','니치에이','야마토','신와','도요','가이세이','메이요','아사히','쇼와','고요','긴카'],
+  XX: ['오리엔트','퍼시픽','이스턴','실버','코스모스','에버','시노','오션','골든','노던'],
+};
+function raceNpc(port, w) {
+  const h = raceHash(port + ':' + Math.round(w.at)), P = PORTS[port];
+  const jp = !P.dom && P.lon > 128.5 && P.lon < 146 && P.lat > 30 && P.lat < 46;
+  const pool = P.dom ? RACE_NAMES.KR : jp ? RACE_NAMES.JP : RACE_NAMES.XX;
+  const base = pool[h % pool.length];
+  const name = P.dom ? `${base} ${1 + (h >>> 8) % 9}호` : jp ? `${base} 마루` : `${base} ${['스타','프린스','벤처','트레이더'][(h >>> 8) % 4]}`;
+  const near = Object.keys(PORTS).filter(k => k !== port && portOpenId(k) && dist(k, port) > 40 && dist(k, port) < 520);
+  const origin = near.length ? near[(h >>> 4) % near.length] : port;
+  return { npc: true, sid: 'n' + Math.round(w.at), name, company: P.dom ? '국내선' : jp ? '일본선' : '외국선', origin, eta: w.at, svcH: w.svc / HOUR, joined: false };
+}
+function raceNpcPos(x, port) {
+  if (x.origin === port) return null;
+  const path = legPath(x.origin, port); const left = (x.eta - sim.t) / HOUR * 9.5;
+  if (!(path?.nm > 0) || left >= path.nm) return null;
+  return pointOnSeaLeg(path, 1 - left / path.nm);
+}
+function raceRivalEta(s, port) {
+  const p = s.activePlan; if (!p?.route || p.route.length < 2) return null;
+  const R = p.route, legs = []; let total = 0;
+  for (let i = 0; i < R.length - 1; i++) { let nm = 0; try { nm = legPath(R[i], R[i + 1]).nm; } catch (_) {} nm = nm > 0 ? nm : Math.max(1, dist(R[i], R[i + 1])); total += nm; legs.push(total); }
+  const dur = Math.max(HR_T, p.end - p.started), now = (sim.t - p.started) / dur;
+  for (let i = 1; i < R.length; i++) if (R[i] === port) { const f = legs[i - 1] / total; if (f > now + 1e-6) return p.started + dur * f; }
+  return null;
+}
+function raceServiceH(s, port) {
+  const it = (s.activePlan?.items ?? []).filter(x => x.to === port || x.from === port);
+  const h = it.reduce((a, x) => a + x.tons / Math.max(1, dischargeRate(port, x.cargo, 100, 0, 0)) / 16 * 24, 0);
+  return Math.max(6, h);
+}
+function raceOurEta() {
+  const left = Math.max(0, dist(...st.leg) - st.done);
+  return sim.t + left / Math.max(SHIP.ecoSpeed * 0.8, st.curV || SHIP.serviceSpeed) * HOUR;
+}
+function raceTick() {
+  const R = st.race;
+  if (st.phase !== '항해' || !st.leg) {             // 도착(또는 항해 끝) — 결과를 한 줄 남기고 닫는다
+    if (R && !R.done) { R.done = true;
+      const beat = R.racers.filter(x => !x.joined && x.eta > sim.t).sort((a, b) => a.eta - b.eta)[0];
+      if (beat) say(`${beat.name}보다 ${((beat.eta - sim.t) / HOUR).toFixed(1)}시간 먼저 ${PORTS[R.port].name}에 닿았다 — 줄은 우리가 앞`, 'b'); }
+    return;
+  }
+  const port = st.leg[1], key = st.leg[0] + '>' + port;
+  if (!R || R.key !== key || R.done) {
+    if (R?.key === key && R.done) return;
+    st.race = { key, port, racers: [], scanT: -1e12, asked: false, done: false };
+  }
+  const Q = st.race;
+  // 20분마다 다시 찾는다
+  if (sim.t - Q.scanT >= 1200) {
+    Q.scanT = sim.t;
+    const ours = raceOurEta(), found = [];
+    for (const r of sim.rivals ?? []) { if (!r.alive) continue;
+      for (const s of r.fleet ?? []) { if (s.sold) continue;
+        if (Q.racers.some(x => x.sid === s.id && x.joined)) continue;
+        const eta = raceRivalEta(s, port); if (eta == null || eta <= sim.t) continue;
+        if (Math.abs(eta - ours) > 12 * HOUR) continue;
+        found.push({ rid: r.id, sid: s.id, name: s.name, company: r.name, eta, svcH: raceServiceH(s, port), joined: false });
+      } }
+    // 같은 항구로 드는 다른 배들 — 대기열이 미리 뽑아 둔 실제 입항선
+    const q = sim.queues[port];
+    if (q?.genTo) { q.genTo(ours + 8 * HOUR);
+      for (const w of q.ahead) if (w.at > sim.t && Math.abs(w.at - ours) <= 8 * HOUR && !Q.racers.some(x => x.sid === 'n' + Math.round(w.at) && x.joined)) found.push(raceNpc(port, w)); }
+    found.sort((a, b) => Math.abs(a.eta - ours) - Math.abs(b.eta - ours));
+    const keep = Q.racers.filter(x => x.joined);
+    for (const f of found.slice(0, 3)) {
+      const old = Q.racers.find(x => x.sid === f.sid);
+      if (!old && !(Q.told ??= []).includes(f.sid)) Q.told.push(f.sid), say(`【경주】 ${f.company} ${f.name}도 ${josaRo(PORTS[port].name)} 간다 — ${f.eta < ours ? `우리보다 ${((ours - f.eta) / HOUR).toFixed(1)}시간 앞` : `우리보다 ${((f.eta - ours) / HOUR).toFixed(1)}시간 뒤`}. 먼저 닿는 배가 선석을 먼저 받는다.`, 'm');
+      keep.push(old ? Object.assign(old, { eta: f.eta, svcH: f.svcH }) : f);
+    }
+    Q.racers = keep;
+  }
+  // 경쟁선이 먼저 닿는 순간 그 항구 대기열에 실제로 든다
+  for (const x of Q.racers) {
+    if (x.joined || x.eta > sim.t) continue;
+    x.joined = true;
+    const q = sim.queues[port];
+    if (q && !x.npc) { q.advance(sim.t); q.waiting.push({ at: x.eta, svc: x.svcH * HOUR }); q.waiting.sort((a, b) => a.at - b.at); q.drain(sim.t); }
+    say(`${x.name}가 먼저 ${PORTS[port].name}에 닿았다 — 우리 앞에 줄을 선다 (하역 약 ${x.svcH.toFixed(0)}시간)`, 'm');
+    st.destEtaAt = 0;   // 선석 예정 다시 계산
+  }
+}
+// 선장이 묻는다 — 기름을 써서 앞지를 것인가
+function capRaceCall() {
+  const Q = st.race; if (!Q || Q.asked || Q.done || st.phase !== '항해' || !st.leg) return;
+  const ours = raceOurEta(), left = Math.max(0, dist(...st.leg) - st.done);
+  const v = Math.max(3, st.curV || SHIP.serviceSpeed);
+  if (v >= SHIP.fullSpeed - 0.2) return;
+  const gainH = left / v - left / SHIP.fullSpeed;
+  const ahead = Q.racers.filter(x => !x.joined && x.eta < ours).sort((a, b) => b.eta - a.eta)[0];
+  if (!ahead) return;
+  const behindH = (ours - ahead.eta) / HOUR;
+  if (behindH > gainH * 0.95 || behindH < 0.2) return;      // 올려도 못 이기거나, 차이가 없으면 묻지 않는다
+  Q.asked = true;
+  const P = PORTS[Q.port], busy = Math.min(1, (P.occ ?? 0.5) + 0.15);
+  const loseH = ahead.svcH / Math.max(1, P.berths) * busy;
+  const hourCost = (COST.crewDay + COST.foodDay + COST.maintDay + COST.insDay) / 24;
+  const burn = (kn) => SHIP.propFuelAtService * Math.pow(kn / SHIP.serviceSpeed, 3) + SHIP.auxFuel;
+  const fuelFull = Math.round((burn(SHIP.fullSpeed) - burn(v)) * (left / SHIP.fullSpeed / 24) * sim.bunkerPrice);
+  const hold = Math.round(loseH * hourCost);
+  captainAsk('race', `${ahead.name}가 앞서 있습니다`,
+    `${P.name}까지 ${left.toFixed(0)}해리 · ${ahead.company} ${ahead.name}가 ${behindH.toFixed(1)}시간 앞<br>전속이면 ${gainH.toFixed(1)}시간 당겨 먼저 닿는다. 지면 선석을 약 ${loseH.toFixed(0)}시간 기다릴 수 있다.`,
+    [
+      { label:'전속으로 앞지른다', sub:`기름 ${won(fuelFull)}원 더`, cost: fuelFull, run:() => setEot('FULL') },
+      { label:'지금 속력을 지킨다', sub:`지면 대기 약 ${loseH.toFixed(0)}시간`, cost: hold, run:() => {} },
+    ]);
+}
+function drawRace() {
+  const Q = st.race; if (!Q || Q.done || !Q.racers.length) return;
+  const P = PORTS[Q.port]; const [tx, ty] = px(P.lat, P.lon);
+  const ours = raceOurEta();
+  cx.save();
+  cx.strokeStyle = C('--magenta'); cx.lineWidth = 1.5;
+  cx.beginPath(); cx.arc(tx, ty, 13 + Math.sin(performance.now() / 300) * 2, 0, Math.PI * 2); cx.stroke();
+  cx.font = `11px ${C('--face-name')}`; cx.fillStyle = C('--magenta');
+  const placed = [];
+  for (const x of Q.racers) {
+    if (x.joined) continue;
+    let q;
+    if (x.npc) { q = raceNpcPos(x, Q.port); if (!q) continue; }
+    else { const r = (sim.rivals ?? []).find(z => z.id === x.rid), s = r?.fleet?.find(z => z.id === x.sid);
+      const sp = s ? trafficFromShip(r, s, sim.t) : null; if (!sp) continue;
+      q = shipPos(sp, sim.t, legPath); if (q.inPort) continue; }
+    const [x0, y0] = px(q.lat, q.lon);
+    cx.setLineDash([4, 4]); cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(tx, ty); cx.stroke(); cx.setLineDash([]);
+    cx.beginPath(); cx.arc(x0, y0, 5, 0, Math.PI * 2); cx.stroke();
+    const d = (x.eta - ours) / HOUR;
+    const lab = `${x.name} ${d < 0 ? (-d).toFixed(1) + '시간 앞' : d.toFixed(1) + '시간 뒤'}`;
+    const tw = cx.measureText(lab).width, lx = x0 + 9; let ly = y0 - 18;
+    while (placed.some(r => lx < r[0] + r[2] && lx + tw + 6 > r[0] && ly < r[1] + 16 && ly + 16 > r[1])) ly += 17;   // 이름표끼리 겹치지 않게
+    placed.push([lx - 3, ly - 1, tw + 6]);
+    cx.fillStyle = C('--paper'); cx.globalAlpha = .92; cx.fillRect(lx - 3, ly - 1, tw + 6, 15); cx.globalAlpha = 1;
+    cx.strokeRect(lx - 3, ly - 1, tw + 6, 15);
+    cx.fillStyle = C('--magenta'); cx.fillText(lab, lx, ly + 11);
+  }
+  cx.restore();
+}
 function captainReports(M) {
+  try { raceTick(); } catch (_) {}
   if (asking) return;
-  if (st.phase === '항해') { if (M) capStormCall(M); capLaycanCall(); return; }
+  if (st.phase === '항해') { if (M) capStormCall(M); capLaycanCall(); if (!asking) capRaceCall(); return; }
   if (st.phase === '적재' || st.phase === '양하') { capLaytimeCall(); return; }
   capRepairCall();
 }
