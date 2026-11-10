@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.14.0</title>
+<title>TRAMP LINE 1962 · v3.15.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -485,6 +485,15 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #port-approach .pa-head b { font-family:var(--face-title); font-size:12px; font-weight:400; letter-spacing:.08em; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 #port-approach .pa-head button { width:34px; height:27px; min-height:0; border:0; border-left:1px solid var(--rule); padding:0; background:transparent; color:var(--ink); font-size:17px; }
 #pa-canvas { display:block; width:100%; aspect-ratio:16/9; background:#b9c6c7; image-rendering:pixelated; border-bottom:1px solid var(--line); }
+#sea-view{position:absolute;left:10px;bottom:10px;z-index:8;width:min(330px,84vw);display:none;border:1px solid rgba(24,32,34,.88);background:rgba(241,237,224,.96);box-shadow:0 5px 18px rgba(0,0,0,.32)}
+#sea-view.on{display:block}#sea-view.big{width:calc(100% - 20px)}
+#sea-view .pa-head{height:28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--rule);padding-left:8px}
+#sea-view .pa-head b{font-family:var(--face-title);font-size:12px;font-weight:400;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
+#sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
+#sv-race{color:var(--magenta)!important}
+#sea-show{position:absolute;left:8px;top:8px;z-index:6;min-height:30px;padding:0 10px}#sea-show[hidden]{display:none}
+@media(max-width:430px){#sea-view{left:6px;bottom:6px;width:min(280px,74vw)}#sea-view.big{width:calc(100% - 12px)}}
 .pa-meta { display:grid; grid-template-columns:1fr 1fr; gap:2px 8px; padding:5px 7px 6px; font-size:9px; color:var(--ink2); line-height:1.35; }
 .pa-meta span:nth-child(3), .pa-meta span:nth-child(4) { color:var(--ink); }
 @media(max-width:430px){ #port-approach{left:6px;bottom:6px;width:min(260px,68vw)} .pa-meta{grid-template-columns:1fr 1fr;gap:2px 5px;font-size:8.2px;padding:4px 6px 5px} }
@@ -966,7 +975,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.14.0</div>
+      <div class="mm-version">CONTENT v3.15.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1042,6 +1051,12 @@ button[data-hold].nudge{animation:nudge .32s}
         <span id="pa-berth">—</span><span id="pa-note">—</span>
       </div>
     </aside>
+    <aside id="sea-view" aria-hidden="true">
+      <div class="pa-head"><b id="sv-title">선교</b><span><button id="sv-big" aria-label="크게">⤢</button><button id="sv-close" aria-label="선교 창 닫기">×</button></span></div>
+      <canvas id="sv-canvas" width="240" height="135"></canvas>
+      <div class="pa-meta"><span id="sv-time">—</span><span id="sv-weather">—</span><span id="sv-race">—</span><span id="sv-left">—</span></div>
+    </aside>
+    <button id="sea-show" hidden>선교 창</button>
   </main>
   <!-- ── 아래: 조작 독 ── -->
   <footer id="dock">
@@ -1205,7 +1220,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.14.0 · 경주 — 같은 항구로 드는 배와 선석 다툼</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.15.0 · 선교 창 — 뱃머리 너머 바다</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1447,7 +1462,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.14.0';
+const TRAMP_LINE_CONTENT_VERSION='3.15.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -5966,11 +5981,13 @@ course:Math.atan2(g.lat-f.lat,(g.lon-f.lon)*Math.cos(f.lat*Math.PI/180))};
 return {...q,inPort:false,frac};
 }
 const D2R = Math.PI / 180;
+const GAME_TZ = 9;
 function subsolar(date) {
 const start = Date.UTC(date.getUTCFullYear(), 0, 0);
 const doy = (date.getTime() - start) / 86400000;
 const dec = -23.44 * Math.cos(D2R * 360 / 365.24 * (doy + 10));
-const utcH = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600;
+// 게임 시계는 한국 표준시(작업시간·일요일이 이 시계 기준). 해의 위치는 세계시로 계산하므로 9시간을 뺀다.
+const utcH = date.getUTCHours() + date.getUTCMinutes() / 60 + date.getUTCSeconds() / 3600 - GAME_TZ;
 const lon = ((180 - utcH * 15) + 540) % 360 - 180;
 return { dec, lon };
 }
@@ -7469,7 +7486,7 @@ if(PORTS[ref])return WORLD_PORTS.find(p=>p.name===PORTS[ref].name)??{name:PORTS[
 return WORLD_PORTS.find(p=>p.name===ref)??null;
 }
 function worldPortWeather(wp,coreId=null){if(coreId&&PORTS[coreId])return sim.weather.atPort(coreId,sim.t);const pr=project(wp.lat,wp.lon);return sim.weather.at(pr.x,pr.y,sim.t);}
-function localWorldPortHour(wp){return ((hourOfDay(sim.t)+wp.lon/15)%24+24)%24;}
+function localWorldPortHour(wp){return ((hourOfDay(sim.t)-GAME_TZ+wp.lon/15)%24+24)%24;}
 function worldPortAccessBrief(wp){const q=portStatus(wp,sim.t,company(),sim.politics);if(q.s==='open')return '취항 가능';if(q.s==='size')return `회사 규모 조건 미달 · ${q.u?.label??'항로'}`;return `연표 대기 · ${q.u?.year??'—'}년 ${q.u?.month??1}월`;
 }
 const paCanvas=$('pa-canvas'),paCx=paCanvas?.getContext('2d');
@@ -7521,6 +7538,150 @@ $('pa-weather').textContent=`파고 ${w.hs.toFixed(1)}m · 풍 ${Math.round((w.d
 $('pa-berth').textContent=`${worldPortAccessBrief(wp)} · ${profile.type}`;$('pa-note').textContent=profile.note;drawPortApproachScene(wp);
 }
 function hidePortApproach(force=false){if(!force&&portScene.key&&!portScene.preview&&performance.now()-portScene.shownAt<4500)return;$('port-approach')?.classList.remove('on');$('port-approach')?.setAttribute('aria-hidden','true');portScene.key=null;portScene.port=null;portScene.world=null;portScene.preview=false;}
+// ── 선교 창 ───────────────────────────────────────────────────────
+// 항해 중 뱃머리 너머 풍경. 시각(태양고도)·파고·바람·시정·주변 배·가까운 육지를 실제 상태에서 그린다.
+const svCanvas = $('sv-canvas'), svCx = svCanvas?.getContext('2d');
+const seaView = { on:false, dismissed:null, big:false, last:0, raf:0 };
+function svLegKey() { return st.leg ? `${st.voyageStart || 0}:${st.leg[0]}>${st.leg[1]}` : null; }
+function gcNm(a1, o1, a2, o2) { const p1 = a1 * D2R, p2 = a2 * D2R, dl = (o2 - o1) * D2R;
+  const c = Math.sin(p1) * Math.sin(p2) + Math.cos(p1) * Math.cos(p2) * Math.cos(dl); return Math.acos(Math.max(-1, Math.min(1, c))) * 3437.7; }
+function gcBrg(a1, o1, a2, o2) { const p1 = a1 * D2R, p2 = a2 * D2R, dl = (o2 - o1) * D2R;
+  return (Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)) / D2R + 360) % 360; }
+function svMix(a, b, t) { t = Math.max(0, Math.min(1, t)); const A = parseInt(a.slice(1), 16), B = parseInt(b.slice(1), 16);
+  const ch = (sh) => Math.round(((A >> sh) & 255) * (1 - t) + ((B >> sh) & 255) * t);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`; }
+function svHex(rgb) { const m = rgb.match(/\d+/g); return '#' + m.slice(0, 3).map(v => (+v).toString(16).padStart(2, '0')).join(''); }
+const SV_SKY = [ // [태양고도, 하늘 위, 수평선]
+  [-90, '#070d14', '#101a22'], [-12, '#0b121a', '#18242e'], [-6, '#1f2a3e', '#4b4560'], [-1, '#3a4766', '#c7856a'],
+  [3, '#5d7c99', '#e2aa7e'], [10, '#7f9fb3', '#cfd3c6'], [90, '#86a7b8', '#d3dad2'] ];
+function svSky(alt) { for (let i = 1; i < SV_SKY.length; i++) if (alt <= SV_SKY[i][0]) { const a = SV_SKY[i - 1], b = SV_SKY[i], t = (alt - a[0]) / (b[0] - a[0]);
+  return [svHex(svMix(a[1], b[1], t)), svHex(svMix(a[2], b[2], t))]; } return [SV_SKY.at(-1)[1], SV_SKY.at(-1)[2]]; }
+const SV_DIR = ['북','북동','동','남동','남','남서','서','북서'];
+function svCompass(deg) { return SV_DIR[Math.round(((deg % 360) + 360) % 360 / 45) % 8]; }
+function svScene() {
+  const M = marineState(), q = M.q, w = M.w, now = performance.now() / 1000;
+  const sun = subsolar(gameDate(sim.t)), phi = q.lat * D2R, dec = sun.dec * D2R, H = (q.lon - sun.lon) * D2R;
+  const alt = Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) / D2R;
+  const az = (Math.atan2(-Math.sin(H), Math.tan(dec) * Math.cos(phi) - Math.sin(phi) * Math.cos(H)) / D2R + 360) % 360;
+  const hdg = courseBearing(q.course);
+  // 주변 배: 경주선 + 해도 위 다른 배 (25해리 안)
+  const ships = [];
+  const Q = st.race;
+  for (const x of (Q && !Q.done ? Q.racers : [])) { if (x.joined) continue; let p = null;
+    if (x.npc) p = raceNpcPos(x, Q.port); else { const r = (sim.rivals ?? []).find(z => z.id === x.rid), s = r?.fleet?.find(z => z.id === x.sid); const sp = s ? trafficFromShip(r, s, sim.t) : null; const pp = sp ? shipPos(sp, sim.t, legPath) : null; if (pp && !pp.inPort) p = pp; }
+    if (p) ships.push({ name:x.name, lat:p.lat, lon:p.lon, racer:true, ahead:x.eta < raceOurEta(), key:x.sid }); }
+  for (const sp of traffic ?? []) { if (ships.length > 8) break; const p = shipPos(sp, sim.t, legPath); if (p.inPort) continue;
+    if (ships.some(z => z.key === sp.sid)) continue; ships.push({ name:sp.name, lat:p.lat, lon:p.lon, racer:false, key:sp.sid }); }
+  for (const z of ships) { z.nm = gcNm(q.lat, q.lon, z.lat, z.lon); z.rel = ((gcBrg(q.lat, q.lon, z.lat, z.lon) - hdg + 540) % 360) - 180; }
+  const land = Object.keys(PORTS).map(k => ({ k, nm: gcNm(q.lat, q.lon, PORTS[k].lat, PORTS[k].lon) })).filter(x => x.nm < 32)
+    .map(x => ({ ...x, rel: ((gcBrg(q.lat, q.lon, PORTS[x.k].lat, PORTS[x.k].lon) - hdg + 540) % 360) - 180 }));
+  const dbg = window.__sv;   // 화면 점검용(시각·날씨 덮어쓰기). 평소엔 비어 있다.
+  return { M, q, w: dbg?.w ? { ...w, ...dbg.w } : w, now, alt: dbg?.alt ?? alt, az: dbg?.az ?? az, hdg, ships: ships.filter(z => z.nm < 25), land };
+}
+function svDraw() {
+  if (!svCx) return;
+  const S = svScene(), { w, now, alt } = S, c = svCx, W = svCanvas.width, Hh = svCanvas.height;
+  const rain = Math.max(0, Math.min(1, (w.hs - 2.2) / 3.5)), grey = Math.min(.75, rain * .9 + Math.max(0, (8 - w.vis) / 14));
+  let [skyTop, skyHor] = svSky(alt);
+  if (grey > 0) { skyTop = svHex(svMix(skyTop, alt > -4 ? '#7b8386' : '#1c2226', grey)); skyHor = svHex(svMix(skyHor, alt > -4 ? '#9aa09c' : '#252c30', grey)); }
+  const night = alt < -6;
+  // 배의 흔들림: 파고에 비례
+  const pitch = Math.min(9, w.hs * 1.7) * Math.sin(now * 2 * Math.PI / 6.2);
+  const roll = Math.min(7, w.hs * 1.3) * Math.sin(now * 2 * Math.PI / 9.5 + 1) * D2R;
+  const hy = 62 + pitch * .55;
+  c.save(); c.imageSmoothingEnabled = false;
+  c.translate(W / 2, hy); c.rotate(roll); c.translate(-W / 2, -hy);
+  // 하늘
+  const g = c.createLinearGradient(0, -20, 0, hy); g.addColorStop(0, skyTop); g.addColorStop(1, skyHor);
+  c.fillStyle = g; c.fillRect(-30, -30, W + 60, hy + 30);
+  // 별
+  if (alt < -8 && grey < .5) { for (let i = 0; i < 60; i++) { const h = raceHash('st' + i), x = (h % (W + 40)) - 20, y = ((h >>> 9) % 56) - 6;
+    const tw = .45 + .55 * Math.abs(Math.sin(now * (.6 + (h % 7) / 9) + i)); c.globalAlpha = tw * (1 - grey) * Math.min(1, (-alt - 8) / 6); c.fillStyle = '#e8e6da'; c.fillRect(x, y, 1, 1); } c.globalAlpha = 1; }
+  // 해·노을
+  const sunRel = ((S.az - S.hdg + 540) % 360) - 180;
+  if (Math.abs(sunRel) < 75 && alt > -3 && grey < .7) { const sx = W / 2 + sunRel / 75 * W / 2, sy = hy - alt * 3.2;
+    c.globalAlpha = .9 * (1 - grey); c.fillStyle = alt < 6 ? '#f2c78f' : '#f4ecd2'; c.beginPath(); c.arc(sx, sy, 5, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; S.sunX = sx; }
+  // 육지(항구 32해리 안): 수평선 위 낮은 능선, 밤엔 등대
+  for (const L of S.land) { if (Math.abs(L.rel) > 80) continue; const x = W / 2 + L.rel / 80 * W / 2, hgt = Math.max(2, 14 - L.nm * .38), wid = 70 - L.nm;
+    c.fillStyle = night ? '#141c22' : svHex(svMix(skyHor, '#5d6660', .55 - L.nm / 90)); const h0 = raceHash(L.k);
+    c.beginPath(); c.moveTo(x - wid, hy); for (let i = 0; i <= 8; i++) c.lineTo(x - wid + i * wid / 4, hy - hgt * (.45 + .55 * (((h0 >>> i) & 7) / 7))); c.lineTo(x + wid, hy); c.fill();
+    if (night && L.nm < 22 && Math.sin(now * 2 * Math.PI / 5 + h0) > .93) { c.fillStyle = '#fff3c8'; c.fillRect(x + ((h0 >>> 3) % 20) - 10, hy - hgt - 1, 2, 2); }
+    if (night) { c.fillStyle = '#e3bd73'; for (let i = 0; i < 6; i++) if (((h0 >>> i) & 3) === 0) c.fillRect(x - wid / 2 + i * wid / 6, hy - 2, 1, 1); } }
+  // 바다
+  const seaTop = night ? '#0e1820' : svHex(svMix(skyHor, '#3d5862', .62)), seaBot = night ? '#0a1117' : svHex(svMix(skyTop, '#24363e', .72));
+  const g2 = c.createLinearGradient(0, hy, 0, Hh + 20); g2.addColorStop(0, seaTop); g2.addColorStop(1, seaBot);
+  c.fillStyle = g2; c.fillRect(-30, hy, W + 60, Hh - hy + 40);
+  if (S.sunX != null) { c.globalAlpha = .35 * (1 - grey); c.fillStyle = alt < 6 ? '#e9b47c' : '#eae6d2';
+    for (let y = hy + 2; y < Hh + 10; y += 3) { const wd = 2 + (y - hy) * .35; c.fillRect(S.sunX - wd / 2 + Math.sin(now * 3 + y) * 2, y, wd * (.4 + .6 * Math.abs(Math.sin(y * 1.7 + now * 2))), 1); } c.globalAlpha = 1; }
+  // 너울 줄: 원근으로 아래로 갈수록 굵고 빠르게
+  const amp = Math.min(1, .25 + w.hs / 4), lineC = night ? 'rgba(120,150,160,.22)' : 'rgba(235,240,230,.28)';
+  c.fillStyle = lineC;
+  for (let r = 0; r < 14; r++) { const z = r / 13, y = hy + 2 + Math.pow(z, 1.7) * (Hh - hy + 6), seg = 4 + z * 18, gap = 9 + z * 26;
+    const off = (now * (6 + z * 30) * (.6 + amp)) % (seg + gap);
+    for (let x = -seg - gap + off + (r % 2) * gap / 2; x < W + seg; x += seg + gap) c.fillRect(x, y + Math.sin(x * .05 + now * 1.4 + r) * amp * (1 + z * 3), seg * amp, 1 + Math.round(z)); }
+  // 흰 물마루
+  if (w.U > 8) { c.fillStyle = night ? 'rgba(200,210,210,.35)' : 'rgba(250,250,245,.8)'; const n = Math.min(40, (w.U - 8) * 5);
+    for (let i = 0; i < n; i++) { const h = raceHash('wc' + i + ':' + Math.floor(now * .7 + i * .13)), x = h % W, y = hy + 3 + ((h >>> 8) % (Hh - hy)); c.fillRect(x, y, 2 + (y - hy) / 20, 1); } }
+  // 다른 배
+  for (const z of S.ships.sort((a, b) => b.nm - a.nm)) { if (Math.abs(z.rel) > 80) continue;
+    const x = W / 2 + z.rel / 80 * W / 2, sc = Math.max(.35, Math.min(2.2, 6 / Math.max(1.5, z.nm))), y = hy + Math.min(10, 18 / Math.max(1, z.nm));
+    if (night) { c.fillStyle = '#f6efd6'; c.fillRect(x, y - 5 * sc, 1, 1); c.fillStyle = (raceHash(z.key) & 1) ? '#d0453c' : '#3fae6a'; c.fillRect(x + 2 * sc, y - 2 * sc, 1, 1); }
+    else { c.fillStyle = svHex(svMix(skyHor, '#2a2f30', .55 + Math.min(.4, 4 / z.nm)));
+      c.fillRect(x - 7 * sc, y - 2 * sc, 14 * sc, 2 * sc + 1); c.fillRect(x + 1 * sc, y - 5 * sc, 4 * sc, 3 * sc); c.fillRect(x - 5 * sc, y - 6 * sc, 1, 4 * sc); }
+    if (z.racer) { c.fillStyle = '#c0185f'; c.fillRect(x - 1, y - 9 * sc - 4, 3, 2); } }
+  // 안개
+  const fog = Math.max(0, Math.min(.82, (7 - w.vis) / 7.5));
+  if (fog > 0) { const fg = c.createLinearGradient(0, 0, 0, Hh); fg.addColorStop(0, night ? `rgba(40,48,54,${fog * .7})` : `rgba(214,218,212,${fog * .75})`); fg.addColorStop(.5, night ? `rgba(40,48,54,${fog})` : `rgba(220,223,216,${fog})`); fg.addColorStop(1, night ? `rgba(30,36,40,${fog * .5})` : `rgba(210,214,208,${fog * .45})`); c.fillStyle = fg; c.fillRect(-30, -30, W + 60, Hh + 60); }
+  c.restore();
+  // 뱃머리(앞갑판): 배와 함께 흔들리지만 수평선보다 덜 — 화면에 붙은 쪽
+  c.save(); c.translate(W / 2, Hh); c.rotate(roll * .35); c.translate(-W / 2, -Hh + pitch * .25);
+  const hull = night ? '#06090c' : grey > .4 ? '#3a3f40' : '#2f3332', deck = night ? '#0c1115' : '#4c4f4a';
+  c.fillStyle = deck; c.beginPath(); c.moveTo(W / 2, 96); c.lineTo(W / 2 + 62, Hh + 2); c.lineTo(W / 2 - 62, Hh + 2); c.closePath(); c.fill();
+  c.fillStyle = hull; c.beginPath(); c.moveTo(W / 2, 92); c.lineTo(W / 2 + 70, Hh + 2); c.lineTo(W / 2 + 62, Hh + 2); c.lineTo(W / 2, 97); c.lineTo(W / 2 - 62, Hh + 2); c.lineTo(W / 2 - 70, Hh + 2); c.closePath(); c.fill();
+  // 난간 기둥
+  for (let i = 1; i < 7; i++) { const t = i / 7; c.fillRect(W / 2 + t * 66 - 1, 92 + t * 43 - 5, 1, 5); c.fillRect(W / 2 - t * 66, 92 + t * 43 - 5, 1, 5); }
+  // 앞돛대·데릭
+  c.fillRect(W / 2 - 1, 52, 2, 62); c.fillRect(W / 2 - 9, 60, 18, 2);
+  c.save(); c.lineWidth = 1; c.strokeStyle = hull; c.beginPath(); c.moveTo(W / 2 - 2, 108); c.lineTo(W / 2 - 26, 70); c.moveTo(W / 2 + 2, 108); c.lineTo(W / 2 + 26, 70);
+  c.moveTo(W / 2, 54); c.lineTo(W / 2 - 26, 70); c.moveTo(W / 2, 54); c.lineTo(W / 2 + 26, 70); c.stroke(); c.restore();
+  c.fillRect(W / 2 - 18, 112, 36, 8);   // 해치
+  if (night) { c.fillStyle = '#fff6d8'; c.fillRect(W / 2 - 1, 50, 2, 2); c.globalAlpha = .25; c.beginPath(); c.arc(W / 2, 51, 5, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1; }
+  // 물보라
+  if (w.hs > 2.4 && pitch < -Math.min(9, w.hs * 1.7) * .7) { c.fillStyle = 'rgba(240,244,240,.75)'; for (let i = 0; i < 14; i++) { const h = raceHash('sp' + i + Math.floor(now * 4)); c.fillRect(W / 2 - 30 + (h % 60), 84 + ((h >>> 7) % 12), 2, 1); } }
+  c.restore();
+  // 비
+  if (rain > .05) { c.strokeStyle = night ? 'rgba(150,170,180,.35)' : 'rgba(220,226,230,.55)'; c.lineWidth = 1; c.beginPath();
+    const slant = Math.sin(((S.w.dir / D2R) - (90 - S.hdg)) * D2R) * 3;
+    for (let i = 0; i < rain * 90; i++) { const h = raceHash('rn' + i), x = (h % (W + 20)) - 10, y = ((h >>> 8) % Hh + now * 160 * (1 + (h % 3) / 3)) % Hh; c.moveTo(x, y); c.lineTo(x + slant, y + 5); } c.stroke(); }
+  // 글줄
+  const hh = navShipTime(S.q.lon, sim.t); const time = `${hh.slice(0, 2)}:${hh.slice(2)}`;
+  $('sv-title').textContent = `선교 · ${PORTS[st.leg[0]].name} → ${PORTS[st.leg[1]].name}`;
+  $('sv-time').textContent = `선내시 ${time} · ${alt > 6 ? '주간' : alt > -6 ? '박명' : '야간'}`;
+  $('sv-weather').textContent = `파고 ${w.hs.toFixed(1)}m · ${svCompass(courseBearing(w.dir) + 180)}풍 ${w.U.toFixed(0)}m/s · 시정 ${w.vis >= 20 ? '좋음' : w.vis.toFixed(0) + 'km'}`;
+  const R = S.ships.filter(z => z.racer).sort((a, b) => a.nm - b.nm)[0], O = S.ships.filter(z => Math.abs(z.rel) <= 80).length;
+  const side = (rel) => Math.abs(rel) < 12 ? '정면' : `${rel < 0 ? '좌현' : '우현'} ${Math.abs(rel) < 60 ? '앞' : '옆'}`;
+  $('sv-race').textContent = R ? `${R.name} · ${side(R.rel)} ${R.nm.toFixed(0)}해리` : O ? `수평선에 배 ${O}척` : '보이는 배 없음';
+  const left = Math.max(0, dist(...st.leg) - st.done);
+  $('sv-left').textContent = `${PORTS[st.leg[1]].name}까지 ${left.toFixed(0)}해리 · ${(st.curV ?? 0).toFixed(1)}kn`;
+}
+function svLoop(ts) {
+  if (!seaView.on) { seaView.raf = 0; return; }
+  if (ts - seaView.last > 66) { seaView.last = ts; try { svDraw(); } catch (e) { console.warn(e); } }
+  seaView.raf = requestAnimationFrame(svLoop);
+}
+function maybeSeaView() {
+  const el = $('sea-view'), btn = $('sea-show'); if (!el) return;
+  const k = svLegKey(), pa = $('port-approach')?.classList.contains('on');
+  const want = visualPrefs.portScenes && st.phase === '항해' && !!st.leg && !pa && seaView.dismissed !== k;
+  if (btn) btn.hidden = !(st.phase === '항해' && st.leg && !pa && seaView.dismissed === k);
+  if (want === seaView.on) return;
+  seaView.on = want; el.classList.toggle('on', want); el.setAttribute('aria-hidden', want ? 'false' : 'true');
+  if (want && !seaView.raf) seaView.raf = requestAnimationFrame(svLoop);
+}
+$('sv-close').onclick = () => { seaView.dismissed = svLegKey(); maybeSeaView(); };
+$('sea-show').onclick = () => { seaView.dismissed = null; maybeSeaView(); };
+$('sv-big').onclick = () => { seaView.big = !seaView.big; $('sea-view').classList.toggle('big', seaView.big); };
+svCanvas?.addEventListener('click', () => $('sv-big').click());
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -9802,7 +9963,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.14.0 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.15.0 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -10506,7 +10667,7 @@ function navSunAlt(lat, lon, t) {
 }
 function navShipTime(lon, t) {
   const d = gameDate(t);
-  const h = (d.getUTCHours() + d.getUTCMinutes() / 60 + lon / 15 + 24) % 24;
+  const h = ((d.getUTCHours() + d.getUTCMinutes() / 60 - GAME_TZ + lon / 15) % 24 + 48) % 24;
   return String(Math.floor(h)).padStart(2, '0') + String(Math.floor((h % 1) * 60)).padStart(2, '0');
 }
 function navHourAngle(lon, t) {
@@ -12931,7 +13092,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach();
+maybePortApproach(); try { maybeSeaView(); } catch (_) {}
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
