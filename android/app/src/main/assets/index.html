@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.22.0</title>
+<title>TRAMP LINE 1962 · v3.23.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -995,6 +995,26 @@ button[data-hold].nudge{animation:nudge .32s}
 .cap-say span{display:block;font:10px var(--face-name);color:var(--ink2);margin-top:2px}
 .askopt .rec{display:inline-block;font:600 9px var(--face-num);letter-spacing:.06em;color:var(--paper);background:var(--ink);padding:1px 5px;margin-left:6px;vertical-align:2px}
 
+/* ── 의뢰 ── */
+#quest-btn{position:absolute;right:8px;top:84px;z-index:6;min-height:30px;padding:0 10px;display:flex;align-items:center;gap:6px;
+  border:1px solid var(--rule);background:var(--paper);font-family:var(--face-title);letter-spacing:.08em}
+#quest-btn[hidden]{display:none}
+#quest-btn b{font:600 10px var(--face-num);min-width:16px;height:16px;border-radius:8px;background:var(--magenta);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+#quest-btn b:empty{display:none}
+#qs-body{padding:10px 12px 14px;display:flex;flex-direction:column;gap:10px}
+.qcard{border:1px solid var(--line);background:var(--face);padding:8px 10px 9px;border-left:4px solid var(--ink2)}
+.qcard.arc{border-left-color:var(--magenta)}
+.qh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.qh b{font:400 var(--fs-mid) var(--face-title)}
+.qtag{font:600 9px var(--face-num);letter-spacing:.08em;color:var(--paper);background:var(--bake);padding:2px 6px}
+.qcard.arc .qtag{background:var(--magenta)}
+.qwho{font-size:var(--fs-micro);color:var(--ink2);margin-top:2px}
+.qobj{font:12px var(--face-num);margin-top:6px}
+.qfoot{display:flex;justify-content:space-between;font-size:var(--fs-micro);color:var(--ink2);margin-top:4px}
+.qfoot em{font-style:normal;font-family:var(--face-num);color:var(--magenta)}
+.qcard button{margin-top:7px;min-height:30px;padding:0 10px;font-size:var(--fs-micro);flex:0 0 auto}
+.qnote{font-size:var(--fs-micro);color:var(--ink2);text-align:right}
+
 </style>
 </head>
 <body>
@@ -1005,7 +1025,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.22.0</div>
+      <div class="mm-version">CONTENT v3.23.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1070,6 +1090,7 @@ button[data-hold].nudge{animation:nudge .32s}
     </section>
     <button id="wharf-show" hidden>부두 화면</button>
     <button id="wire-btn" hidden>전보 <b id="wire-n"></b></button>
+    <button id="quest-btn" hidden>의뢰 <b id="quest-n"></b></button>
     <div id="wire-toast" hidden></div>
     <div id="mapbar" hidden><span id="mapbar-t"></span><button id="mapbar-list">목록</button><button id="mapbar-x" aria-label="항차 닫기">×</button></div>
     <div id="mapcard" hidden></div>
@@ -1257,7 +1278,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.22.0 · 항차 단계 띠와 전환 장면</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.23.0 · 의뢰 — 단골 부탁과 시대·지역 이야기</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1306,6 +1327,12 @@ button[data-hold].nudge{animation:nudge .32s}
   <div class="sheetbox">
     <header><h2 id="vs-h">항차 상세</h2><button id="vs-close">닫기</button></header>
     <div id="vs-body"></div>
+  </div>
+</div>
+<div id="questsheet" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="qs-h">
+  <div class="sheetbox">
+    <header><h2 id="qs-h">맡은 의뢰</h2><button id="qs-close">닫기</button></header>
+    <div id="qs-body"></div>
   </div>
 </div>
 <div id="chsheet" class="sheetwrap" role="dialog" aria-modal="true" aria-labelledby="ch-h">
@@ -1538,7 +1565,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.22.0';
+const TRAMP_LINE_CONTENT_VERSION='3.23.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -8390,7 +8417,7 @@ function storyPost(at) {
   // 적기가 지나 버린 화물(정비·대기로 며칠 보낸 뒤)은 새로 낸다
   if (S.lots[key] && S.lots[key].some(c => c.laycanEnd < sim.t + 6 * HOUR)) delete S.lots[key];
   if (!S.lots[key]) { const B = storyBeat(b, at); S.lots[key] = B ? B.lots : []; }
-  const keep = (sim.market.posted[at] ?? []).filter(c => c.coaId);
+  const keep = (sim.market.posted[at] ?? []).filter(c => c.coaId || c.questId);
   sim.market.posted[at] = [...S.lots[key].filter(c => c.expires > sim.t || (c.expires = sim.t + 48 * HOUR)), ...keep];
 }
 function storyShow(b) {
@@ -8447,6 +8474,373 @@ function storyTick() {
     const q = posOnLeg(st.leg[0], st.leg[1], Math.min(.95, f + .35)), pr = project(q.lat, q.lon);
     sim.weather.systems.push({ x: pr.x - 40, y: pr.y - 240, p: 968, R: 300, vx: 3, vy: 13, born: sim.t, life: 4 * DAY, typhoon: true });
     st.capStorm = false; }
+}
+
+// ── 의뢰 — 열린 시장 위에 얹는 이야기 ─────────────────────────────
+// 1장 레일이 끝나면 시장은 열려 있고, 그 위에 늘 의뢰가 1~3건 얹힌다.
+//  · 이야기 줄기 하나 — 지역이 열리거나 시대가 바뀌면 그 주제의 짧은 이야기(2~3걸음)가 시작된다.
+//  · 단골 부탁 1~2건 — 아는 사람들이 그때그때 부탁한다. 받을지 말지는 사장이 정한다.
+// 의뢰 화물은 해도와 후보에 ★로 뜬다. 안 받아도 게임은 굴러간다.
+const QUEST_SIDE_MAX = 2;
+function questState(co = sim.company) {
+  co.quests ??= { active:[], offers:[], done:[], arcs:{}, nextSide:(sim?.t ?? 0) + 2 * DAY, serial:1, visited:{} };
+  const Q = co.quests; Q.active ??= []; Q.offers ??= []; Q.done ??= []; Q.arcs ??= {}; Q.visited ??= {};
+  return Q;
+}
+function questOn() { try { return !storyOn(); } catch (_) { return true; } }
+function unlockOpen(key) {
+  const co = company();
+  return WORLD_PORTS.some(p => p.key === key && PORTS[Object.keys(PORTS).find(k => PORTS[k].name === p.name)] && portStatus(p, sim.t, co, sim.politics).s === 'open');
+}
+function dateAt(y, m) { return (Date.UTC(y, m - 1, 1) - Date.UTC(1962, 6, 1)) / 1000; }
+const pn = (k) => PORTS[k]?.name ?? k;
+const capName = () => { try { return playerCaptain()?.name ? `${playerCaptain().name} 선장` : '선장'; } catch (_) { return '선장'; } };
+function nearOpen(at, list) { const open = list.filter(p => PORTS[p] && portOpenId(p)); return open.sort((a, b) => dist(at, a) - dist(at, b))[0] ?? null; }
+function farOpen(at, list) { const open = list.filter(p => PORTS[p] && portOpenId(p)); return open.sort((a, b) => dist(at, b) - dist(at, a))[0] ?? null; }
+
+// ── 이야기 줄기 ────────────────────────────────────────────────
+// when(): 시작 조건. steps: 걸음마다 { who, title, body, obj, reward, after }. obj.type = deliver|visit|branch|dwt|cash|kind
+const ARCS = [
+  { id:'KOBE', theme:'지역', name:'고베의 상사맨', when:() => unlockOpen('JP_WEST'), steps:[
+    () => ({ who:'도요상사 야마다 과장', title:'고베에서 뵙고 싶습니다',
+      body:`처음 뵙겠습니다. 도요상사 고베 지점의 야마다입니다. 한국 배가 고베에 들어온다는 말을 들었습니다.<br>우리 상사는 한국에 보낼 기계와 한국에서 받을 물건이 많습니다. <b>한번 고베에 들러 주십시오.</b> 얼굴을 봐야 장사가 됩니다.`,
+      obj:{ type:'visit', port:'KOBE' }, reward:{ rep:2 }, after:'잘 오셨습니다. 이제 서로 얼굴을 알았으니 짐 이야기를 하지요.' }),
+    () => ({ who:'도요상사 야마다 과장', title:'방직 기계를 부산으로',
+      body:`부산의 방직 공장에서 주문한 <b>기계 600톤</b>이 고베 창고에 있습니다. 한국 배로 보내 달라는 주문입니다.<br>운임은 시세보다 넉넉히 치르겠습니다. 다만 기계는 비싸니 조심해서.`,
+      obj:{ type:'deliver', from:'KOBE', to:'BUSAN', cargo:'MACHINE', tons:600, rate:1.35, days:30 }, reward:{ cash:3000, rep:2 },
+      after:'공장에서 기계를 받았다고 연락이 왔습니다. 다음은 반대 방향입니다.' }),
+    () => ({ who:'도요상사 야마다 과장', title:'한국 물건을 일본으로',
+      body:`이번엔 반대입니다. 부산의 <b>합판·가발 같은 수출품 700톤</b>을 고베로 받고 싶습니다. 일본에서 잘 팔립니다.<br>한국 배가 한국 물건을 싣고 오면 세관 사람들도 보는 눈이 달라집니다.`,
+      obj:{ type:'deliver', from:'BUSAN', to:'KOBE', cargo:'GENERAL', tons:700, rate:1.3, days:35 }, reward:{ cash:6000, rep:4 },
+      after:'고베에 금하해운 이름이 났습니다. 앞으로 짐이 생기면 먼저 연락드리겠습니다.' }),
+  ] },
+  { id:'SOUTH_SEA', theme:'지역', name:'남쪽 바다의 화교 상인', when:() => unlockOpen('OCEAN1'), steps:[
+    () => ({ who:'홍콩 화교 상인 진(陳) 사장', title:'남쪽 바다가 열렸소',
+      body:`원양 면허를 받았다 들었소. 대만·홍콩·마닐라는 우리 화교 상인들의 바다요. 우리 줄 없이는 짐이 안 나오오.<br>먼저 <b>기륭에 들러</b> 우리 사람을 만나시오. 거기서부터 이야기합시다.`,
+      obj:{ type:'visit', port:'KEELUNG' }, reward:{ rep:2 }, after:'기륭의 우리 사람이 금하해운을 반가워하오. 이제 짐 이야기를 하겠소.' }),
+    () => ({ who:'홍콩 화교 상인 진(陳) 사장', title:'대만 설탕을 홍콩으로',
+      body:`기륭 창고에 <b>설탕 800톤</b>이 있소. 홍콩 내 가게로 보내야 하오. 홍콩은 늘 물건이 모자라는 곳이오.<br>약속한 날에 대 주면 다음엔 더 큰 짐을 주겠소.`,
+      obj:{ type:'deliver', from:'KEELUNG', to:'HONGKONG', cargo:'FOOD', tons:800, rate:1.3, days:30 }, reward:{ cash:4000, rep:2 },
+      after:'설탕이 잘 들어왔소. 이번엔 한국에 좋은 이야기를 하나 해 주겠소.' }),
+    () => ({ who:'홍콩 화교 상인 진(陳) 사장', title:'마닐라 원목을 부산으로',
+      body:`부산에 합판 공장이 생긴다 들었소. 공장은 원목이 있어야 돌아가오. <b>마닐라 원목 900톤</b>을 부산까지 실어 주시오.<br>원목은 부피가 커서 배 칸을 잘 나눠야 하오.`,
+      obj:{ type:'deliver', from:'MANILA', to:'BUSAN', cargo:'TIMBER', tons:900, rate:1.3, days:40 }, reward:{ cash:8000, rep:4 },
+      after:'남쪽 바다에서 금하해운은 이제 「믿을 만한 한국 배」요. 우리 상인들에게 그렇게 말해 두었소.' }),
+  ] },
+  { id:'EXPORT64', theme:'시대', name:'수출 1억 달러', when:() => sim.t >= dateAt(1964, 5), steps:[
+    () => ({ who:'상공부 수출진흥과 정 과장', title:'수출의 해입니다',
+      body:`나라가 올해 수출 1억 달러를 목표로 걸었습니다. 수출품은 있는데 실어 낼 배가 늘 모자랍니다.<br>금하해운이 <b>부산 수출품 600톤</b>을 일본이나 홍콩으로 실어 내 주십시오. 실적은 상공부에 기록됩니다.`,
+      obj:{ type:'deliver', from:'BUSAN', to:() => nearOpen('BUSAN', ['HAKATA', 'KOBE', 'HONGKONG']) ?? 'HAKATA', cargo:'GENERAL', tons:600, rate:1.25, days:30 }, reward:{ cash:3000, rep:3 },
+      after:'수출 실적이 올라갔습니다. 과장님들이 금하해운 이름을 압니다.' }),
+    () => ({ who:'상공부 수출진흥과 정 과장', title:'배가 더 있어야 합니다',
+      body:`수출은 이제 시작입니다. 배 한 척으로는 모자랍니다. <b>회사 선복을 2,400 DWT까지</b> 늘리시면 수출 화물을 우선 배정해 드리겠습니다.<br><small>「회사」 탭 → 중고선 시장</small>`,
+      obj:{ type:'dwt', dwt:2400 }, reward:{ cash:8000, rep:4 },
+      after:'두 척이 된 금하해운 — 수출선 명단에 올렸습니다.' }),
+  ] },
+  { id:'TREATY65', theme:'시대', name:'한일 국교 정상화', when:() => sim.t >= dateAt(1965, 7), steps:[
+    () => ({ who:'산업은행 윤 대리', title:'일본 항로가 바빠집니다',
+      body:`사장님, 한일 기본조약이 맺어졌습니다. 이제 일본 전역에 배를 댈 수 있습니다. 대신 큰 선사들도 일본 항로로 몰려옵니다.<br>일본에 발판이 있어야 합니다. <b>하카타나 고베에 대리점</b>을 하나 두십시오. 짐을 먼저 잡습니다.`,
+      obj:{ type:'branch', ports:['HAKATA', 'KOBE', 'SHIMO'] }, reward:{ cash:6000, rep:3 },
+      after:'대리점이 생기니 일본 쪽 전보가 빨라졌습니다. 소문을 남보다 먼저 듣는 것이 해운입니다.' }),
+    () => ({ who:`${(() => { try { return storyRivalName(); } catch (_) { return '협신해운'; } })()} 최 전무`, title:'한번 겨뤄 봅시다',
+      body:`금하해운, 소문 들었소. 일본 항로는 이제 우리 협신이 잡을 거요. 다음 달 <b>고베행 강재 1,000톤</b> — 먼저 대는 쪽이 앞으로도 그 화주 짐을 받소. 겨뤄 보겠소?`,
+      obj:{ type:'deliver', from:'BUSAN', to:'KOBE', cargo:'STEEL', tons:1000, rate:1.25, days:20 }, reward:{ cash:5000, rep:5 },
+      after:'최 전무: 이번엔 졌소. 금하해운, 만만치 않구려.' }),
+  ] },
+  { id:'VIETNAM66', theme:'지역', name:'월남 특수', when:() => unlockOpen('VIETNAM'), steps:[
+    () => ({ who:'국방부 조달본부 김 소령', title:'사이공까지 갈 배가 필요합니다',
+      body:`파월 장병들에게 갈 물자가 부산 부두에 쌓입니다. 미군 배만으로는 모자랍니다.<br><b>사이공에 한 번 들어가</b> 항만 사정을 보고 와 주십시오. 전쟁 중인 항구입니다. 선원들에게 단단히 일러 두십시오.`,
+      obj:{ type:'visit', port:'SAIGON' }, reward:{ cash:6000, rep:3 }, after:'사이공 부두 사정이 보고되었습니다. 이제 정식으로 짐을 맡기겠습니다.' }),
+    () => ({ who:'국방부 조달본부 김 소령', title:'보급 물자 1,500톤',
+      body:`<b>보급 물자 1,500톤</b>을 부산에서 사이공까지. 운임은 군 예산이라 넉넉합니다. 날짜는 꼭 지켜 주십시오.<br><small>${capName()}: 장거리입니다. 기름과 선원 피로를 보고 가십시오.</small>`,
+      obj:{ type:'deliver', from:'BUSAN', to:'SAIGON', cargo:'GENERAL', tons:1500, rate:1.45, days:45 }, reward:{ cash:15000, rep:5 },
+      after:'물자는 무사히 닿았습니다. 국방부가 금하해운을 기억할 겁니다 — 군수 계약 입찰에서도.' }),
+    () => ({ who:'방콕 쌀 무역상', title:'돌아오는 배에 쌀을',
+      body:`월남까지 왔다 빈 배로 돌아가는 건 손해요. <b>방콕 쌀 1,200톤</b>을 부산으로 실어 가시오. 한국은 늘 쌀이 모자라지 않소.`,
+      obj:{ type:'deliver', from:'BANGKOK', to:'BUSAN', cargo:'GRAIN', tons:1200, rate:1.3, days:40 }, reward:{ cash:8000, rep:3 },
+      after:'갈 때 물자, 올 때 쌀 — 빈 배로 다니지 않는 것이 트램프의 셈이다.' }),
+  ] },
+  { id:'TIMBER68', theme:'지역', name:'남양 원목', when:() => unlockOpen('SEASIA'), steps:[
+    () => ({ who:'싱가포르 원목상 림 사장', title:'보르네오 원목이 넘칩니다',
+      body:`한국 합판 공장들이 원목을 찾는다 들었습니다. 보르네오 숲은 넓고, 원목은 넘칩니다. <b>발릭파판 원목 1,500톤</b>을 부산으로.<br>원목은 무겁고 부피가 큽니다. 배를 잘 고르십시오.`,
+      obj:{ type:'deliver', from:'BALIKPAPAN', to:'BUSAN', cargo:'TIMBER', tons:1500, rate:1.3, days:50 }, reward:{ cash:12000, rep:4 },
+      after:'원목 한 배가 공장 한 달을 돌립니다. 다음은 큰 배 이야기를 하지요.' }),
+    () => ({ who:'싱가포르 원목상 림 사장', title:'원목 전용선이 있으면',
+      body:`원목은 목재선이 제일입니다. 갑판에도 쌓고, 긴 화물창에 통째로 넣습니다. <b>목재선을 한 척</b> 들이시면 원목을 몰아 드리겠습니다.`,
+      obj:{ type:'kind', kind:'TIMBER' }, reward:{ cash:20000, rep:5 }, after:'목재선이 생겼으니 남양 원목은 금하해운 몫입니다.' }),
+  ] },
+  { id:'INDIA70', theme:'지역', name:'인도양의 면화', when:() => unlockOpen('INDIA'), steps:[
+    () => ({ who:'봄베이 면화상 라오 씨', title:'면화가 부산을 찾습니다',
+      body:`한국 방직 공장은 면화가 필요하고, 우리는 면화가 넘칩니다. 인도양은 멀지만 운임은 그만큼 좋습니다.<br>먼저 <b>콜롬보에 들러</b> 급유하고 우리 대리인을 만나시오.`,
+      obj:{ type:'visit', port:'COLOMBO' }, reward:{ rep:3 }, after:'콜롬보의 대리인이 금하해운을 반겼습니다.' }),
+    () => ({ who:'봄베이 면화상 라오 씨', title:'면화 2,000톤',
+      body:`<b>봄베이 면화 2,000톤</b>을 부산으로. 습기를 조심하시오 — 젖은 면화는 값이 반이오.`,
+      obj:{ type:'deliver', from:'BOMBAY', to:'BUSAN', cargo:'GENERAL', tons:2000, rate:1.3, days:60 }, reward:{ cash:20000, rep:5 },
+      after:'인도양을 건넌 한국 배 — 회사 이름이 바다 밖으로 나갔다.' }),
+  ] },
+  { id:'OIL73', theme:'시대', name:'석유 파동', when:() => unlockOpen('MIDEAST'), steps:[
+    () => ({ who:'산업은행 윤 대리', title:'기름값이 네 배가 됐습니다',
+      body:`사장님, 중동에서 기름을 끊었습니다. 벙커유값이 하늘로 갑니다. 그런데 중동은 돈이 넘쳐 건설을 시작합니다.<br>위기와 기회가 같이 왔습니다. <b>쿠웨이트에 한 번 들어가</b> 보십시오.`,
+      obj:{ type:'visit', port:'KUWAIT' }, reward:{ rep:4 }, after:'쿠웨이트 부두에 한국 건설 회사 사람들이 보입니다.' }),
+    () => ({ who:'해외건설협회', title:'사막에 철근을',
+      body:`한국 건설 회사들이 중동 공사를 땄습니다. <b>부산 강재 3,000톤</b>을 지다로. 사막에 길과 항만을 놓습니다.`,
+      obj:{ type:'deliver', from:'BUSAN', to:'JEDDAH', cargo:'STEEL', tons:3000, rate:1.4, days:70 }, reward:{ cash:40000, rep:6 },
+      after:'중동 건설 특수 — 금하해운 배가 그 길을 열었다.' }),
+  ] },
+];
+
+// ── 단골 부탁 ───────────────────────────────────────────────────
+function sideTemplates(at) {
+  const P = storyPorts(at), near = P[0], mid = P[Math.min(1, P.length - 1)], far = P[Math.min(3, P.length - 1)];
+  const Q = questState(), co = sim.company, cap = capName(), rv = (() => { try { return storyRivalName(); } catch (_) { return '협신해운'; } })();
+  const out = [];
+  if (near) out.push({ key:'PARK', who:'삼화상사 박 사장', title:'또 급한 짐이 생겼소',
+    body:`금하해운, 또 부탁 좀 하겠소. ${pn(at)} 창고의 <b>강재 ${700}톤</b>을 ${pn(mid)}까지 — 열흘 안에. 운임은 섭섭지 않게 드리겠소.`,
+    obj:{ type:'deliver', from:at, to:mid, cargo:'STEEL', tons:700, rate:1.25, days:10 }, reward:{ rep:1 }, fail:'박 사장: 약속을 못 지키면 다음은 없소.' });
+  if (near) out.push({ key:'RUSH', who:'부두 화주', title:'오늘 밤까지 실을 배를 찾습니다',
+    body:`급한 <b>기계 400톤</b>이 ${pn(near)}로 가야 합니다. 엿새 안에 닿으면 운임을 곱으로 드립니다.`,
+    obj:{ type:'deliver', from:at, to:near, cargo:'MACHINE', tons:400, rate:1.55, days:6 }, reward:{}, fail:'화주가 다른 배를 구했다.' });
+  if (at !== 'BUSAN' && portOpenId('BUSAN')) out.push({ key:'HOME', who:'부산 객주 김 노인', title:'부산으로 오는 길에',
+    body:`${pn(at)}에서 부산으로 오는 배가 있으면 <b>잡화 500톤</b>을 실어 주시오. 부산 시장이 물건을 기다리오.`,
+    obj:{ type:'deliver', from:at, to:'BUSAN', cargo:'GENERAL', tons:500, rate:1.25, days:14 }, reward:{ rep:1 }, fail:'김 노인: 다른 배 편에 보냈소.' });
+  const unvisited = Object.keys(PORTS).filter(k => portOpenId(k) && !Q.visited[k] && dist(at, k) <= Math.min(sim.reach ?? 900, 900) && k !== at);
+  if (unvisited.length) { const k = unvisited.sort((a, b) => dist(at, a) - dist(at, b))[0];
+    out.push({ key:'SCOUT', who:'산업은행 윤 대리', title:`${pn(k)} 사정을 알아봐 주십시오`,
+      body:`사장님, 은행이 ${pn(k)} 쪽 융자를 검토합니다. 지나가시는 길에 <b>${pn(k)}에 한 번 들러</b> 부두 사정을 봐 주십시오. 은행에선 그런 보고가 귀합니다.`,
+      obj:{ type:'visit', port:k }, reward:{ cash:1500, rep:1 }, days:40, fail:'윤 대리: 이번엔 다른 분께 부탁했습니다.' }); }
+  const L = co.finance?.loans?.find(l => l.starter && l.status === 'ACTIVE');
+  if (L && sim.ship.cash > 60000) out.push({ key:'PREPAY', who:'산업은행 윤 대리', title:'빚을 앞당겨 갚으시면',
+    body:`사장님, 현금이 넉넉하시면 <b>회사 현금 ${won(Math.min(150000, Math.round(sim.ship.cash * 1.6 / 5000) * 5000))}원</b>을 한 번 만들어 보여 주십시오. 은행이 금하해운 신용등급을 올리고 금리를 1%p 깎아 드리겠습니다.`,
+    obj:{ type:'cash', cash:Math.min(150000, Math.round(sim.ship.cash * 1.6 / 5000) * 5000) }, reward:{ rate:-0.01, rep:1 }, days:60, fail:'윤 대리: 심사 기간이 지났습니다. 다음 기회에.' });
+  if ((sim.ship.state?.ENGINE ?? 100) < 80) out.push({ key:'ENGINE', who:`기관장 ${(() => { try { return crewName('engine'); } catch (_) { return ''; } })()}`, title:'주기관을 봐 주십시오',
+    body:`사장님, 주기관이 ${Math.round(sim.ship.state.ENGINE)}입니다. 소리가 나쁩니다. 다음 항구에서 <b>정비해서 90 이상</b>으로 올려 주시면 선원들도 마음 놓고 탑니다.`,
+    obj:{ type:'state', part:'ENGINE', min:90 }, reward:{ rep:1, morale:true }, days:30, fail:'기관장이 한숨을 쉰다.' });
+  if (far && far !== near) out.push({ key:'RIVAL', who:`${rv} 최 전무`, title:'남는 짐을 넘기겠소',
+    body:`금하해운, 우리 배가 모자라 짐이 남았소. ${pn(at)}에서 ${pn(far)}까지 <b>석탄 900톤</b> — 운임은 제값이오. 대신 날짜는 지켜 주시오. 우리 화주요.`,
+    obj:{ type:'deliver', from:at, to:far, cargo:'COAL', tons:900, rate:1.15, days:16 }, reward:{ rep:2 }, fail:`${rv} 최 전무: 역시 맡기는 게 아니었소.` });
+  return out;
+}
+
+// ── 의뢰 만들기 · 화물 게시 ──────────────────────────────────────
+function questMake(src, def, meta) {
+  const Q = questState(), id = `Q${Q.serial++}`;
+  const o = { ...def.obj };
+  if (typeof o.to === 'function') o.to = o.to();
+  const days = o.days ?? def.days ?? null;
+  return { id, src, ...meta, who:def.who, title:def.title, body:def.body, obj:o, reward:def.reward ?? {}, after:def.after ?? '', fail:def.fail ?? '',
+    until: days ? sim.t + days * DAY : null, done:0, made:sim.t };
+}
+function questLotLive(q) {
+  return Object.values(sim.market.posted ?? {}).flat().find(c => c.questId === q.id && c.expires > sim.t) ?? null;
+}
+function questAboard(q) {
+  return (st.plan?.active && (st.plan.items ?? []).some(x => x.c.questId === q.id && !x.delivered)) || st.contract?.questId === q.id;
+}
+function questPostLot(q) {
+  const o = q.obj; if (o.type !== 'deliver' || !PORTS[o.from] || !PORTS[o.to]) return null;
+  const left = Math.max(PLAN_MIN_TONS, o.tons - (q.done ?? 0));
+  const c = storyMk(q.id, 'Q', o.from, o.to, o.cargo, left, { rate:1, endH:Math.max(24, ((q.until ?? sim.t + 30 * DAY) - sim.t) / HOUR), expiresH:Math.max(24, ((q.until ?? sim.t + 30 * DAY) - sim.t) / HOUR) });
+  c.perTon = freightBase(Math.max(40, c.d), o.cargo) * (o.rate ?? 1.2) * (() => { try { return shippingEconomyIndexForCargo(sim.market, o.cargo); } catch (_) { return 1; } })();
+  c.freight = Math.round(c.perTon * c.tons); c.demurrage = Math.round(c.freight * DEMURRAGE_RATE);
+  c.id = `${q.id}-${Math.floor(sim.t)}`; c.questId = q.id; c.questWho = q.who; c.questTitle = q.title; delete c.storyTag;
+  c.hint = `의뢰 · ${q.who}`;
+  (sim.market.posted[o.from] ??= []).push(c);
+  return c;
+}
+function questObjText(q) {
+  const o = q.obj, co = sim.company;
+  switch (o.type) {
+    case 'deliver': return `${CARGO[o.cargo].name} ${won(o.tons)}t · ${pn(o.from)} → ${pn(o.to)}${q.done ? ` (${won(q.done)}t 인도)` : ''}`;
+    case 'visit': return `${pn(o.port)}에 들른다`;
+    case 'branch': return `${o.ports.map(pn).join('·')} 중 한 곳에 대리점`;
+    case 'dwt': return `회사 선복 ${won(o.dwt)} DWT (지금 ${won(companyDwt(co))})`;
+    case 'kind': return `${FLEET_KIND[o.kind]?.name ?? o.kind} 한 척`;
+    case 'cash': return `회사 현금 ${won(o.cash)}원 (지금 ${won(Math.round(sim.ship.cash))})`;
+    case 'state': return `주기관 ${o.min} 이상 (지금 ${Math.round(sim.ship.state?.[o.part] ?? 0)})`;
+  }
+  return '';
+}
+function questRewardText(r) {
+  const a = [];
+  if (r.cash) a.push(`사례 ${won(r.cash)}원`);
+  if (r.rep) a.push(`평판 +${r.rep}`);
+  if (r.rate) a.push(`금리 ${(r.rate * 100).toFixed(0)}%p`);
+  if (r.morale) a.push('선원 사기');
+  return a.join(' · ') || '운임이 좋다';
+}
+// ── 진척 · 완수 · 실패 ─────────────────────────────────────────
+function questDelivered(c, tons) {
+  if (!c?.questId) return;
+  const q = questState().active.find(x => x.id === c.questId); if (!q) return;
+  q.done = (q.done ?? 0) + tons; q.justDelivered = true;
+}
+function questCheck(q) {
+  const o = q.obj, co = sim.company;
+  switch (o.type) {
+    case 'deliver': return q.justDelivered && !questLotLive(q) && !questAboard(q) || (q.done ?? 0) >= o.tons - 1;
+    case 'visit': return sim.ship.at === o.port && !st.leg;
+    case 'branch': return o.ports.some(p => { try { return branchLevel(co, p) >= 1; } catch (_) { return false; } });
+    case 'dwt': return companyDwt(co) >= o.dwt;
+    case 'kind': return supportShips(co).some(s => (s.kind ?? fleetModel(s)?.kind) === o.kind && !s.sold);
+    case 'cash': return sim.ship.cash >= o.cash;
+    case 'state': return (sim.ship.state?.[o.part] ?? 0) >= o.min;
+  }
+  return false;
+}
+function questReward(q) {
+  const r = q.reward ?? {};
+  if (r.cash) sim.ship.cash += r.cash;
+  if (r.rep) sim.politics.reputation = Math.min(100, (sim.politics.reputation ?? 50) + r.rep);
+  if (r.rate) { const L = sim.company.finance?.loans?.find(l => l.starter && l.status === 'ACTIVE'); if (L) L.annual = Math.max(0.02, L.annual + r.rate); }
+  if (r.morale) { try { const c = playerCrew(); if (c) c.fatigue = Math.max(0, (c.fatigue ?? 0) - 20); } catch (_) {} }
+}
+function questWire(q, kind, body) {
+  try { sim.pushWires([{ id:`W-q-${kind}-${q.id}-${Math.floor(sim.t)}`, t:sim.t, kind:'story', src:q.who, title:`${kind === 'new' ? '의뢰' : kind === 'done' ? '완수' : '무산'} · ${q.title}`, body, up:kind !== 'fail', ports:[q.obj.from ?? q.obj.port].filter(Boolean), read:kind === 'new' }]); } catch (_) {}
+}
+let questShowing = false;
+function questFinish(q, ok) {
+  const Q = questState();
+  Q.active = Q.active.filter(x => x !== q);
+  for (const p of Object.keys(sim.market.posted ?? {})) sim.market.posted[p] = (sim.market.posted[p] ?? []).filter(c => c.questId !== q.id);
+  Q.done.push({ id:q.id, arc:q.arc, step:q.step, ok, t:sim.t, title:q.title });
+  if (ok) {
+    questReward(q);
+    if (q.src === 'arc') { const A = Q.arcs[q.arc]; A.step = (A.step ?? 0) + 1; A.wait = sim.t + 3 * DAY; if (A.step >= ARCS.find(a => a.id === q.arc).steps.length) A.done = sim.t; }
+    questWire(q, 'done', `${q.after} — ${questRewardText(q.reward)}`);
+    Q.pendingNote = { q, ok:true };
+  } else {
+    if (q.src === 'side') sim.politics.reputation = Math.max(0, (sim.politics.reputation ?? 50) - 1);
+    questWire(q, 'fail', q.fail || '기한이 지났다.');
+    say(`【의뢰 무산】 ${q.title} — ${q.fail || '기한이 지났다'}`, 'm');
+  }
+  questBtnPaint();
+}
+// 이야기 줄기를 깨운다 · 단골 부탁을 낸다
+function questSpawn() {
+  const Q = questState(), at = sim.ship.at;
+  const arcBusy = Q.active.some(x => x.src === 'arc') || Q.offers.some(x => x.src === 'arc');
+  if (!arcBusy) {
+    for (const A of ARCS) {
+      const S = Q.arcs[A.id];
+      if (S?.done) continue;
+      if (!S) { let ok = false; try { ok = A.when(); } catch (_) {} if (!ok) continue; Q.arcs[A.id] = { step:0, started:sim.t, wait:sim.t }; }
+      const T = Q.arcs[A.id]; if (sim.t < (T.wait ?? 0)) break;
+      const def = A.steps[T.step]?.(); if (!def) { T.done = sim.t; continue; }
+      if (def.obj.type === 'deliver' && (!portOpenId(def.obj.from) || !portOpenId(typeof def.obj.to === 'function' ? def.obj.to() : def.obj.to))) continue;
+      if (def.obj.type === 'visit' && !portOpenId(def.obj.port)) continue;
+      Q.offers.push(questMake('arc', def, { arc:A.id, arcName:A.name, theme:A.theme, step:T.step, steps:A.steps.length }));
+      break;
+    }
+  }
+  const sides = Q.active.filter(x => x.src === 'side').length + Q.offers.filter(x => x.src === 'side').length;
+  if (sides < QUEST_SIDE_MAX && sim.t >= (Q.nextSide ?? 0) && PORTS[at]) {
+    const used = new Set([...Q.active, ...Q.offers].map(x => x.key));
+    const pool = sideTemplates(at).filter(d => !used.has(d.key) && (d.obj.type !== 'deliver' || (portOpenId(d.obj.from) && portOpenId(d.obj.to))));
+    if (pool.length) {
+      const d = pool[Math.floor(sim.rng.npc.next() * pool.length)];
+      Q.offers.push(questMake('side', d, { key:d.key }));
+    }
+    Q.nextSide = sim.t + (8 + Math.floor(sim.rng.npc.next() * 9)) * DAY;
+  }
+}
+// 정박해 있을 때 의뢰를 꺼낸다 — 판단창 하나에 하나씩
+function questOffer(q) {
+  const Q = questState();
+  Q.offers = Q.offers.filter(x => x !== q);
+  const head = q.src === 'arc' ? `${q.theme === '시대' ? '시대' : '새 바다'} · ${q.arcName} ${q.step + 1}/${q.steps}` : '부탁';
+  const body = `<div class="st-who">${q.who}</div><div class="st-body">${q.body}</div>` +
+    `<div class="st-learn">할 일 · ${questObjText(q)}${q.until ? ` · ${Math.round((q.until - sim.t) / DAY)}일 안에` : ''}<br>보상 · ${questRewardText(q.reward)}</div>`;
+  const accept = () => {
+    Q.active.push(q);
+    if (q.obj.type === 'deliver') questPostLot(q);
+    questWire(q, 'new', `${questObjText(q)} · ${questRewardText(q.reward)}`);
+    questBtnPaint();
+  };
+  const choices = [{ label:q.obj.type === 'deliver' ? '맡는다' : '알겠다', sub:q.obj.type === 'deliver' ? '해도에 ★로 뜬다' : '', run:accept }];
+  if (q.src === 'side') choices.push({ label:'사양한다', sub:'이번엔 안 받는다', run:() => {} });
+  ask.head = q.title; ask(head, body, choices);
+}
+function questNote(n) {
+  const q = n.q;
+  const body = `<div class="st-who">${q.who}</div><div class="st-body">${q.after || '고맙소.'}</div><div class="st-learn">보상 · ${questRewardText(q.reward)}</div>`;
+  ask.head = `완수 · ${q.title}`; ask(q.src === 'arc' ? `${q.arcName} ${q.step + 1}/${q.steps}` : '부탁', body, [{ label:'좋다', run:() => {} }]);
+}
+let questLastScan = -1;
+function questTick() {
+  if (!sim?.company || !questOn()) return;
+  if ($('main-menu')?.classList.contains('on')) return;
+  const Q = questState();
+  if (PORTS[sim.ship.at] && !st.leg) Q.visited[sim.ship.at] = true;
+  // 진척 · 기한
+  for (const q of Q.active.slice()) {
+    if (questCheck(q)) { questFinish(q, true); continue; }
+    if (q.until && sim.t > q.until && !questAboard(q)) {
+      if (q.src === 'arc') { q.until = sim.t + 30 * DAY; if (q.obj.type === 'deliver' && !questLotLive(q)) questPostLot(q); }
+      else questFinish(q, false);
+      continue;
+    }
+    if (q.obj.type === 'deliver' && !questLotLive(q) && !questAboard(q) && !(q.done > 0)) questPostLot(q);
+  }
+  // 하루에 한 번 새 의뢰를 본다
+  const day = Math.floor(sim.t / DAY);
+  if (day !== questLastScan) { questLastScan = day; questSpawn(); questBtnPaint(); }
+  // 정박해 있고 다른 창이 없을 때만 말을 건다
+  const busy = asking || document.querySelector('.sheetwrap.on') || $('ask')?.classList.contains('on');
+  const idle = !st.leg && !st.contract && !st.plan?.active;
+  if (busy) return;
+  if (Q.pendingNote) { const n = Q.pendingNote; Q.pendingNote = null; questNote(n); return; }
+  if (idle && Q.offers.length) questOffer(Q.offers[0]);
+}
+// ── 의뢰 장부 · 해도 표시 ────────────────────────────────────────
+function questBtnPaint() {
+  const b = $('quest-btn'); if (!b) return;
+  if (!questOn()) { b.hidden = true; return; }
+  const Q = questState(), n = Q.active.length;
+  b.hidden = n === 0 && !Q.done.length;
+  $('quest-n').textContent = n ? String(n) : '';
+}
+function questBoardPaint() {
+  const Q = questState(), box = $('qs-body');
+  const row = (q) => {
+    const port = q.obj.type === 'deliver' ? (questAboard(q) ? q.obj.to : q.obj.from) : q.obj.port ?? null;
+    return `<div class="qcard ${q.src}"><div class="qh"><span class="qtag">${q.src === 'arc' ? `${q.arcName} ${q.step + 1}/${q.steps}` : '부탁'}</span><b>${q.title}</b></div>` +
+      `<div class="qwho">${q.who}</div><div class="qobj">${questObjText(q)}${questAboard(q) ? ' · 싣고 가는 중' : ''}</div>` +
+      `<div class="qfoot"><span>${questRewardText(q.reward)}</span><em>${q.until ? `D-${Math.max(0, Math.ceil((q.until - sim.t) / DAY))}` : ''}</em></div>` +
+      (port ? `<button data-qgo="${port}">해도에서 보기</button>` : '') + `</div>`;
+  };
+  const arcsDone = Object.entries(Q.arcs).filter(([, a]) => a.done).map(([k]) => ARCS.find(a => a.id === k)?.name).filter(Boolean);
+  box.innerHTML = (Q.active.length ? Q.active.map(row).join('') : '<div class="planner-none">맡은 의뢰가 없다. 정박해 있으면 사람들이 찾아온다.</div>') +
+    (arcsDone.length ? `<div class="lbl">끝낸 이야기</div><div class="ch-done">${arcsDone.map(n => `<span>${n}</span>`).join('')}</div>` : '') +
+    `<div class="qnote">끝낸 의뢰 ${Q.done.filter(d => d.ok).length}건 · 무산 ${Q.done.filter(d => !d.ok).length}건</div>`;
+}
+function openQuests() { questBoardPaint(); $('questsheet').classList.add('on'); $('questsheet').scrollTop = 0; $('coach').classList.remove('on'); }
+function drawQuestMarks() {
+  if (!questOn()) return;
+  const Q = sim.company?.quests; if (!Q?.active?.length) return;
+  cx.save();
+  for (const q of Q.active) {
+    const o = q.obj; let p = null, txt = '';
+    if (o.type === 'deliver') { const aboard = questAboard(q); p = aboard ? o.to : (questLotLive(q) ? o.from : null); txt = aboard ? `★ ${pn(o.to)} 인도` : `★ 의뢰 ${CARGO[o.cargo].name}`; }
+    else if (o.type === 'visit') { p = o.port; txt = '◎ 들른다'; }
+    if (!p || !PORTS[p]) continue;
+    const [x, y] = px(PORTS[p].lat, PORTS[p].lon);
+    cx.strokeStyle = C('--magenta'); cx.lineWidth = 1.6;
+    cx.beginPath(); cx.arc(x, y, 9.5, 0, Math.PI * 2); cx.stroke();
+    cx.font = `bold 9px ${C('--face-num')}`;
+    const w = cx.measureText(txt).width + 8;
+    cx.fillStyle = C('--magenta'); cx.fillRect(x - w / 2, y + 12, w, 13);
+    cx.fillStyle = C('--paper'); cx.textAlign = 'center'; cx.fillText(txt, x, y + 22); cx.textAlign = 'start';
+  }
+  cx.restore();
+}
+function questBoot() {
+  $('quest-btn').onclick = openQuests;
+  $('qs-close').onclick = () => $('questsheet').classList.remove('on');
+  $('qs-body').onclick = (e) => { const b = e.target.closest('[data-qgo]'); if (!b) return;
+    $('questsheet').classList.remove('on'); const P = PORTS[b.dataset.qgo]; if (!P) return;
+    view.lat = P.lat; view.lon = P.lon; view.k = Math.max(view.k, 26); try { clampView(); dropViewPreset(); } catch (_) {}
+    try { wireFlash = { ports:[b.dataset.qgo], until:performance.now() + 4500 }; } catch (_) {} };
+  questBtnPaint();
 }
 
 // ── 항차 단계 — 띠와 전환 장면 ──────────────────────────────────
@@ -8676,7 +9070,7 @@ fit(); drawSea(); drawGraticule();
 LON_OFF = 0; drawMarineWeather();
 for (const o of wraps()) {
 LON_OFF = o;
-drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); try { drawRace(); } catch (_) {} drawTrack(st); drawMarketSignals(); drawChapterMarks(); drawFleetMarks(); drawPlanLines();
+drawLand(); drawStraits(); drawPlaces(); drawStrategyOverlay(); drawTraffic(); try { drawRace(); } catch (_) {} drawTrack(st); drawMarketSignals(); drawChapterMarks(); drawFleetMarks(); try { drawQuestMarks(); } catch (_) {} drawPlanLines();
 }
 LON_OFF = 0;
 drawNight(); drawNightLights(); drawRose(); drawScaleBar();
@@ -9454,7 +9848,7 @@ if (storyOn() && origin === sim.ship.at) { storyPost(origin); }
 else if (tut.on && origin === sim.ship.at) {
 if (!tut.forced.market) {
   tut.forced.market = true;
-  sim.market.posted[origin] = [...tutorialContracts(sim.t), ...(sim.market.posted[origin] ?? []).filter(c => c.coaId)];
+  sim.market.posted[origin] = [...tutorialContracts(sim.t), ...(sim.market.posted[origin] ?? []).filter(c => c.coaId || c.questId)];
 } else if (origin !== 'BUSAN' || (sim.ship.voyages??0) > 0) {
   updateReach();
   sim.market.generate(origin, sim.t, Math.min(sim.reach,directOperationalReach()), portOpenId);
@@ -9784,7 +10178,7 @@ const x=P.items[i];
 const gross=x.c.perTon*x.tons*(st.boon??1);
 const rev=gross*x.rateFactor;
 const dem=x.laytimeLeft<0?(-x.laytimeLeft/DAY)*x.c.demurrage:0;
-x.revenue=rev; x.demurrage=dem; x.delivered=true; x.loaded=false; chapterDelivered(x.c, x.tons);
+x.revenue=rev; x.demurrage=dem; x.delivered=true; x.loaded=false; chapterDelivered(x.c, x.tons); questDelivered(x.c, x.tons);
 portRev+=rev; portDem+=dem; layLoss+=gross-rev;
 sim.market.move(x.c.from,x.c.to,x.c.cargo,x.tons);
 recordShipperDelivery(sim.company,x.c,x.tons,sim.t,{lateH:x.laycanLateH,demurrage:dem,source:'DIRECT'});
@@ -10868,7 +11262,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.22.0 · 항차 단계 띠와 전환 장면 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.23.0 · 의뢰 · 항차 단계 띠와 전환 장면 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -13051,7 +13445,7 @@ function drawPlanLines() {
       if (inDraft.has(k.c.id)) continue;
       const hot = mapSel?.kind === 'cand' && mapSel.c.id === k.c.id;
       const m = mapMid(k.path); let [mx, my] = px(m[0], m[1]);
-      const text = (k.gain == null ? `${PORTS[k.c.to].name} 선복 없음` : `${PORTS[k.c.to].name} ${k.gain >= 0 ? '+' : '−'}${won(Math.abs(k.gain))}`) + ((k.c.flowBoost ?? 1) > 1.04 ? ' ▲' : '') + (k.c.coaId ? ' ◆국가' : '');
+      const text = (k.gain == null ? `${PORTS[k.c.to].name} 선복 없음` : `${PORTS[k.c.to].name} ${k.gain >= 0 ? '+' : '−'}${won(Math.abs(k.gain))}`) + ((k.c.flowBoost ?? 1) > 1.04 ? ' ▲' : '') + (k.c.coaId ? ' ◆국가' : '') + (k.c.questId ? ' ★의뢰' : '');
       cx.font = `10px ${C('--face-num')}`; const w = cx.measureText(text).width + 8;
       for (let tries = 0; tries < 6; tries++) {                 // 겹치면 아래로 한 줄씩 민다
         const clash = placed.some(r => Math.abs(r.x - mx) < (r.w + w) / 2 + 2 && Math.abs(r.y - my) < 16);
@@ -13120,7 +13514,8 @@ function mapCandCard(c) {
       act = `<button data-mc="add" class="${d.delta >= 0 ? 'good' : ''}">계획에 넣는다 ${money(d.delta)}</button>`;
     }
   } catch (e) { body = `<div class="mc-no">${e.message}</div>`; }
-  const coa = c.coaId ? `<div class="mc-row"><span>국가 계약 · ${c.coaTitle}</span><b class="up">장(章) 물량</b><em></em></div>` : '';
+  const coa = (c.coaId ? `<div class="mc-row"><span>국가 계약 · ${c.coaTitle}</span><b class="up">장(章) 물량</b><em></em></div>` : '') +
+    (c.questId ? `<div class="mc-row"><span>의뢰 · ${c.questWho}</span><b class="up">★ ${c.questTitle}</b><em></em></div>` : '');
   return `<div class="mc-head">${head}</div>${coa}${body}${mapNextLine(c)}<div class="btnrow">${act}<button data-mc="close">닫기</button></div>`;
 }
 // 그 항구에 내려놓은 뒤 — 다음 화물이 있는가. 배를 어디에 둘지 고르는 데 필요한 한 줄
@@ -14099,7 +14494,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {} try { stagePaint(); } catch (e) { console.warn(e); } try { storyTick(); } catch (e) { console.warn(e); }
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {} try { stagePaint(); } catch (e) { console.warn(e); } try { storyTick(); } catch (e) { console.warn(e); } try { questTick(); } catch (e) { console.warn(e); }
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
@@ -14305,7 +14700,7 @@ say(`양하 완료 · 운임 ${Math.round(rev).toLocaleString()}원` +
 (dem > 0 ? ` · 체선 ${Math.round(dem).toLocaleString()}원` : ''), dem > 0 ? 'm' : 'b');
 st.acc.dem = dem;
 sim.market.move(c.from, c.to, c.cargo, st.tons);
-chapterDelivered(c, st.tons);
+chapterDelivered(c, st.tons); questDelivered(c, st.tons);
 recordShipperDelivery(sim.company,c,st.tons,sim.t,{lateH:0,demurrage:dem,source:'DIRECT'});
 const claim=assessCargoClaim(sim.company,c,st.tons,sim.t,{crew:playerCrew(),state:S.state,maxHs:st.voyageRisk?.maxHs??0,rng:sim.rng.crew,shipId:'GEUMHA'});if(claim){S.cash-=claim.net;st.acc.claim=(st.acc.claim??0)+claim.net;say(`【화물클레임】 ${claim.label} · 손해 ${won(claim.gross)}원 · 보험금 ${won(claim.insurance)}원 · 회사부담 ${won(claim.net)}원`,'m');}
 const tr=warehouseGenerateTransship(sim.company,sim.market,c,st.tons,sim.t,sim.reach,portOpenId);if(tr)say(`【환적연계】 ${PORTS[c.to].name} 지점이 도착화물 중 ${tr.tons}t을 ${PORTS[tr.to].name}행 계약으로 집하했다`,'b');
@@ -14390,7 +14785,7 @@ DIP_ACTIONS, normalizeDiplomacy, syncDiplomacy, diplomacyStatus, diplomacyAction
 LOAN_PRODUCTS, INSURANCE_PLANS, CHARTER_OFFERS, normalizeFinance, financeSnapshot, financeRating, financeCreditLimit, loanTerms, takeLoan, repayLoan, charterIn, charterPrepareRedelivery, charterReturnEarly, charterEarlyReturnQuote, charterRedeliveryQuote, normalizeCorporateDeals, corporateDealsMonthlyTick, buyLiquidationAuction, acquireRivalCompany, setInsurancePlan, financeMonthlyTick, openFinance,
 PE_BANKS, PE_OFFICES, PE_ACTIONS, PE_RIVAL_PATRON, normalizePoliticalEconomy, peAgenda, peRefreshFinanceTerms, peSetMainBank, peInstitutionAction, peLegacyLobbyEffect, peMonthlyTick, peSnapshot, openPoliticalEconomy,
 MG_FACTIONS, MG_ROLES, EXECUTIVE_POOL, normalizeManagement, managementSnapshot, managementFactionSnapshot, availableExecutiveCandidates, promoteFleetChief, demoteFleetChief, hireExecutive, dismissExecutive, supportManagementFaction, managementMonthlyTick, openManagement,
-get asking() { return asking; }, get draftPlan(){ return draftPlan; }, eotSeaSync, eotPlanSet, tonsCap, instrLast, debtDue, debtTotal, pollDebt, openWires, wireGo, CHAPTERS, chapterState, chapterBid, chapterDaily, openChapter, repayLoan, get gameOver(){ return sim.gameOver; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
+get asking() { return asking; }, get draftPlan(){ return draftPlan; }, questState, questTick, questSpawn, ARCS, openQuests, questCheck, eotSeaSync, eotPlanSet, tonsCap, instrLast, debtDue, debtTotal, pollDebt, openWires, wireGo, CHAPTERS, chapterState, chapterBid, chapterDaily, openChapter, repayLoan, get gameOver(){ return sim.gameOver; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
 SLOTS, SLOT_BY_ID, slotOf, slotSet, stowSnapshot, stowStability, stowShifting, stowCharacter, wharfItems, wharfPaint,
 navState, navLegReset, navTick, navOpportunities, navDoFix, navProgressFactor, navPenalty, navNearestLand, navLoranChain, navSunAlt, paintNavWatch, navCycleBerthPolicy, navBuyLoran, BERTH_POLICY,
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
@@ -14405,6 +14800,7 @@ wharfBoot();
 mapPlanBoot();
 wireBoot();
 chapterBoot();
+questBoot();
 fit(); requestAnimationFrame(loop);
 </script>
 </body>
