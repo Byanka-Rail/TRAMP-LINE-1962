@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.21.0</title>
+<title>TRAMP LINE 1962 · v3.22.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -492,6 +492,18 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 #sea-view .pa-head span{display:flex}#sea-view .pa-head button{width:34px;height:27px;min-height:0;border:0;border-left:1px solid var(--rule);padding:0;background:transparent;color:var(--ink);font-size:16px}
 #sv-canvas{display:block;width:100%;aspect-ratio:16/9;background:#1a2630;image-rendering:pixelated;border-bottom:1px solid var(--line)}
 #sv-race{color:var(--magenta)!important}
+#stage-rail{display:flex;align-items:center;gap:0;background:var(--ink);padding:5px 10px 0;font-size:11px;letter-spacing:.12em}
+#stage-rail span{flex:none;padding:2px 7px;color:#6f7d80;border:1px solid transparent;transition:all .25s}
+#stage-rail span.done{color:#a9b7ba}#stage-rail span.done::before{content:'✓ ';font-size:9px}
+#stage-rail span.now{color:#fff;background:var(--magenta);border-color:var(--magenta);font-weight:600}
+#stage-rail i{flex:1;height:1px;background:#4a575a;min-width:6px}
+#stage-rail.idle span{color:#56646a}
+#phase-card{position:absolute;inset:0;z-index:12;background:#0b1116;overflow:hidden;cursor:pointer}#phase-card[hidden]{display:none}
+#pc-c{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.pc-txt{position:absolute;left:0;right:0;top:0;padding:14px 16px 26px;background:linear-gradient(180deg,rgba(8,13,17,.82),rgba(8,13,17,0));color:#f3efe2;animation:pcIn .35s ease-out}
+.pc-txt b{display:block;font-family:var(--face-title);font-weight:400;font-size:34px;letter-spacing:.3em;line-height:1.15}
+.pc-txt span{display:block;font-size:13px;margin-top:4px;color:#e3ddc9}.pc-txt small{position:absolute;right:12px;top:14px;font-size:10px;color:#a9b7ba;letter-spacing:.08em}
+@keyframes pcIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .st-who{font-family:var(--face-title);font-size:13px;letter-spacing:.06em;color:var(--magenta);margin-bottom:6px}.st-body{font-size:14px;line-height:1.6}.st-body small{display:block;margin-top:8px;color:var(--ink2);font-size:12.5px;line-height:1.5}.st-learn{margin-top:10px;padding-top:8px;border-top:1px dotted var(--line);font-size:12px;color:var(--ink2)}
 .sx-box{max-width:380px}#sp-c{display:block;width:100%;aspect-ratio:320/190;background:#e9e5d8;touch-action:none}
 .sp-cost{display:flex;align-items:baseline;gap:8px;padding:8px 12px 4px}.sp-cost span{font-size:11px;color:var(--ink2)}.sp-cost b{font-size:22px;font-family:var(--face-num)}.sp-cost small{font-size:12px}
@@ -993,7 +1005,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.21.0</div>
+      <div class="mm-version">CONTENT v3.22.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1078,12 +1090,14 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="pa-meta"><span id="sv-time">—</span><span id="sv-weather">—</span><span id="sv-race">—</span><span id="sv-left">—</span></div>
     </aside>
     <button id="sea-show" hidden>선교 창</button>
+    <div id="phase-card" hidden><canvas id="pc-c" width="240" height="135"></canvas><div class="pc-txt"><b id="pc-t">출항</b><span id="pc-s">—</span><small>눌러서 넘기기</small></div></div>
     <button id="craft-btn" hidden>📋 적부도 짜기</button>
     <div id="talk-toast" hidden></div>
   </main>
   <!-- ── 아래: 조작 독 ── -->
   <footer id="dock">
     <div id="dock-resize" role="separator" aria-label="하단 메뉴 높이 조절" aria-orientation="horizontal"><i></i><span>끌어올려 크게 보기</span></div>
+    <div id="stage-rail" aria-label="항차 단계"><span data-s="LOAD">선적</span><i></i><span data-s="DEP">출항</span><i></i><span data-s="SEA">항해</span><i></i><span data-s="ARR">입항</span><i></i><span data-s="UNLOAD">양하</span></div>
     <div id="todo"><b>지금</b><span id="todo-t">—</span></div>
     <div id="act-row"><button id="todo-act">—</button></div>
     <div id="speed-row"></div>
@@ -1243,7 +1257,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.21.0 · 1장 이야기 항차</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.22.0 · 항차 단계 띠와 전환 장면</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1524,7 +1538,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.21.0';
+const TRAMP_LINE_CONTENT_VERSION='3.22.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -8434,6 +8448,132 @@ function storyTick() {
     sim.weather.systems.push({ x: pr.x - 40, y: pr.y - 240, p: 968, R: 300, vx: 3, vy: 13, born: sim.t, life: 4 * DAY, typhoon: true });
     st.capStorm = false; }
 }
+
+// ── 항차 단계 — 띠와 전환 장면 ──────────────────────────────────
+// 선적 · 출항 · 항해 · 입항 · 양하. 아래 띠가 지금 단계를 늘 보여 주고, 단계가 바뀌는 순간
+// 해도 자리에 짧은 장면(옆에서 본 부두와 배)이 뜬다. 장면 동안 게임 시간은 멈춘다. 누르면 넘어간다.
+const phaseFx = { on:false, stage:null, last:null };
+const STAGES = ['LOAD', 'DEP', 'SEA', 'ARR', 'UNLOAD'];
+function stageNow() {
+  if (st.phase === '항해' && st.leg) { const D = dist(...st.leg), left = D - st.done;
+    return left <= 12 ? 'ARR' : st.done <= Math.min(8, D * .12) ? 'DEP' : 'SEA'; }
+  if (st.phase === '적재' || st.phase === '적재 대기') return 'LOAD';
+  if (st.phase === '양하' || st.phase === '양하 대기') return 'UNLOAD';
+  return null;
+}
+function stageCargo(kind) {   // 이 항구에서 싣는/내리는 화물 한 줄
+  try { const at = sim.ship.at, P = st.plan;
+    let L = [];
+    if (P?.active) L = (P.items ?? []).filter(x => kind === 'LOAD' ? x.c.from === at && !x.delivered : x.c.to === at && !x.delivered).map(x => [x.c.cargo, x.tons]);
+    else if (st.contract) L = [[st.contract.cargo, st.contract.tons]];
+    if (!L.length) return { text:'', cargo:null };
+    return { text: L.map(([c, t]) => `${CARGO[c].name} ${Math.round(t).toLocaleString()}t`).join(' · '), cargo: L[0][0] };
+  } catch (_) { return { text:'', cargo:null }; }
+}
+function stagePaint() {
+  const rail = $('stage-rail'); if (!rail) return;
+  const s = stageNow(), work = st.phase === '적재' || st.phase === '양하';
+  const key = `${s}|${st.phase}`; 
+  if (rail._k !== key) { rail._k = key; rail.classList.toggle('idle', !s);
+    const i = STAGES.indexOf(s);
+    for (const el of rail.querySelectorAll('span')) { const j = STAGES.indexOf(el.dataset.s);
+      el.classList.toggle('now', j === i && i >= 0); el.classList.toggle('done', i >= 0 && j < i);
+      const base = { LOAD:'선적', DEP:'출항', SEA:'항해', ARR:'입항', UNLOAD:'양하' }[el.dataset.s];
+      el.textContent = j === i && (s === 'LOAD' || s === 'UNLOAD') && !work ? `${base} · 선석 대기` : base; } }
+  // 전환 장면: 실제 작업이 시작될 때(선적·양하), 떠날 때(출항), 항구가 가까울 때(입항)
+  const ev = s === 'LOAD' ? (st.phase === '적재' ? 'LOAD' : null) : s === 'UNLOAD' ? (st.phase === '양하' ? 'UNLOAD' : null) : s === 'DEP' ? 'DEP' : s === 'ARR' ? 'ARR' : null;
+  const evKey = ev ? `${ev}:${sim.ship.at}:${st.leg ? st.leg.join('>') : ''}:${st.voyageStart || 0}:${ev === 'LOAD' || ev === 'UNLOAD' ? (st.plan?.routeIdx ?? 0) : ''}` : null;
+  if (evKey && phaseFx.last !== evKey && phaseFx.armed) { phaseFx.last = evKey; if (visualPrefs.portScenes && !$('main-menu')?.classList.contains('on')) phaseCardShow(ev); }
+  else if (evKey) phaseFx.last = evKey;
+  phaseFx.armed = true;    // 첫 그리기(불러오기 직후)에는 띄우지 않는다
+}
+function phaseCardShow(kind) {
+  const at = sim.ship.at, C = stageCargo(kind === 'UNLOAD' ? 'UNLOAD' : 'LOAD');
+  const port = kind === 'DEP' ? st.leg[0] : kind === 'ARR' ? st.leg[1] : at, P = PORTS[port];
+  let sub = '';
+  if (kind === 'LOAD') sub = `${P.name} · ${C.text || '화물을 싣는다'}`;
+  if (kind === 'UNLOAD') sub = `${P.name} · ${C.text || '화물을 내린다'}`;
+  if (kind === 'DEP') sub = `${PORTS[st.leg[0]].name} → ${PORTS[st.leg[1]].name} · ${Math.round(dist(...st.leg))}해리`;
+  if (kind === 'ARR') sub = `${P.name}${st.destEta ? ` · 선석 예정 ${clock(st.destEta)}` : ''}`;
+  const sun = subsolar(gameDate(sim.t)), alt = Math.asin(Math.sin(P.lat * D2R) * Math.sin(sun.dec * D2R) + Math.cos(P.lat * D2R) * Math.cos(sun.dec * D2R) * Math.cos((P.lon - sun.lon) * D2R)) / D2R;
+  let hs = 0.6; try { if (st.leg) hs = marineState().w.hs; } catch (_) {}
+  Object.assign(phaseFx, { on:true, kind, t0:performance.now(), dur: kind === 'DEP' || kind === 'ARR' ? 2800 : 2400, alt, hs, cargo:C.cargo, seed: raceHash(port) });
+  $('pc-t').textContent = { LOAD:'선적', DEP:'출항', ARR:'입항', UNLOAD:'양하' }[kind];
+  $('pc-s').textContent = sub;
+  const el = $('phase-card'); el.hidden = false; const tx = el.querySelector('.pc-txt'); tx.style.animation = 'none'; void tx.offsetWidth; tx.style.animation = '';
+  try { soundscape.ui(kind === 'DEP' || kind === 'ARR' ? 'bell' : 'telegraph'); } catch (_) {}
+  requestAnimationFrame(phaseCardLoop);
+}
+function phaseCardEnd() { phaseFx.on = false; $('phase-card').hidden = true; last = performance.now(); }
+function phaseCardLoop(now) {
+  if (!phaseFx.on) return;
+  const F = phaseFx, u = Math.min(1, (now - F.t0) / F.dur), t = (now - F.t0) / 1000;
+  try { phaseCardDraw(F, u, t); } catch (e) { console.warn(e); }
+  if (u >= 1) return phaseCardEnd();
+  requestAnimationFrame(phaseCardLoop);
+}
+function phaseCardDraw(F, u, t) {
+  const c = $('pc-c').getContext('2d'), W = 240, H = 135, night = F.alt < -6, wl = 96;   // wl = 수면
+  let [top, hor] = svSky(F.alt);
+  const g = c.createLinearGradient(0, 0, 0, wl); g.addColorStop(0, top); g.addColorStop(1, hor); c.fillStyle = g; c.fillRect(0, 0, W, wl);
+  if (night) { c.fillStyle = '#e8e6da'; for (let i = 0; i < 40; i++) { const h = raceHash('ps' + i); c.globalAlpha = .4 + .6 * Math.abs(Math.sin(t * 1.3 + i)); c.fillRect(h % W, (h >>> 9) % 60, 1, 1); } c.globalAlpha = 1; }
+  else if (F.alt < 8) { c.fillStyle = '#f2c78f'; c.beginPath(); c.arc(190, wl - 6 - F.alt * 2, 7, 0, Math.PI * 2); c.fill(); }
+  // 먼 산·도시 윤곽
+  c.fillStyle = night ? '#141c22' : svHex(svMix(hor, '#55605c', .5));
+  c.beginPath(); c.moveTo(0, wl); for (let x = 0; x <= W; x += 12) c.lineTo(x, wl - 8 - ((F.seed >>> (x / 12 % 20)) & 7) * 1.6 - (x < 90 ? 6 : 0)); c.lineTo(W, wl); c.fill();
+  if (night) { c.fillStyle = '#e3bd73'; for (let i = 0; i < 26; i++) { const h = raceHash('pl' + i + F.seed); c.fillRect(h % W, wl - 3 - (h >>> 8) % 9, 1, 1); } }
+  // 바다
+  const sg = c.createLinearGradient(0, wl, 0, H); sg.addColorStop(0, night ? '#0e1820' : svHex(svMix(hor, '#34525c', .65))); sg.addColorStop(1, night ? '#070d12' : '#1d3038'); c.fillStyle = sg; c.fillRect(0, wl, W, H - wl);
+  c.fillStyle = night ? 'rgba(130,160,170,.25)' : 'rgba(235,242,235,.35)';
+  for (let i = 0; i < 26; i++) { const h = raceHash('pw' + i), y = wl + 3 + (h >>> 8) % (H - wl - 4), sp = 6 + (y - wl) * .5; c.fillRect(((h % 300) + t * sp) % 280 - 20, y, 5 + (y - wl) / 5, 1); }
+  // 부두(왼쪽): 안벽·창고·크레인
+  const quay = (F.kind === 'DEP' || F.kind === 'ARR');
+  c.fillStyle = night ? '#23282a' : '#7d796d'; c.fillRect(0, wl - 10, 78, H - wl + 10);
+  c.fillStyle = night ? '#2f3537' : '#a09b8c'; c.fillRect(0, wl - 12, 80, 3);
+  c.fillStyle = night ? '#1a2023' : '#5f5d55'; c.fillRect(4, wl - 34, 40, 22); c.fillStyle = night ? '#101518' : '#4a4944'; c.beginPath(); c.moveTo(2, wl - 34); c.lineTo(24, wl - 44); c.lineTo(46, wl - 34); c.fill();
+  if (night) { c.fillStyle = '#ffd98a'; c.fillRect(12, wl - 26, 3, 3); c.fillRect(30, wl - 26, 3, 3); }
+  for (let x = 58; x < 80; x += 9) { c.fillStyle = '#15191b'; c.fillRect(x, wl - 15, 3, 4); }
+  // 배 위치: 접안(60) ↔ 바다(오른쪽 밖)
+  const ease = (x) => 1 - Math.pow(1 - x, 2.4);
+  let sx = 82, bob = Math.sin(t * 2.2) * (.6 + F.hs * .25);
+  if (F.kind === 'DEP') sx = 82 + Math.pow(u, 1.8) * 190;
+  if (F.kind === 'ARR') sx = 82 + (1 - ease(u)) * 200;
+  const sy = wl + bob, L = 106;
+  // 계류줄
+  if ((F.kind === 'LOAD' || F.kind === 'UNLOAD') || (F.kind === 'DEP' && u < .18) || (F.kind === 'ARR' && u > .9)) { c.strokeStyle = night ? '#8c8676' : '#3a3a36'; c.lineWidth = 1; c.beginPath(); c.moveTo(76, wl - 13); c.lineTo(sx + 4, sy - 13); c.moveTo(70, wl - 13); c.lineTo(sx + 26, sy - 13); c.stroke(); }
+  // 항적·선수파
+  if (F.kind === 'DEP' || (F.kind === 'ARR' && u < .85)) { c.fillStyle = 'rgba(240,246,240,.7)'; const dir = F.kind === 'DEP' ? -1 : 1, v = F.kind === 'DEP' ? u : 1 - u;
+    for (let i = 0; i < 16 * v + 3; i++) { const h = raceHash('wk' + i + Math.floor(t * 5)); c.fillRect((F.kind === 'DEP' ? sx : sx + L) + dir * (h % Math.max(6, 60 * v)), sy + 1 + (h >>> 8) % 4, 3, 1); } }
+  // 선체 (선수가 오른쪽)
+  c.fillStyle = night ? '#0a0d10' : '#1f2325';
+  c.beginPath(); c.moveTo(sx, sy - 14); c.lineTo(sx + L - 14, sy - 14); c.lineTo(sx + L, sy - 19); c.lineTo(sx + L - 8, sy + 2); c.lineTo(sx + 5, sy + 2); c.closePath(); c.fill();
+  c.fillStyle = '#7a2a2f'; c.fillRect(sx + 5, sy - 1, L - 13, 3);
+  c.fillStyle = night ? '#b9b3a2' : '#e9e4d4'; c.fillRect(sx + 8, sy - 26, 26, 12); c.fillRect(sx + 12, sy - 33, 16, 7);   // 선교(선미 쪽)
+  c.fillStyle = night ? '#ffe9a8' : '#2b3a40'; for (let i = 0; i < 4; i++) c.fillRect(sx + 11 + i * 6, sy - 23, 3, 2);
+  c.fillStyle = '#1b1d1e'; c.fillRect(sx + 17, sy - 43, 7, 10); c.fillStyle = '#c0185f'; c.fillRect(sx + 17, sy - 40, 7, 3);                // 굴뚝
+  c.fillStyle = night ? '#0a0d10' : '#2a2d2e'; c.fillRect(sx + 48, sy - 44, 2, 30); c.fillRect(sx + 82, sy - 40, 2, 26);                      // 돛대
+  c.fillRect(sx + 38, sy - 17, 18, 3); c.fillRect(sx + 60, sy - 17, 18, 3);                                                                    // 해치
+  // 연기
+  const smoke = F.kind === 'DEP' ? 1 : F.kind === 'ARR' ? .6 : .25;
+  for (let i = 0; i < 9; i++) { const a = ((t * .6 + i / 9) % 1); c.globalAlpha = (1 - a) * .55 * smoke; c.fillStyle = night ? '#59626a' : '#3d4144';
+    c.beginPath(); c.arc(sx + 20 - a * 34 * (F.kind === 'ARR' ? -0.3 : 1), sy - 46 - a * 22, 2 + a * 6, 0, Math.PI * 2); c.fill(); } c.globalAlpha = 1;
+  // 데릭과 화물 — 선적은 부두→창, 양하는 창→부두
+  if (F.kind === 'LOAD' || F.kind === 'UNLOAD') {
+    const k = (t * .55) % 1, f = F.kind === 'LOAD' ? k : 1 - k, hx = sx + 46, qx = 62;
+    // 경로: 부두 위(0) → 들어올림(.25) → 가로질러(.7) → 창으로 내림(1)
+    let px, py; if (f < .25) { px = qx; py = wl - 16 - f / .25 * 30; } else if (f < .7) { px = qx + (hx - qx) * ((f - .25) / .45); py = wl - 46; } else { px = hx; py = wl - 46 + (f - .7) / .3 * 28; }
+    c.strokeStyle = night ? '#8c8676' : '#2a2d2e'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(sx + 49, sy - 44); c.lineTo(px, wl - 56); c.stroke();         // 붐
+    c.lineWidth = 1; c.beginPath(); c.moveTo(px, wl - 56); c.lineTo(px, py - 4); c.stroke();                                                                 // 줄
+    c.fillStyle = WHARF_COLOR[F.cargo] ?? '#8a7a55'; c.fillRect(px - 5, py - 4, 10, 7); c.strokeStyle = 'rgba(0,0,0,.5)'; c.strokeRect(px - 4.5, py - 3.5, 9, 6);
+    c.fillStyle = WHARF_COLOR[F.cargo] ?? '#8a7a55'; for (let i = 0; i < 4; i++) c.fillRect(48 + i * 6, wl - 19 - (i % 2) * 6, 5, 6);                         // 부두에 쌓인 짐
+    for (let i = 0; i < 3; i++) { c.fillStyle = night ? '#c9c3b1' : '#1b1d1e'; const wx = 52 + i * 8 + Math.sin(t * 3 + i) * 1.5; c.fillRect(wx, wl - 17, 2, 5); c.fillRect(wx, wl - 19, 2, 2); } // 인부
+  }
+  // 예선(입항)
+  if (F.kind === 'ARR' && u > .35) { const tx = sx + L + 6, ty = wl + Math.sin(t * 3) * .8; c.fillStyle = night ? '#0a0d10' : '#2a2d2e'; c.fillRect(tx, ty - 5, 16, 6); c.fillStyle = '#e7b24a'; c.fillRect(tx + 4, ty - 10, 7, 5); }
+  // 기적
+  if (F.kind === 'DEP' && u > .1 && u < .6) { c.fillStyle = '#f3efe2'; c.font = '9px ' + C('--face-name'); c.globalAlpha = 1 - Math.abs(u - .35) * 3; c.fillText('뿌 우 —', sx + 30, sy - 52); c.globalAlpha = 1; }
+}
+$('phase-card').addEventListener('click', phaseCardEnd);
 function maybePortApproach(){
 if(!visualPrefs.portScenes){hidePortApproach(true);return;}
 if(portScene.preview)return;
@@ -10728,7 +10868,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.21.0 · 1장 이야기 항차 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.22.0 · 항차 단계 띠와 전환 장면 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -13959,7 +14099,7 @@ const intel = shippingMarketIntel(sim.market, S.at, sim.t, co, sim.rivals);
 
 function paint() {
 paintClock();
-maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {} try { storyTick(); } catch (e) { console.warn(e); }
+maybePortApproach(); try { maybeSeaView(); } catch (_) {} try { sextantPrompt(); berthPrompt(); stowPrompt(); } catch (_) {} try { stagePaint(); } catch (e) { console.warn(e); } try { storyTick(); } catch (e) { console.warn(e); }
 refreshTraffic();
 const S = sim.ship, c = st.contract;
 {
@@ -14074,7 +14214,7 @@ $('i-gauges').innerHTML = Object.entries(S.state).map(([k, v]) =>
 let acc = 0, last = performance.now();
 function loop(now) {
 const real = Math.min(0.25, (now - last) / 1000); last = now;
-if (!st.paused) {
+if (!st.paused && !phaseFx.on) {
 const cap = st.phase === '항해' ? st.speedTier : Math.min(86400, st.speedTier * 4);
 acc += real * cap;
 let guard = 0;
