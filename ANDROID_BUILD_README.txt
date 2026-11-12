@@ -19,7 +19,7 @@ v2.4 부터: main 브랜치에 index.html 을 푸시하기만 하면 된다.
  d) zip 안 index.html 의 TRAMP_LINE_CONTENT_VERSION 이 태그보다 낮으면 무시된다
 
 콘텐츠 업데이트:
-- 기본 내장 콘텐츠: v3.8.0 (국면 중심 화면 · 부두 적부/항차/하역 · 항해당직 · 입출항 조선)
+- 기본 내장 콘텐츠: v3.24.0 (시대 이야기 · 의뢰 · 열린 시장 · 항해당직 · 입출항 조선)
 - 앱 실행 때 GitHub Latest Release 확인
 - TRAMP_LINE_UPDATE_v<버전>.zip asset을 찾음
 - ZIP 내부 index.html의 TRAMP_LINE_CONTENT_VERSION을 검사

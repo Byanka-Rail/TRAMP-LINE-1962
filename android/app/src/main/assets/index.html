@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TRAMP LINE 1962 · v3.23.1</title>
+<title>TRAMP LINE 1962 · v3.24.0</title>
 <style>:root {
 --sea:      #eef2f1;
 --shoal:    #cfe0e4;
@@ -610,6 +610,7 @@ box-shadow:0 5px 18px rgba(0,0,0,.32); pointer-events:auto;
 .lg-speed button{min-height:30px;font-size:var(--fs-micro)}
 #ak-btns.stack{flex-direction:column;gap:4px}
 #ak-btns.stack button{margin:0}
+#ak-btns button:not(.askopt) small{display:block;margin-top:3px;font-weight:400;font-size:var(--fs-micro);color:var(--ink2);letter-spacing:0}
 .askopt{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;
   align-items:center;text-align:left;padding:7px 10px;min-height:46px;column-gap:10px}
 .askopt b{font-family:var(--face-title);font-size:var(--fs-mid);font-weight:400;grid-column:1;grid-row:1}
@@ -1025,7 +1026,7 @@ button[data-hold].nudge{animation:nudge .32s}
       <div class="era">BUSAN · 1962</div>
       <h1 id="mm-title">TRAMP LINE 1962</h1>
       <p>재래화물선 한 척에서 출발해 세계 선복시장을 읽고 선대를 키우는 해운회사 시뮬레이터</p>
-      <div class="mm-version">CONTENT v3.23.1</div>
+      <div class="mm-version">CONTENT v3.24.0</div>
     </div>
     <div class="mm-actions">
       <button id="mm-new" class="primary">새 게임</button>
@@ -1278,7 +1279,7 @@ button[data-hold].nudge{animation:nudge .32s}
         <div id="log" aria-live="polite"></div>
       </section>
       <section data-page="options" class="page" id="options-page">
-        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.23.1 · 열린 시장 수지 — 근해 화물 한 건을 배의 절반 이상으로</div>
+        <div class="option-note"><b>현재 콘텐츠 버전</b> · v3.24.0 · 시대 이야기 — 1962~1975 이야기 줄기 22개 · 고르는 의뢰 · 사람의 세월 · 달마다 호외</div>
         <div class="lbl">저장 슬롯</div>
         <div id="save-slots-options" class="save-slots"></div>
         <div class="savebar">
@@ -1565,7 +1566,7 @@ button[data-hold].nudge{animation:nudge .32s}
 <div id="ui-attic" hidden></div>
 <div id="tip" role="tooltip"></div>
 <script>
-const TRAMP_LINE_CONTENT_VERSION='3.23.1';
+const TRAMP_LINE_CONTENT_VERSION='3.24.0';
 const STREAM_SALT = {
 weather:   0x9E3779B9,
 market:    0x85EBCA6B,
@@ -8484,7 +8485,7 @@ function storyTick() {
 const QUEST_SIDE_MAX = 2;
 function questState(co = sim.company) {
   co.quests ??= { active:[], offers:[], done:[], arcs:{}, nextSide:(sim?.t ?? 0) + 2 * DAY, serial:1, visited:{} };
-  const Q = co.quests; Q.active ??= []; Q.offers ??= []; Q.done ??= []; Q.arcs ??= {}; Q.visited ??= {};
+  const Q = co.quests; Q.active ??= []; Q.offers ??= []; Q.done ??= []; Q.arcs ??= {}; Q.visited ??= {}; Q.flags ??= {}; Q.eraSent ??= {};
   return Q;
 }
 function questOn() { try { return !storyOn(); } catch (_) { return true; } }
@@ -8500,19 +8501,124 @@ function farOpen(at, list) { const open = list.filter(p => PORTS[p] && portOpenI
 
 // ── 이야기 줄기 ────────────────────────────────────────────────
 // when(): 시작 조건. steps: 걸음마다 { who, title, body, obj, reward, after }. obj.type = deliver|visit|branch|dwt|cash|kind
+// ── 시대 — 사람의 직함과 세월 ───────────────────────────────────
+function eraYear(t = sim.t) { const d = gameDate(t); return d.getUTCFullYear() + d.getUTCMonth() / 12; }
+function chTitle(id, t = sim.t) {
+  const y = eraYear(t), rv = (() => { try { return storyRivalName(); } catch (_) { return '협신해운'; } })();
+  switch (id) {
+    case 'YOON': return y < 1967 ? '산업은행 윤 대리' : y < 1972 ? '산업은행 윤 과장' : y < 1975 ? '산업은행 윤 차장' : '산업은행 부산지점 윤 지점장';
+    case 'PARK': return y < 1967.2 ? '삼화상사 박 사장' : y < 1972 ? '삼화무역 박 전무' : y < 1975 ? '삼화무역 박 사장' : '삼화종합상사 박 회장';
+    case 'JUNG': return y < 1970 ? '상공부 정 과장' : '상공부 정 국장';
+    case 'KIM':  return y < 1970 ? '국방부 조달본부 김 소령' : '국방부 조달본부 김 중령';
+    case 'CHOI': return `${rv} 최 ${y < 1972 ? '전무' : '사장'}`;
+    case 'YAMADA': return y < 1970 ? '도요상사 야마다 과장' : '도요상사 야마다 부장';
+    case 'RADIO': { try { return `통신장 ${crewName('radio')}`; } catch (_) { return '통신장'; } }
+  }
+  return id;
+}
+// 「선택」 의뢰의 효과 — 저장본에 남으므로 데이터로만 적는다
+function questApply(eff = {}) {
+  const Q = questState(), co = sim.company;
+  if (eff.cash) sim.ship.cash += eff.cash;
+  if (eff.rep) sim.politics.reputation = Math.max(0, Math.min(100, (sim.politics.reputation ?? 50) + eff.rep));
+  if (eff.flag) (Q.flags ??= {})[eff.flag] = eff.flagVal ?? true;
+  if (eff.loanRate) for (const L of co.finance?.loans ?? []) if (L.status === 'ACTIVE') L.annual = Math.max(0.02, L.annual + eff.loanRate);
+  if (eff.fatigue) { try { const c = playerCrew(); if (c) c.fatigue = Math.max(0, Math.min(100, (c.fatigue ?? 0) + eff.fatigue)); } catch (_) {} }
+  if (eff.flow) { const f = eff.flow, m = sim.market; m.flow ??= { lastMonth:-1, events:[] };
+    m.flow.events.push({ id:`Q-${f.id}-${Math.floor(sim.t)}`, region:f.region, cargo:f.cargo, side:f.side, factor:f.factor, start:sim.t, until:sim.t + (f.days ?? 60) * DAY, fake:false, cause:f.cause ?? '', label:f.label ?? f.cause ?? '', announced:true, wired:true }); }
+  if (eff.captain) {
+    const base = CAPTAIN_POOL.find(c => c.id === eff.captain), ship = (co.ships ?? []).find(s => s.role === 'PLAYER');
+    if (base && ship) {
+      const old = co.captains.find(c => c.id === ship.captainId); if (old) { old.assignedShipId = null; old.retired = true; }
+      co.captains = co.captains.filter(c => !(c.founder && c.retired));
+      let cap = co.captains.find(c => c.id === base.id);
+      if (!cap) { cap = { ...base, hiredAt:sim.t, temporary:false, assignedShipId:null }; co.captains.push(cap); (co.hiredCaptainIds ??= []).push(base.id); }
+      for (const s of supportShips(co)) if (s.captainId === cap.id) { s.captainId = null; }
+      cap.assignedShipId = ship.id; ship.captainId = cap.id;
+    }
+  }
+}
+function questFlag(k) { return !!questState().flags?.[k]; }
+// 후임 선장 후보 — 아직 고용하지 않은 사람 셋
+function captainCandidates() {
+  const co = sim.company, hired = new Set((co.captains ?? []).map(c => c.id));
+  return CAPTAIN_POOL.filter(c => !hired.has(c.id)).slice(0, 3);
+}
+const PROMOTE = (y, m, who, title, body) => ({ y, m, who, title, body });
+
+// ── 시대 전보 (호외) — 할 일은 없다. 그 달의 공기만 ──────────────────
+const ERA_WIRES = [
+  { y:1962, m:7,  t:'통화개혁 한 달', b:'환(圜)이 원(圓)이 된 지 한 달. 시장에 새 돈이 돌고, 부두 노임 계산도 새로 한다.' },
+  { y:1962, m:10, t:'카리브해 봉쇄', b:'미국이 쿠바를 봉쇄했다. 세계가 전쟁 직전이다. 태평양 해상보험료가 오른다.' },
+  { y:1963, m:2,  t:'울산 공업센터', b:'울산에 비료·정유 공장 터가 닦인다. 부산 부두에 기자재가 쌓이기 시작한다.' },
+  { y:1963, m:12, t:'서독행 광부 첫 출국', b:'광부 이백여 명이 김포에서 서독으로 떠났다. 외화가 귀한 나라다.' },
+  { y:1964, m:6,  t:'계엄령', b:'한일회담 반대 시위가 커져 서울에 계엄이 선포됐다. 부산 부두도 어수선하다.' },
+  { y:1964, m:11, t:'수출 1억 달러', b:'올해 수출이 1억 달러를 넘었다. 11월 30일을 「수출의 날」로 정했다.' },
+  { y:1965, m:6,  t:'한일 기본조약 조인', b:'국교가 열린다. 일본 항로에 큰 선사들이 몰려올 것이다.' },
+  { y:1966, m:7,  t:'월남 특수', b:'부산 부두에 월남행 군수 물자가 산처럼 쌓였다. 배가 모자란다.' },
+  { y:1967, m:1,  t:'윤 대리 과장 승진', b:'산업은행 윤 대리가 과장이 됐다. 「사장님 덕에 저도 과장입니다.」' },
+  { y:1967, m:3,  t:'삼화무역', b:'삼화상사가 「삼화무역」으로 이름을 바꿨다. 박 사장은 이제 전무다. 가발과 봉제품을 판다.' },
+  { y:1967, m:4,  t:'구로 수출공단', b:'서울 구로에 수출공단이 섰다. 가발·봉제·전자 조립품이 부산으로 내려온다.' },
+  { y:1968, m:2,  t:'경부고속도로 착공', b:'서울과 부산을 잇는 고속도로 공사가 시작됐다. 강재와 시멘트가 모자란다.' },
+  { y:1969, m:7,  t:'달에 사람이 섰다', b:'통신장이 단파로 들은 소식 — 미국 사람이 달을 걸었다. 선원들이 밤하늘을 오래 봤다.' },
+  { y:1970, m:1,  t:'정 국장 · 김 중령', b:'상공부 정 과장이 국장이 됐고, 국방부 김 소령은 중령이 됐다.' },
+  { y:1970, m:7,  t:'경부고속도로 개통', b:'서울·부산 다섯 시간. 근해 잡화 가운데 일부는 이제 트럭이 실어 간다.' },
+  { y:1970, m:12, t:'수출 10억 달러', b:'수출이 10억 달러를 넘었다. 공장이 바다 쪽으로 늘어선다.' },
+  { y:1971, m:8,  t:'달러 금태환 정지', b:'미국이 달러를 금으로 바꿔 주지 않는다고 했다. 달러 운임 계약이 흔들린다.' },
+  { y:1972, m:1,  t:'윤 차장', b:'윤 과장이 차장이 됐다. 이제 큰 융자도 그의 손을 거친다.' },
+  { y:1972, m:8,  t:'사채 동결', b:'정부가 기업의 사채를 동결했다. 빚에 허덕이던 회사들이 숨을 돌린다.' },
+  { y:1973, m:6,  t:'포항 첫 쇳물', b:'포항의 첫 용광로에서 쇳물이 나왔다. 원료탄과 철광석이 바다로 들어온다.' },
+  { y:1973, m:10, t:'중동전쟁', b:'산유국들이 원유를 줄였다. 벙커유값이 하늘로 간다.' },
+  { y:1974, m:6,  t:'울산의 첫 대형선', b:'울산 새 조선소에서 첫 대형 유조선이 진수됐다. 한국이 배를 만든다.' },
+  { y:1975, m:1,  t:'윤 지점장', b:'윤 차장이 부산지점장이 됐다. 「금하해운 첫 화물을 주선하던 때가 엊그제 같습니다.」' },
+  { y:1975, m:4,  t:'사이공 함락', b:'월남이 무너졌다. 남쪽 바다의 지도가 바뀐다.' },
+];
+function eraWiresTick() {
+  const Q = questState(); Q.eraSent ??= {};
+  for (const w of ERA_WIRES) {
+    const at = dateAt(w.y, w.m), id = `${w.y}-${w.m}-${w.t}`;
+    if (Q.eraSent[id] || sim.t < at) continue;
+    Q.eraSent[id] = true;
+    if (sim.t > at + 45 * DAY) continue;                  // 불러온 옛 저장본 — 지난 소식은 조용히 넘긴다
+    try { sim.pushWires([{ id:`W-era-${id}`, t:sim.t, kind:'era', src:'호외', title:w.t, body:w.b, up:true, ports:[] }]); } catch (_) {}
+  }
+}
+
+// ── 이야기 줄기 ────────────────────────────────────────────────
+// 걸음은 (Q) => def. def.obj.type: deliver|visit|branch|dwt|kind|cash|state|newbuild|choose
+// choose: obj.opts = [{ label, sub, cost, eff:{cash,rep,flag,...}, after }] — 고르면 바로 끝난다.
+// 시대 줄기는 open(열리는 날짜) + expire(그 안에 시작 못 하면 지나간다)
 const ARCS = [
+  { id:'CUBA62', theme:'시대', name:'카리브해의 겨울', when:() => sim.t >= dateAt(1962, 10), expire:60, steps:[
+    () => ({ who:chTitle('RADIO'), title:'미국이 쿠바를 봉쇄했습니다',
+      body:`사장님, 단파 방송입니다. 미국이 쿠바를 둘러막았습니다. 소련 배가 그쪽으로 간답니다. 세계가 전쟁 직전이라는데요.<br>보험회사에서 전화가 왔습니다 — <b>해상보험료를 올리겠다</b>고. 올려서 받든지, 지금 조건으로 가든지 정하랍니다.`,
+      obj:{ type:'choose', opts:[
+        { label:'보험을 올린다', sub:'사고가 나면 회사 부담이 적다', cost:2500, eff:{ cash:-2500, flag:'insured62' }, after:'보험 증권에 도장을 찍었다. 바다가 조용하기를.' },
+        { label:'지금 조건으로 간다', sub:'아무 일 없으면 아낀 돈이다', cost:0, eff:{ flag:'bare62' }, after:'한 선장이 고개를 끄덕였다. 「바다는 우리 바다입니다.」' } ] } }),
+  ] },
   { id:'KOBE', theme:'지역', name:'고베의 상사맨', when:() => unlockOpen('JP_WEST'), steps:[
-    () => ({ who:'도요상사 야마다 과장', title:'고베에서 뵙고 싶습니다',
+    () => ({ who:chTitle('YAMADA'), title:'고베에서 뵙고 싶습니다',
       body:`처음 뵙겠습니다. 도요상사 고베 지점의 야마다입니다. 한국 배가 고베에 들어온다는 말을 들었습니다.<br>우리 상사는 한국에 보낼 기계와 한국에서 받을 물건이 많습니다. <b>한번 고베에 들러 주십시오.</b> 얼굴을 봐야 장사가 됩니다.`,
       obj:{ type:'visit', port:'KOBE' }, reward:{ rep:2 }, after:'잘 오셨습니다. 이제 서로 얼굴을 알았으니 짐 이야기를 하지요.' }),
-    () => ({ who:'도요상사 야마다 과장', title:'방직 기계를 부산으로',
+    () => ({ who:chTitle('YAMADA'), title:'방직 기계를 부산으로',
       body:`부산의 방직 공장에서 주문한 <b>기계 600톤</b>이 고베 창고에 있습니다. 한국 배로 보내 달라는 주문입니다.<br>운임은 시세보다 넉넉히 치르겠습니다. 다만 기계는 비싸니 조심해서.`,
       obj:{ type:'deliver', from:'KOBE', to:'BUSAN', cargo:'MACHINE', tons:600, rate:1.35, days:30 }, reward:{ cash:3000, rep:2 },
       after:'공장에서 기계를 받았다고 연락이 왔습니다. 다음은 반대 방향입니다.' }),
-    () => ({ who:'도요상사 야마다 과장', title:'한국 물건을 일본으로',
+    () => ({ who:chTitle('YAMADA'), title:'한국 물건을 일본으로',
       body:`이번엔 반대입니다. 부산의 <b>합판·가발 같은 수출품 700톤</b>을 고베로 받고 싶습니다. 일본에서 잘 팔립니다.<br>한국 배가 한국 물건을 싣고 오면 세관 사람들도 보는 눈이 달라집니다.`,
       obj:{ type:'deliver', from:'BUSAN', to:'KOBE', cargo:'GENERAL', tons:700, rate:1.3, days:35 }, reward:{ cash:6000, rep:4 },
       after:'고베에 금하해운 이름이 났습니다. 앞으로 짐이 생기면 먼저 연락드리겠습니다.' }),
+  ] },
+  { id:'AIDGRAIN63', theme:'시대', name:'보릿고개', when:() => sim.t >= dateAt(1963, 4), expire:90, steps:[
+    () => ({ who:'농림부 양정과 오 주사', title:'원조 양곡이 일본 항구에 묶여 있습니다',
+      body:`올봄은 흉년입니다. 시골엔 보리가 패기도 전에 쌀독이 비었습니다.<br>미국 원조 밀가루와 옥수수가 <b>하카타 창고</b>에 와 있는데 실어 올 배가 없습니다. <b>1,000톤</b>만 부산으로 옮겨 주십시오. 나랏돈이라 운임은 박합니다.`,
+      obj:{ type:'deliver', from:() => nearOpen('BUSAN', ['HAKATA', 'SHIMO', 'NAGASAKI']) ?? 'HAKATA', to:'BUSAN', cargo:'GRAIN', tons:1000, rate:1.0, days:25 }, reward:{ rep:4 },
+      after:'양곡이 풀렸다. 부산 시장에 줄이 짧아졌다는 말이 들린다.' }),
+    () => ({ who:'농림부 양정과 오 주사', title:'계속 맡아 주시겠습니까',
+      body:`보릿고개는 아직 두 달 남았습니다. 원조 양곡을 <b>계속 싼 운임으로</b> 맡아 주시면 농림부가 잊지 않겠습니다.<br>시세대로 받으시겠다면, 그것도 장사니 어쩔 수 없지요.`,
+      obj:{ type:'choose', opts:[
+        { label:'싸게 계속 맡는다', sub:'평판 +5 · 한 달 운임이 준다', cost:4000, eff:{ cash:-4000, rep:5, flag:'aidLoyal' }, after:'오 주사가 고개를 깊이 숙였다. 「나라가 기억할 겁니다.」' },
+        { label:'시세대로 받겠다', sub:'장사는 장사다', cost:0, eff:{ flag:'aidMarket' }, after:'오 주사는 다른 배를 찾으러 갔다.' } ] } }),
   ] },
   { id:'SOUTH_SEA', theme:'지역', name:'남쪽 바다의 화교 상인', when:() => unlockOpen('OCEAN1'), steps:[
     () => ({ who:'홍콩 화교 상인 진(陳) 사장', title:'남쪽 바다가 열렸소',
@@ -8527,31 +8633,65 @@ const ARCS = [
       obj:{ type:'deliver', from:'MANILA', to:'BUSAN', cargo:'TIMBER', tons:900, rate:1.3, days:40 }, reward:{ cash:8000, rep:4 },
       after:'남쪽 바다에서 금하해운은 이제 「믿을 만한 한국 배」요. 우리 상인들에게 그렇게 말해 두었소.' }),
   ] },
-  { id:'EXPORT64', theme:'시대', name:'수출 1억 달러', when:() => sim.t >= dateAt(1964, 5), steps:[
-    () => ({ who:'상공부 수출진흥과 정 과장', title:'수출의 해입니다',
+  { id:'ELECTION63', theme:'시대', name:'민정 이양', when:() => sim.t >= dateAt(1963, 9), expire:50, steps:[
+    () => ({ who:chTitle('PARK'), title:'해운업자 간담회가 있소',
+      body:`금하해운, 시월에 대통령 선거가 있소. 군복 벗은 양반들이 민간 정부를 세운다는 거요.<br>부산 해운업자들이 <b>간담회 찬조금</b>을 모으고 있소. 내면 앞으로 관청 문턱이 낮아질 거고, 안 내면… 그건 사장이 판단하시오.`,
+      obj:{ type:'choose', opts:[
+        { label:'찬조금을 낸다', sub:'평판 +3 · 입찰에서 유리', cost:6000, eff:{ cash:-6000, rep:3, flag:'donor63' }, after:'박 사장: 잘 생각했소. 이 나라에선 줄이 곧 길이오.' },
+        { label:'내지 않는다', sub:'정치와는 거리를 둔다', cost:0, eff:{ flag:'clean63' }, after:'박 사장: 배짱 하나는 좋구려. 나중에 아쉬운 소리 마시오.' } ] } }),
+  ] },
+  { id:'EXPORT64', theme:'시대', name:'수출 1억 달러', when:() => sim.t >= dateAt(1964, 5), expire:150, steps:[
+    () => ({ who:chTitle('JUNG'), title:'수출의 해입니다',
       body:`나라가 올해 수출 1억 달러를 목표로 걸었습니다. 수출품은 있는데 실어 낼 배가 늘 모자랍니다.<br>금하해운이 <b>부산 수출품 600톤</b>을 일본이나 홍콩으로 실어 내 주십시오. 실적은 상공부에 기록됩니다.`,
       obj:{ type:'deliver', from:'BUSAN', to:() => nearOpen('BUSAN', ['HAKATA', 'KOBE', 'HONGKONG']) ?? 'HAKATA', cargo:'GENERAL', tons:600, rate:1.25, days:30 }, reward:{ cash:3000, rep:3 },
       after:'수출 실적이 올라갔습니다. 과장님들이 금하해운 이름을 압니다.' }),
-    () => ({ who:'상공부 수출진흥과 정 과장', title:'배가 더 있어야 합니다',
+    () => ({ who:chTitle('JUNG'), title:'배가 더 있어야 합니다',
       body:`수출은 이제 시작입니다. 배 한 척으로는 모자랍니다. <b>회사 선복을 2,400 DWT까지</b> 늘리시면 수출 화물을 우선 배정해 드리겠습니다.<br><small>「회사」 탭 → 중고선 시장</small>`,
       obj:{ type:'dwt', dwt:2400 }, reward:{ cash:8000, rep:4 },
       after:'두 척이 된 금하해운 — 수출선 명단에 올렸습니다.' }),
+    () => ({ who:chTitle('JUNG'), title:'수출의 날에 부산에 계십시오', notBefore:dateAt(1964, 11) + 27 * DAY,
+      body:`11월 30일, 첫 「수출의 날」 기념식이 있습니다. 수출에 애쓴 선사에 표창이 나갑니다.<br>그날 <b>부산에 배를 대고</b> 계십시오. 사장님이 직접 받으셔야 합니다.`,
+      obj:{ type:'visit', port:'BUSAN' }, reward:{ cash:5000, rep:5, rate:-0.005 },
+      after:'표창장을 받았다. 은행이 금하해운 금리를 0.5%p 깎아 주었다.' }),
+  ] },
+  { id:'PROTEST64', theme:'시대', name:'유월의 부두', when:() => sim.t >= dateAt(1964, 6), expire:40, steps:[
+    () => ({ who:capName(), title:'부두가 멈췄습니다',
+      body:`사장님, 한일회담 반대 시위로 서울에 계엄이 났답니다. 부산 부두도 노조가 일손을 놓았습니다.<br>지금 싣고 내리는 짐은 <b>며칠씩 밀립니다.</b> 화주에게 체선을 보전해 주겠다고 할지, 계약대로 하자고 버틸지 정하셔야 합니다.`,
+      obj:{ type:'choose', opts:[
+        { label:'체선을 보전해 준다', sub:'화주 평판을 지킨다', cost:3000, eff:{ cash:-3000, rep:3 }, after:'화주들이 고맙다고 했다. 박 사장도 들었다.' },
+        { label:'계약대로 버틴다', sub:'돈은 지킨다', cost:0, eff:{ rep:-2 }, after:'화주 몇이 다른 배를 알아보기 시작했다.' } ] } }),
   ] },
   { id:'TREATY65', theme:'시대', name:'한일 국교 정상화', when:() => sim.t >= dateAt(1965, 7), steps:[
-    () => ({ who:'산업은행 윤 대리', title:'일본 항로가 바빠집니다',
+    () => ({ who:chTitle('YOON'), title:'일본 항로가 바빠집니다',
       body:`사장님, 한일 기본조약이 맺어졌습니다. 이제 일본 전역에 배를 댈 수 있습니다. 대신 큰 선사들도 일본 항로로 몰려옵니다.<br>일본에 발판이 있어야 합니다. <b>하카타나 고베에 대리점</b>을 하나 두십시오. 짐을 먼저 잡습니다.`,
       obj:{ type:'branch', ports:['HAKATA', 'KOBE', 'SHIMO'] }, reward:{ cash:6000, rep:3 },
       after:'대리점이 생기니 일본 쪽 전보가 빨라졌습니다. 소문을 남보다 먼저 듣는 것이 해운입니다.' }),
-    () => ({ who:`${(() => { try { return storyRivalName(); } catch (_) { return '협신해운'; } })()} 최 전무`, title:'한번 겨뤄 봅시다',
-      body:`금하해운, 소문 들었소. 일본 항로는 이제 우리 협신이 잡을 거요. 다음 달 <b>고베행 강재 1,000톤</b> — 먼저 대는 쪽이 앞으로도 그 화주 짐을 받소. 겨뤄 보겠소?`,
+    () => ({ who:chTitle('CHOI'), title:'한번 겨뤄 봅시다',
+      body:`금하해운, 소문 들었소. 일본 항로는 이제 우리가 잡을 거요. 다음 달 <b>고베행 강재 1,000톤</b> — 먼저 대는 쪽이 앞으로도 그 화주 짐을 받소. 겨뤄 보겠소?`,
       obj:{ type:'deliver', from:'BUSAN', to:'KOBE', cargo:'STEEL', tons:1000, rate:1.25, days:20 }, reward:{ cash:5000, rep:5 },
       after:'최 전무: 이번엔 졌소. 금하해운, 만만치 않구려.' }),
   ] },
+  { id:'CLAIMFUND66', theme:'시대', name:'청구권 자금', when:() => sim.t >= dateAt(1966, 2) && unlockOpen('JP_WEST'), steps:[
+    () => ({ who:chTitle('YAMADA'), title:'청구권 자금으로 공장이 섭니다',
+      body:`국교가 열리고 청구권 자금이 풀렸습니다. 그 돈으로 한국에 비료 공장, 제철 설비가 들어갑니다. 설비는 전부 일본에서 나갑니다.<br>첫 물량 <b>공장 설비 1,200톤</b>을 고베에서 부산으로. 금하해운에 먼저 말씀드리는 겁니다.`,
+      obj:{ type:'deliver', from:'KOBE', to:'BUSAN', cargo:'MACHINE', tons:1200, rate:1.35, days:35 }, reward:{ cash:6000, rep:3 },
+      after:'설비가 부두에 내렸다. 크레인 기사들이 이런 쇳덩이는 처음 본다고 했다.' }),
+    () => ({ who:chTitle('YAMADA'), title:'전속 계약을 하시지요',
+      body:`도요상사가 금하해운과 <b>전속 운송 계약</b>을 하고 싶어 합니다. 짐은 꾸준히 드리겠습니다. 대신 운임은 조금 낮춰 주셔야 합니다.<br>자유롭게 시장을 보실지, 안정을 택하실지.`,
+      obj:{ type:'choose', opts:[
+        { label:'전속 계약을 한다', sub:'일본 짐이 꾸준해진다 · 운임은 조금 낮다', cost:0, eff:{ rep:2, flag:'toyoContract', flow:{ id:'TOYO', region:'JAPAN', cargo:'MACHINE', side:'SUPPLY', factor:1.25, days:240, cause:'도요상사 전속 화물' } }, after:'야마다: 좋은 동반자가 되겠습니다.' },
+        { label:'자유롭게 간다', sub:'시장을 내 눈으로 본다', cost:0, eff:{ flag:'toyoFree' }, after:'야마다: 아쉽지만, 짐이 생기면 또 연락드리겠습니다.' } ] } }),
+  ] },
   { id:'VIETNAM66', theme:'지역', name:'월남 특수', when:() => unlockOpen('VIETNAM'), steps:[
-    () => ({ who:'국방부 조달본부 김 소령', title:'사이공까지 갈 배가 필요합니다',
+    () => ({ who:chTitle('KIM'), title:'전쟁 바다의 보험',
+      body:`사장님, 월남 항로는 전쟁 바다입니다. 보험회사는 <b>전쟁위험 할증</b>을 따로 받습니다. 들지 않으면 사고가 나도 한 푼 못 받습니다.<br>군수 물자를 맡으시려면 미리 정해 두십시오.`,
+      obj:{ type:'choose', opts:[
+        { label:'전쟁위험 보험에 든다', sub:'항차마다 마음이 놓인다', cost:5000, eff:{ cash:-5000, flag:'warRisk' }, after:'증권을 받았다. 선원들 얼굴이 조금 펴졌다.' },
+        { label:'들지 않는다', sub:'운이 좋으면 다 남는다', cost:0, eff:{ flag:'noWarRisk', fatigue:8 }, after:'선원들이 말없이 출항 준비를 했다.' } ] } }),
+    () => ({ who:chTitle('KIM'), title:'사이공까지 갈 배가 필요합니다',
       body:`파월 장병들에게 갈 물자가 부산 부두에 쌓입니다. 미군 배만으로는 모자랍니다.<br><b>사이공에 한 번 들어가</b> 항만 사정을 보고 와 주십시오. 전쟁 중인 항구입니다. 선원들에게 단단히 일러 두십시오.`,
       obj:{ type:'visit', port:'SAIGON' }, reward:{ cash:6000, rep:3 }, after:'사이공 부두 사정이 보고되었습니다. 이제 정식으로 짐을 맡기겠습니다.' }),
-    () => ({ who:'국방부 조달본부 김 소령', title:'보급 물자 1,500톤',
+    () => ({ who:chTitle('KIM'), title:'보급 물자 1,500톤',
       body:`<b>보급 물자 1,500톤</b>을 부산에서 사이공까지. 운임은 군 예산이라 넉넉합니다. 날짜는 꼭 지켜 주십시오.<br><small>${capName()}: 장거리입니다. 기름과 선원 피로를 보고 가십시오.</small>`,
       obj:{ type:'deliver', from:'BUSAN', to:'SAIGON', cargo:'GENERAL', tons:1500, rate:1.45, days:45 }, reward:{ cash:15000, rep:5 },
       after:'물자는 무사히 닿았습니다. 국방부가 금하해운을 기억할 겁니다 — 군수 계약 입찰에서도.' }),
@@ -8559,6 +8699,43 @@ const ARCS = [
       body:`월남까지 왔다 빈 배로 돌아가는 건 손해요. <b>방콕 쌀 1,200톤</b>을 부산으로 실어 가시오. 한국은 늘 쌀이 모자라지 않소.`,
       obj:{ type:'deliver', from:'BANGKOK', to:'BUSAN', cargo:'GRAIN', tons:1200, rate:1.3, days:40 }, reward:{ cash:8000, rep:3 },
       after:'갈 때 물자, 올 때 쌀 — 빈 배로 다니지 않는 것이 트램프의 셈이다.' }),
+  ] },
+  { id:'GURO67', theme:'시대', name:'가발과 봉제', when:() => sim.t >= dateAt(1967, 4), steps:[
+    () => ({ who:chTitle('PARK'), title:'가발이 바다를 건넙니다',
+      body:`금하해운, 오랜만이오. 우리 회사가 이름을 바꿨소 — 삼화무역이오. 이제 가발이랑 봉제품을 미국·일본에 파오.<br>구로공단에서 내려온 <b>가발·봉제품 800톤</b>을 고베로. 미국행 큰 배에 옮겨 싣는 거요.`,
+      obj:{ type:'deliver', from:'BUSAN', to:() => portOpenId('KOBE') ? 'KOBE' : 'HAKATA', cargo:'GENERAL', tons:800, rate:1.3, days:25 }, reward:{ cash:4000, rep:2 },
+      after:'박 전무: 여공들 손이 얼마나 빠른지 아오? 이 나라는 이걸로 일어설 거요.' }),
+    () => ({ who:chTitle('PARK'), title:'홍콩에도 팔리오',
+      body:`홍콩 상인들이 한국 가발을 찾소. <b>800톤</b>을 홍콩으로. 거기서 동남아로 퍼질 거요.`,
+      obj:{ type:'deliver', from:'BUSAN', to:() => portOpenId('HONGKONG') ? 'HONGKONG' : (portOpenId('KOBE') ? 'KOBE' : 'HAKATA'), cargo:'GENERAL', tons:800, rate:1.3, days:35 }, reward:{ cash:6000, rep:2 },
+      after:'박 전무: 금하해운 배로 나간 가발이 홍콩 진열장에 걸렸다오.' }),
+    () => ({ who:chTitle('PARK'), title:'정기 화주가 되겠소',
+      body:`우리 물량이 이제 배 한두 척으로는 모자라오. 금하해운이 <b>선복 4,000 DWT</b>를 갖추면 삼화무역 수출 화물을 정기로 맡기겠소.`,
+      obj:{ type:'dwt', dwt:4000 }, reward:{ cash:15000, rep:4, flag:'samhwaRegular' },
+      after:'박 전무: 이제 우린 한 배를 탄 거요. 오래 갑시다.' }),
+  ] },
+  { id:'PRICEWAR67', theme:'시대', name:'운임 전쟁', when:() => sim.t >= dateAt(1967, 9), steps:[
+    () => ({ who:chTitle('CHOI'), title:'근해 운임을 깎겠소',
+      body:`금하해운, 미리 말해 두오. 우리 회사는 다음 달부터 <b>근해 운임을 두 할 깎소.</b> 배가 남아돌아서 말이오.<br>따라오든지, 화주를 내주든지.`,
+      obj:{ type:'choose', opts:[
+        { label:'따라 깎는다', sub:'한 달 운임이 준다 · 화주는 지킨다', cost:8000, eff:{ cash:-8000, flag:'matched67' }, after:'두 회사가 같이 피를 흘렸다. 최 전무 쪽이 더 아팠다는 소문이다.' },
+        { label:'버틴다', sub:'근해 화물이 한동안 줄어든다', cost:0, eff:{ flag:'held67', flow:{ id:'WAR67', region:'KOREA', cargo:'GENERAL', side:'SUPPLY', factor:.8, days:60, cause:'협신의 운임 덤핑' } }, after:'화주 몇이 협신으로 갔다. 돌아올지는 두고 봐야 한다.' } ] } }),
+    (Q) => Q.flags?.matched67
+      ? ({ who:chTitle('CHOI'), title:'이러다 둘 다 망하겠소',
+          body:`금하해운, 솔직히 말하겠소. 이대로면 둘 다 망하오. <b>근해 화물 일부를 넘기겠소</b> — 부산에서 일본으로 강재 900톤. 운임은 제값이오. 휴전합시다.`,
+          obj:{ type:'deliver', from:'BUSAN', to:() => nearOpen('BUSAN', ['SHIMO', 'HAKATA', 'NAGASAKI']) ?? 'HAKATA', cargo:'STEEL', tons:900, rate:1.3, days:20 }, reward:{ cash:4000, rep:3, flag:'truce' },
+          after:'최 전무: 맞수가 있어야 장사할 맛도 나는 법이오.' })
+      : ({ who:chTitle('CHOI'), title:'화주들이 돌아가고 있소',
+          body:`(부두 소식) 협신의 싼 운임에 몰렸던 화주들이 배가 늦게 오자 하나둘 돌아온다. 박 전무가 전화를 걸어왔다 — <b>밀린 잡화 700톤</b>을 금하해운이 실어 달라고.`,
+          obj:{ type:'deliver', from:'BUSAN', to:() => nearOpen('BUSAN', ['HAKATA', 'SHIMO', 'NAGASAKI']) ?? 'HAKATA', cargo:'GENERAL', tons:700, rate:1.35, days:15 }, reward:{ cash:5000, rep:4 },
+          after:'싸게 부르는 배보다 제때 오는 배 — 화주들이 그걸 배웠다.' }),
+  ] },
+  { id:'TENSION68', theme:'시대', name:'정초의 긴장', when:() => sim.t >= dateAt(1968, 1) + 20 * DAY, expire:60, steps:[
+    () => ({ who:chTitle('RADIO'), title:'출입항 검문이 강화됩니다',
+      body:`사장님, 정초부터 나라가 시끄럽습니다. 동해에서 미국 정보함이 끌려갔고, 해안 경계가 삼엄합니다. 부산 출입항 검문이 길어졌습니다.<br>한 선장은 <b>야간 출항을 잠시 접자</b>고 합니다. 시간은 늦지만 검문에 덜 걸린다고요.`,
+      obj:{ type:'choose', opts:[
+        { label:'야간 출항을 접는다', sub:'한 달쯤 일정이 느슨해진다', cost:2000, eff:{ cash:-2000, fatigue:-10 }, after:'선원들이 오랜만에 밤에 잤다.' },
+        { label:'그대로 다닌다', sub:'검문에 걸리면 반나절씩 묶인다', cost:0, eff:{ fatigue:10, rep:-1 }, after:'검문소에서 서류를 세 번 보여 줬다.' } ] } }),
   ] },
   { id:'TIMBER68', theme:'지역', name:'남양 원목', when:() => unlockOpen('SEASIA'), steps:[
     () => ({ who:'싱가포르 원목상 림 사장', title:'보르네오 원목이 넘칩니다',
@@ -8569,6 +8746,16 @@ const ARCS = [
       body:`원목은 목재선이 제일입니다. 갑판에도 쌓고, 긴 화물창에 통째로 넣습니다. <b>목재선을 한 척</b> 들이시면 원목을 몰아 드리겠습니다.`,
       obj:{ type:'kind', kind:'TIMBER' }, reward:{ cash:20000, rep:5 }, after:'목재선이 생겼으니 남양 원목은 금하해운 몫입니다.' }),
   ] },
+  { id:'EXPWY70', theme:'시대', name:'고속도로의 시대', when:() => sim.t >= dateAt(1970, 7), expire:90, steps:[
+    () => ({ who:chTitle('YOON'), title:'트럭이 바다 짐을 가져갑니다',
+      body:`사장님, 경부고속도로가 열렸습니다. 서울·부산이 다섯 시간입니다. 그동안 배로 오가던 잡화 일부가 트럭으로 갑니다.<br>근해만 보시면 앞으로 힘드실 겁니다. <b>원양으로 무게를 옮기시든지</b>, 근해에서 버티시든지.`,
+      obj:{ type:'choose', opts:[
+        { label:'원양으로 간다', sub:'선복을 늘려 먼 바다로', cost:0, eff:{ flag:'goOcean', flow:{ id:'EXPWY', region:'KOREA', cargo:'GENERAL', side:'SUPPLY', factor:.85, days:180, cause:'고속도로 개통' } }, after:'윤 과장: 그렇다면 선박 융자 이야기를 해 보지요.' },
+        { label:'근해를 지킨다', sub:'단골 화주를 꽉 잡는다', cost:3000, eff:{ cash:-3000, rep:2, flow:{ id:'EXPWY2', region:'KOREA', cargo:'GENERAL', side:'SUPPLY', factor:.92, days:120, cause:'고속도로 개통' } }, after:'화주들에게 인사를 돌았다. 근해 짐은 덜 빠졌다.' } ] } }),
+    (Q) => Q.flags?.goOcean ? ({ who:chTitle('YOON'), title:'먼 바다로 갈 배',
+      body:`원양으로 가시려면 배가 커야 합니다. <b>회사 선복 9,000 DWT</b>를 갖추시면 은행이 금리를 깎아 드리겠습니다.`,
+      obj:{ type:'dwt', dwt:9000 }, reward:{ rep:3, rate:-0.01 }, after:'금하해운의 배들이 동남아 바다에 흩어졌다.' }) : null,
+  ] },
   { id:'INDIA70', theme:'지역', name:'인도양의 면화', when:() => unlockOpen('INDIA'), steps:[
     () => ({ who:'봄베이 면화상 라오 씨', title:'면화가 부산을 찾습니다',
       body:`한국 방직 공장은 면화가 필요하고, 우리는 면화가 넘칩니다. 인도양은 멀지만 운임은 그만큼 좋습니다.<br>먼저 <b>콜롬보에 들러</b> 급유하고 우리 대리인을 만나시오.`,
@@ -8578,14 +8765,48 @@ const ARCS = [
       obj:{ type:'deliver', from:'BOMBAY', to:'BUSAN', cargo:'GENERAL', tons:2000, rate:1.3, days:60 }, reward:{ cash:20000, rep:5 },
       after:'인도양을 건넌 한국 배 — 회사 이름이 바다 밖으로 나갔다.' }),
   ] },
-  { id:'OIL73', theme:'시대', name:'석유 파동', when:() => unlockOpen('MIDEAST'), steps:[
-    () => ({ who:'산업은행 윤 대리', title:'기름값이 네 배가 됐습니다',
-      body:`사장님, 중동에서 기름을 끊었습니다. 벙커유값이 하늘로 갑니다. 그런데 중동은 돈이 넘쳐 건설을 시작합니다.<br>위기와 기회가 같이 왔습니다. <b>쿠웨이트에 한 번 들어가</b> 보십시오.`,
+  { id:'NIXON71', theme:'시대', name:'달러가 흔들린다', when:() => sim.t >= dateAt(1971, 8) + 15 * DAY, expire:60, steps:[
+    () => ({ who:chTitle('YOON'), title:'달러 운임을 어떻게 하시겠습니까',
+      body:`사장님, 미국이 달러를 금으로 안 바꿔 주겠답니다. 환율이 어디로 튈지 모릅니다.<br>외국 화주와의 운임을 <b>원화로 고정</b>하면 안전하고, <b>달러로 두면</b> 오를 때 먹고 내릴 때 잃습니다.`,
+      obj:{ type:'choose', opts:[
+        { label:'원화로 고정한다', sub:'잃을 것도 얻을 것도 없다', cost:1500, eff:{ cash:-1500, flag:'wonFixed' }, after:'계약서를 고쳐 썼다. 수수료가 들었다.' },
+        { label:'달러로 둔다', sub:'반반의 내기', cost:0, eff:{ cash:(() => { try { return sim.rng.npc.next() < .5 ? 9000 : -7000; } catch (_) { return 0; } })(), flag:'dollarBet' }, after:'석 달 뒤 환율이 정해졌다. 장부를 보라.' } ] } }),
+  ] },
+  { id:'HANRETIRE', theme:'사람', name:'한 선장의 마지막 항해', when:() => sim.t >= dateAt(1971, 10) && !!(sim.company.captains ?? []).find(c => c.founder && !c.retired), steps:[
+    () => { const C = captainCandidates();
+      return { who:capName(), title:'배를 내려야겠습니다',
+        body:`젊은 사장 — 이제 젊다고 하기도 뭣하군요. 금하호를 탄 지 십 년입니다. 다리가 예전 같지 않습니다.<br>이번 항차를 끝으로 배를 내리겠습니다. <b>후임을 정해 주십시오.</b> 셋 다 제가 아는 사람들입니다.`,
+        obj:{ type:'choose', opts: C.map(c => ({ label:`${c.name} 선장`, sub:`${c.age}세 · ${c.trait} — ${c.note}`, cost:0, eff:{ captain:c.id, rep:1 }, after:`한 선장이 ${c.name}의 손을 잡았다. 「금하호를 부탁하네.」` })) } }; },
+  ] },
+  { id:'FREEZE72', theme:'시대', name:'8·3 조치', when:() => sim.t >= dateAt(1972, 8) + 3 * DAY, expire:40, steps:[
+    () => ({ who:chTitle('YOON'), title:'사채가 동결됐습니다',
+      body:`사장님, 정부가 기업 사채를 동결했습니다. 비싼 사채에 묶였던 회사들이 숨을 돌립니다.<br>은행 빚도 금리를 깎아 주라는 지시가 내려왔습니다. <b>금하해운 대출 금리를 1%p 내려 드리겠습니다.</b> 다만 협신 같은 곳도 같이 살아납니다.`,
+      obj:{ type:'choose', opts:[ { label:'고맙소', sub:'모든 대출 금리 −1%p', cost:0, eff:{ loanRate:-0.01 }, after:'장부의 이자 칸이 가벼워졌다.' } ] } }),
+  ] },
+  { id:'SHIPYARD73', theme:'시대', name:'배를 만드는 나라', when:() => sim.t >= dateAt(1973, 3), steps:[
+    () => ({ who:chTitle('JUNG'), title:'우리도 배를 만듭니다',
+      body:`중화학공업을 하겠다고 나라가 선언했습니다. 울산에 큰 조선소가 섭니다. 조선소는 일감이 있어야 삽니다.<br>금하해운이 <b>신조선을 한 척 발주</b>하시면 상공부가 보조금을 드리겠습니다.<br><small>「회사」 탭 → 신조선</small>`,
+      obj:{ type:'newbuild' }, reward:{ cash:40000, rep:6 }, after:'정 국장: 언젠가 금하해운 배가 울산에서 진수할 날이 올 겁니다.' }),
+  ] },
+  { id:'OIL73', theme:'시대', name:'석유 파동', when:() => unlockOpen('MIDEAST') || sim.t >= dateAt(1973, 11), steps:[
+    () => ({ who:chTitle('YOON'), title:'기름값이 네 배가 됐습니다',
+      body:`사장님, 중동에서 기름을 끊었습니다. 벙커유값이 하늘로 갑니다.<br>배를 <b>천천히 몰면</b> 기름이 덜 듭니다. 회사 방침을 정해 주십시오.`,
+      obj:{ type:'choose', opts:[
+        { label:'감속 운항 방침', sub:'기름을 아낀다 · 일정은 늦다', cost:0, eff:{ flag:'slowSteam', rep:1 }, after:'선장들에게 경제 속력 방침을 내렸다.' },
+        { label:'제 속력을 지킨다', sub:'화주와의 약속이 먼저다', cost:4000, eff:{ cash:-4000, rep:2 }, after:'기름값이 장부를 짓눌렀지만 화주들은 고마워했다.' } ] } }),
+    () => ({ who:chTitle('YOON'), title:'위기와 기회',
+      body:`그런데 중동은 돈이 넘쳐 건설을 시작합니다. <b>쿠웨이트에 한 번 들어가</b> 보십시오. 한국 건설 회사 사람들이 벌써 와 있답니다.`,
       obj:{ type:'visit', port:'KUWAIT' }, reward:{ rep:4 }, after:'쿠웨이트 부두에 한국 건설 회사 사람들이 보입니다.' }),
     () => ({ who:'해외건설협회', title:'사막에 철근을',
       body:`한국 건설 회사들이 중동 공사를 땄습니다. <b>부산 강재 3,000톤</b>을 지다로. 사막에 길과 항만을 놓습니다.`,
       obj:{ type:'deliver', from:'BUSAN', to:'JEDDAH', cargo:'STEEL', tons:3000, rate:1.4, days:70 }, reward:{ cash:40000, rep:6 },
       after:'중동 건설 특수 — 금하해운 배가 그 길을 열었다.' }),
+  ] },
+  { id:'SAIGON75', theme:'시대', name:'사이공의 마지막 배', when:() => sim.t >= dateAt(1975, 3) && portOpenId('SAIGON'), expire:45, steps:[
+    () => ({ who:chTitle('KIM'), title:'사이공이 무너집니다',
+      body:`사장님, 김입니다. 사이공이 며칠 못 갑니다. 교민들과 대사관 물자를 빼내야 하는데 배가 없습니다.<br><b>사이공에서 부산까지 철수 화물 800톤</b>. 위험합니다. 그러나 이번엔 돈 이야기가 아닙니다.`,
+      obj:{ type:'deliver', from:'SAIGON', to:'BUSAN', cargo:'GENERAL', tons:800, rate:1.8, days:20 }, reward:{ cash:25000, rep:10 },
+      after:'마지막 배가 부산에 닿았다. 부두에서 누군가 울었다.' }),
   ] },
 ];
 
@@ -8594,7 +8815,7 @@ function sideTemplates(at) {
   const P = storyPorts(at), near = P[0], mid = P[Math.min(1, P.length - 1)], far = P[Math.min(3, P.length - 1)];
   const Q = questState(), co = sim.company, cap = capName(), rv = (() => { try { return storyRivalName(); } catch (_) { return '협신해운'; } })();
   const out = [];
-  if (near) out.push({ key:'PARK', who:'삼화상사 박 사장', title:'또 급한 짐이 생겼소',
+  if (near) out.push({ key:'PARK', who:chTitle('PARK'), title:'또 급한 짐이 생겼소',
     body:`금하해운, 또 부탁 좀 하겠소. ${pn(at)} 창고의 <b>강재 ${700}톤</b>을 ${pn(mid)}까지 — 열흘 안에. 운임은 섭섭지 않게 드리겠소.`,
     obj:{ type:'deliver', from:at, to:mid, cargo:'STEEL', tons:700, rate:1.25, days:10 }, reward:{ rep:1 }, fail:'박 사장: 약속을 못 지키면 다음은 없소.' });
   if (near) out.push({ key:'RUSH', who:'부두 화주', title:'오늘 밤까지 실을 배를 찾습니다',
@@ -8605,19 +8826,69 @@ function sideTemplates(at) {
     obj:{ type:'deliver', from:at, to:'BUSAN', cargo:'GENERAL', tons:500, rate:1.25, days:14 }, reward:{ rep:1 }, fail:'김 노인: 다른 배 편에 보냈소.' });
   const unvisited = Object.keys(PORTS).filter(k => portOpenId(k) && !Q.visited[k] && dist(at, k) <= Math.min(sim.reach ?? 900, 900) && k !== at);
   if (unvisited.length) { const k = unvisited.sort((a, b) => dist(at, a) - dist(at, b))[0];
-    out.push({ key:'SCOUT', who:'산업은행 윤 대리', title:`${pn(k)} 사정을 알아봐 주십시오`,
+    out.push({ key:'SCOUT', who:chTitle('YOON'), title:`${pn(k)} 사정을 알아봐 주십시오`,
       body:`사장님, 은행이 ${pn(k)} 쪽 융자를 검토합니다. 지나가시는 길에 <b>${pn(k)}에 한 번 들러</b> 부두 사정을 봐 주십시오. 은행에선 그런 보고가 귀합니다.`,
       obj:{ type:'visit', port:k }, reward:{ cash:1500, rep:1 }, days:40, fail:'윤 대리: 이번엔 다른 분께 부탁했습니다.' }); }
   const L = co.finance?.loans?.find(l => l.starter && l.status === 'ACTIVE');
-  if (L && sim.ship.cash > 60000) out.push({ key:'PREPAY', who:'산업은행 윤 대리', title:'빚을 앞당겨 갚으시면',
+  if (L && sim.ship.cash > 60000) out.push({ key:'PREPAY', who:chTitle('YOON'), title:'빚을 앞당겨 갚으시면',
     body:`사장님, 현금이 넉넉하시면 <b>회사 현금 ${won(Math.min(150000, Math.round(sim.ship.cash * 1.6 / 5000) * 5000))}원</b>을 한 번 만들어 보여 주십시오. 은행이 금하해운 신용등급을 올리고 금리를 1%p 깎아 드리겠습니다.`,
     obj:{ type:'cash', cash:Math.min(150000, Math.round(sim.ship.cash * 1.6 / 5000) * 5000) }, reward:{ rate:-0.01, rep:1 }, days:60, fail:'윤 대리: 심사 기간이 지났습니다. 다음 기회에.' });
   if ((sim.ship.state?.ENGINE ?? 100) < 80) out.push({ key:'ENGINE', who:`기관장 ${(() => { try { return crewName('engine'); } catch (_) { return ''; } })()}`, title:'주기관을 봐 주십시오',
     body:`사장님, 주기관이 ${Math.round(sim.ship.state.ENGINE)}입니다. 소리가 나쁩니다. 다음 항구에서 <b>정비해서 90 이상</b>으로 올려 주시면 선원들도 마음 놓고 탑니다.`,
     obj:{ type:'state', part:'ENGINE', min:90 }, reward:{ rep:1, morale:true }, days:30, fail:'기관장이 한숨을 쉰다.' });
-  if (far && far !== near) out.push({ key:'RIVAL', who:`${rv} 최 전무`, title:'남는 짐을 넘기겠소',
+  if (far && far !== near) out.push({ key:'RIVAL', who:chTitle('CHOI'), title:'남는 짐을 넘기겠소',
     body:`금하해운, 우리 배가 모자라 짐이 남았소. ${pn(at)}에서 ${pn(far)}까지 <b>석탄 900톤</b> — 운임은 제값이오. 대신 날짜는 지켜 주시오. 우리 화주요.`,
     obj:{ type:'deliver', from:at, to:far, cargo:'COAL', tons:900, rate:1.15, days:16 }, reward:{ rep:2 }, fail:`${rv} 최 전무: 역시 맡기는 게 아니었소.` });
+  return [...out, ...eraSideTemplates(at)];
+}
+
+// 시대마다 부두에 나오는 부탁이 다르다
+function eraSideTemplates(at) {
+  const y = eraYear(), out = [], P = storyPorts(at), near = P[0], mid = P[Math.min(1, P.length - 1)];
+  const jp = nearOpen(at, ['HAKATA', 'SHIMO', 'NAGASAKI', 'KOBE'].filter(p => p !== at));
+  const pick = (list) => nearOpen(at, list.filter(p => p !== at));
+  const add = (o) => { if (o.obj.type !== 'deliver' || (o.obj.from && o.obj.to && o.obj.from !== o.obj.to)) out.push(o); };
+  if (y < 1965) {
+    if (at === 'BUSAN' && jp) add({ key:'E_ZAINICHI', who:'재일교포 상회 강 사장', title:'고향으로 가는 물건',
+      body:`오사카·하카타의 교포들이 고향에 보내는 물건이오 — 재봉틀, 라디오, 옷감. 이번엔 반대로 ${pn(jp)}에서 <b>잡화 600톤</b>을 부산으로 실어 오시오. 받는 사람들이 기다리오.`,
+      obj:{ type:'deliver', from:jp, to:'BUSAN', cargo:'GENERAL', tons:600, rate:1.3, days:14 }, reward:{ rep:2 }, fail:'강 사장: 다른 배 편을 알아봤소.' });
+    if (at !== 'BUSAN') add({ key:'E_AID', who:'원조물자 하역 감독관', title:'원조 밀가루가 밀려 있습니다',
+      body:`${pn(at)} 창고의 <b>원조 밀가루 800톤</b>을 부산까지. 서류는 미국 쪽이 다 해 두었습니다. 운임은 정해진 대로입니다.`,
+      obj:{ type:'deliver', from:at, to:'BUSAN', cargo:'GRAIN', tons:800, rate:1.15, days:14 }, reward:{ rep:2 }, fail:'감독관: 서류가 다른 배로 넘어갔습니다.' });
+    if (near) add({ key:'E_PX', who:'부두 브로커 미스터 장', title:'미군 PX 물자요',
+      body:`쉿 — 미군 PX에서 나온 물자 <b>400톤</b>이오. 서류는 깨끗하오. ${pn(near)}까지 엿새 안에. 운임은 두둑하오. 다만 세관이 눈을 부라리면…`,
+      obj:{ type:'deliver', from:at, to:near, cargo:'GENERAL', tons:400, rate:1.6, days:6 }, reward:{ rep:-1 }, fail:'미스터 장은 다시 나타나지 않았다.' });
+  } else if (y < 1970) {
+    if (jp) add({ key:'E_WIG', who:chTitle('PARK'), title:'가발 선적이 밀렸소',
+      body:`가발 주문이 밀려들어 공장이 밤새 돈다오. <b>가발·봉제품 700톤</b>을 ${pn(jp)}로 — 열흘 안에.`,
+      obj:{ type:'deliver', from:'BUSAN', to:jp, cargo:'GENERAL', tons:700, rate:1.3, days:10 }, reward:{ rep:2 }, fail:'박 전무: 이번엔 협신 배로 보냈소. 섭섭하오.' });
+    if (jp) add({ key:'E_USEDMC', who:'중고 기계상 노 사장', title:'일본 중고 기계',
+      body:`일본 공장들이 새 기계를 들이면서 헌 기계를 내놓소. 한국 공장에선 그것도 보배요. ${pn(jp)}의 <b>중고 기계 600톤</b>을 부산으로.`,
+      obj:{ type:'deliver', from:jp, to:'BUSAN', cargo:'MACHINE', tons:600, rate:1.3, days:16 }, reward:{ rep:1 }, fail:'노 사장: 기계가 녹슬겠소.' });
+    if (portOpenId('SAIGON') && at === 'BUSAN') add({ key:'E_VNBUILD', who:'월남 건설 하청 이 소장', title:'사이공 공사 자재',
+      body:`한국 건설 회사가 사이공 비행장 공사를 땄소. <b>시멘트·철근 1,000톤</b>을 사이공으로. 위험한 바다지만 값은 좋소.`,
+      obj:{ type:'deliver', from:'BUSAN', to:'SAIGON', cargo:'STEEL', tons:1000, rate:1.45, days:30 }, reward:{ rep:2 }, fail:'이 소장: 공기가 늦어졌소.' });
+    const hk = pick(['HONGKONG', 'KEELUNG', 'KAOHSIUNG']);
+    if (hk) add({ key:'E_HUAQIAO', who:'화교 중계상 진 사장의 조카', title:'홍콩 중계 화물',
+      body:`삼촌 심부름이오. ${pn(hk)}에서 <b>잡화 900톤</b>을 부산으로. 삼촌 말이 금하해운이면 믿을 만하다고.`,
+      obj:{ type:'deliver', from:hk, to:'BUSAN', cargo:'GENERAL', tons:900, rate:1.25, days:25 }, reward:{ rep:1 }, fail:'조카: 삼촌께 그렇게 전하겠소.' });
+  } else {
+    if (at === 'BUSAN' && mid) add({ key:'E_CEMENT', who:'시멘트 공장 영업부', title:'시멘트 대량 출하',
+      body:`고속도로 다음은 항만·댐 공사입니다. 시멘트가 남아돌다 모자라다 합니다. <b>시멘트 1,200톤</b>을 ${pn(mid)}로.`,
+      obj:{ type:'deliver', from:'BUSAN', to:mid, cargo:'GENERAL', tons:1200, rate:1.2, days:18 }, reward:{ rep:1 }, fail:'영업부: 다음 분기에 다시 연락드리지요.' });
+    const me = pick(['JEDDAH', 'KUWAIT', 'BAHRAIN']);
+    if (me && at === 'BUSAN') add({ key:'E_MIDEAST', who:'해외건설 현장 사무소', title:'사막 현장 자재',
+      body:`현장에 철근이 떨어졌습니다. <b>강재 2,000톤</b>을 ${pn(me)}로. 공사가 멈추면 하루 손해가 큽니다.`,
+      obj:{ type:'deliver', from:'BUSAN', to:me, cargo:'STEEL', tons:2000, rate:1.4, days:60 }, reward:{ rep:2 }, fail:'현장 사무소: 일본 배를 썼습니다.' });
+    const far = pick(['SINGAPORE', 'PENANG', 'COLOMBO']);
+    if (far && at === 'BUSAN') add({ key:'E_FISHING', who:'원양어업 회사', title:'원양 어선단 보급품',
+      body:`인도양 참치 어선단에 보급품이 떨어집니다. <b>식료·어구 600톤</b>을 ${pn(far)} 보급기지로.`,
+      obj:{ type:'deliver', from:'BUSAN', to:far, cargo:'FOOD', tons:600, rate:1.4, days:30 }, reward:{ rep:1 }, fail:'어업 회사: 어선들이 일찍 돌아오게 됐소.' });
+    const us = pick(['SEATTLE', 'VANCOUVER', 'LOSANGELES']);
+    if (us && at === 'BUSAN') add({ key:'E_BOX', who:chTitle('PARK'), title:'상자째 싣는 화물',
+      body:`미국 바이어가 「컨테이너」라는 쇠 상자에 담아 보내라 하오. 시험 삼아 <b>상자 화물 800톤</b>을 ${pn(us)}로. 앞으로 바다가 이걸로 바뀐다는구려.`,
+      obj:{ type:'deliver', from:'BUSAN', to:us, cargo:'GENERAL', tons:800, rate:1.45, days:45 }, reward:{ rep:3 }, fail:'박 사장: 다음엔 컨테이너선을 쓰겠다는구려.' });
+  }
   return out;
 }
 
@@ -8626,9 +8897,10 @@ function questMake(src, def, meta) {
   const Q = questState(), id = `Q${Q.serial++}`;
   const o = { ...def.obj };
   if (typeof o.to === 'function') o.to = o.to();
+  if (typeof o.from === 'function') o.from = o.from();
   const days = o.days ?? def.days ?? null;
   return { id, src, ...meta, who:def.who, title:def.title, body:def.body, obj:o, reward:def.reward ?? {}, after:def.after ?? '', fail:def.fail ?? '',
-    until: days ? sim.t + days * DAY : null, done:0, made:sim.t };
+    until: days ? sim.t + days * DAY : null, done:0, made:sim.t, notBefore:def.notBefore ?? null };
 }
 function questLotLive(q) {
   return Object.values(sim.market.posted ?? {}).flat().find(c => c.questId === q.id && c.expires > sim.t) ?? null;
@@ -8657,6 +8929,8 @@ function questObjText(q) {
     case 'kind': return `${FLEET_KIND[o.kind]?.name ?? o.kind} 한 척`;
     case 'cash': return `회사 현금 ${won(o.cash)}원 (지금 ${won(Math.round(sim.ship.cash))})`;
     case 'state': return `주기관 ${o.min} 이상 (지금 ${Math.round(sim.ship.state?.[o.part] ?? 0)})`;
+    case 'newbuild': return '신조선 한 척 발주';
+    case 'choose': return '고른다';
   }
   return '';
 }
@@ -8678,7 +8952,8 @@ function questCheck(q) {
   const o = q.obj, co = sim.company;
   switch (o.type) {
     case 'deliver': return q.justDelivered && !questLotLive(q) && !questAboard(q) || (q.done ?? 0) >= o.tons - 1;
-    case 'visit': return sim.ship.at === o.port && !st.leg;
+    case 'visit': return sim.ship.at === o.port && !st.leg && sim.t >= (q.notBefore ?? 0);
+    case 'newbuild': return (co.newbuildOrders ?? []).some(x => (x.orderedAt ?? 0) >= (q.made ?? 0));
     case 'branch': return o.ports.some(p => { try { return branchLevel(co, p) >= 1; } catch (_) { return false; } });
     case 'dwt': return companyDwt(co) >= o.dwt;
     case 'kind': return supportShips(co).some(s => (s.kind ?? fleetModel(s)?.kind) === o.kind && !s.sold);
@@ -8693,6 +8968,7 @@ function questReward(q) {
   if (r.rep) sim.politics.reputation = Math.min(100, (sim.politics.reputation ?? 50) + r.rep);
   if (r.rate) { const L = sim.company.finance?.loans?.find(l => l.starter && l.status === 'ACTIVE'); if (L) L.annual = Math.max(0.02, L.annual + r.rate); }
   if (r.morale) { try { const c = playerCrew(); if (c) c.fatigue = Math.max(0, (c.fatigue ?? 0) - 20); } catch (_) {} }
+  if (r.flag) (questState().flags ??= {})[r.flag] = true;
 }
 function questWire(q, kind, body) {
   try { sim.pushWires([{ id:`W-q-${kind}-${q.id}-${Math.floor(sim.t)}`, t:sim.t, kind:'story', src:q.who, title:`${kind === 'new' ? '의뢰' : kind === 'done' ? '완수' : '무산'} · ${q.title}`, body, up:kind !== 'fail', ports:[q.obj.from ?? q.obj.port].filter(Boolean), read:kind === 'new' }]); } catch (_) {}
@@ -8705,7 +8981,7 @@ function questFinish(q, ok) {
   Q.done.push({ id:q.id, arc:q.arc, step:q.step, ok, t:sim.t, title:q.title });
   if (ok) {
     questReward(q);
-    if (q.src === 'arc') { const A = Q.arcs[q.arc]; A.step = (A.step ?? 0) + 1; A.wait = sim.t + 3 * DAY; if (A.step >= ARCS.find(a => a.id === q.arc).steps.length) A.done = sim.t; }
+    if (q.src === 'arc') { const A = Q.arcs[q.arc], def = ARCS.find(a => a.id === q.arc); A.step = (A.step ?? 0) + 1; A.wait = sim.t + (def?.theme === '시대' ? 7 : 3) * DAY; if (A.step >= (def?.steps.length ?? 0)) A.done = sim.t; }
     questWire(q, 'done', `${q.after} — ${questRewardText(q.reward)}`);
     Q.pendingNote = { q, ok:true };
   } else {
@@ -8718,19 +8994,30 @@ function questFinish(q, ok) {
 // 이야기 줄기를 깨운다 · 단골 부탁을 낸다
 function questSpawn() {
   const Q = questState(), at = sim.ship.at;
-  const arcBusy = Q.active.some(x => x.src === 'arc') || Q.offers.some(x => x.src === 'arc');
-  if (!arcBusy) {
-    for (const A of ARCS) {
-      const S = Q.arcs[A.id];
-      if (S?.done) continue;
-      if (!S) { let ok = false; try { ok = A.when(); } catch (_) {} if (!ok) continue; Q.arcs[A.id] = { step:0, started:sim.t, wait:sim.t }; }
-      const T = Q.arcs[A.id]; if (sim.t < (T.wait ?? 0)) break;
-      const def = A.steps[T.step]?.(); if (!def) { T.done = sim.t; continue; }
-      if (def.obj.type === 'deliver' && (!portOpenId(def.obj.from) || !portOpenId(typeof def.obj.to === 'function' ? def.obj.to() : def.obj.to))) continue;
-      if (def.obj.type === 'visit' && !portOpenId(def.obj.port)) continue;
-      Q.offers.push(questMake('arc', def, { arc:A.id, arcName:A.name, theme:A.theme, step:T.step, steps:A.steps.length }));
-      break;
-    }
+  const busyArc = () => Q.active.some(x => x.src === 'arc') || Q.offers.some(x => x.src === 'arc');
+  for (const A of ARCS) {
+    const S = Q.arcs[A.id];
+    if (S?.done) continue;
+    if (Q.active.some(x => x.arc === A.id) || Q.offers.some(x => x.arc === A.id)) continue;
+    if (!S) { let ok = false; try { ok = A.when(); } catch (_) {} if (!ok) continue;
+      Q.arcs[A.id] = { step:0, started:null, opened:sim.t, wait:sim.t }; }
+    const T = Q.arcs[A.id];
+    // 시대 줄기를 오래 못 열면 그 시대는 지나간다
+    if (A.expire && T.started == null && sim.t > (T.opened ?? sim.t) + A.expire * DAY) { T.done = sim.t; T.missed = true; continue; }
+    if (sim.t < (T.wait ?? 0)) continue;
+    let def = null; try { def = A.steps[T.step]?.(Q); } catch (e) { console.warn(e); }
+    if (!def) { T.done = sim.t; continue; }
+    if (def.notBefore && sim.t < def.notBefore) continue;
+    const choose = def.obj.type === 'choose';
+    if (!choose && busyArc()) continue;
+    if (choose && Q.offers.some(x => x.obj.type === 'choose')) continue;
+    if (def.obj.type === 'deliver') {
+      const f = typeof def.obj.from === 'function' ? def.obj.from() : def.obj.from, to = typeof def.obj.to === 'function' ? def.obj.to() : def.obj.to;
+      if (!portOpenId(f) || !portOpenId(to)) continue; }
+    if (def.obj.type === 'visit' && !portOpenId(def.obj.port)) continue;
+    if (choose && !(def.obj.opts ?? []).length) { T.done = sim.t; continue; }
+    T.started ??= sim.t;
+    Q.offers.push(questMake('arc', def, { arc:A.id, arcName:A.name, theme:A.theme, step:T.step, steps:A.steps.length }));
   }
   const sides = Q.active.filter(x => x.src === 'side').length + Q.offers.filter(x => x.src === 'side').length;
   if (sides < QUEST_SIDE_MAX && sim.t >= (Q.nextSide ?? 0) && PORTS[at]) {
@@ -8747,7 +9034,21 @@ function questSpawn() {
 function questOffer(q) {
   const Q = questState();
   Q.offers = Q.offers.filter(x => x !== q);
-  const head = q.src === 'arc' ? `${q.theme === '시대' ? '시대' : '새 바다'} · ${q.arcName} ${q.step + 1}/${q.steps}` : '부탁';
+  if (q.obj.type === 'choose') {
+    const head = `${q.theme === '사람' ? '사람' : q.theme === '시대' ? '시대' : '새 바다'} · ${q.arcName}${q.steps > 1 ? ` ${q.step + 1}/${q.steps}` : ''}`;
+    const body = `<div class="st-who">${q.who}</div><div class="st-body">${q.body}</div>`;
+    const anyCost = q.obj.opts.some(o => Number.isFinite(o.cost) && o.cost > 0);
+    const choices = q.obj.opts.map(o => ({ label:o.label, sub:o.sub ?? '', cost:anyCost ? (Number.isFinite(o.cost) && o.cost > 0 ? o.cost : 0) : undefined,
+      run:() => { questApply(o.eff ?? {}); q.after = o.after ?? ''; q.reward = {}; q.chosen = o.label;
+        const A = Q.arcs[q.arc], def = ARCS.find(a => a.id === q.arc); if (A) { A.step = (A.step ?? 0) + 1; A.wait = sim.t + (def?.theme === '시대' ? 7 : 3) * DAY; if (A.step >= (def?.steps.length ?? 0)) A.done = sim.t; }
+        Q.done.push({ id:q.id, arc:q.arc, step:q.step, ok:true, t:sim.t, title:q.title, chose:o.label });
+        questWire(q, 'done', `${o.label} — ${o.after ?? ''}`);
+        say(`【${q.arcName}】 ${q.title} — ${o.label}`, 'b');
+        if (o.after) { ask.head = q.title; setTimeout(() => { if (!asking) { ask.head = q.title; ask(q.arcName, `<div class="st-who">${q.who}</div><div class="st-body">${o.after}</div>`, [{ label:'좋다', run:() => {} }]); } }, 0); }
+        questBtnPaint(); } }));
+    ask.head = q.title; ask.noBest = true; ask(head, body, choices); return;
+  }
+  const head = q.src === 'arc' ? `${q.theme === '사람' ? '사람' : q.theme === '시대' ? '시대' : '새 바다'} · ${q.arcName} ${q.step + 1}/${q.steps}` : '부탁';
   const body = `<div class="st-who">${q.who}</div><div class="st-body">${q.body}</div>` +
     `<div class="st-learn">할 일 · ${questObjText(q)}${q.until ? ` · ${Math.round((q.until - sim.t) / DAY)}일 안에` : ''}<br>보상 · ${questRewardText(q.reward)}</div>`;
   const accept = () => {
@@ -8783,7 +9084,7 @@ function questTick() {
   }
   // 하루에 한 번 새 의뢰를 본다
   const day = Math.floor(sim.t / DAY);
-  if (day !== questLastScan) { questLastScan = day; questSpawn(); questBtnPaint(); }
+  if (day !== questLastScan) { questLastScan = day; try { eraWiresTick(); } catch (e) { console.warn(e); } questSpawn(); questBtnPaint(); }
   // 정박해 있고 다른 창이 없을 때만 말을 건다
   const busy = asking || document.querySelector('.sheetwrap.on') || $('ask')?.classList.contains('on');
   const idle = !st.leg && !st.contract && !st.plan?.active;
@@ -9200,11 +9501,11 @@ $('ak-h').textContent = ask.head ?? '판단이 필요합니다'; ask.head = null
 $('ak-tag').textContent = tag;
 $('ak-b').innerHTML = body;
 $('ak-btns').innerHTML = '';
-const priced = choices.filter(c => Number.isFinite(c.cost));
-const best = priced.length ? priced.reduce((a, b) => (b.cost < a.cost ? b : a)) : null;
+const priced = choices.filter(c => Number.isFinite(c.cost)), noBest = ask.noBest; ask.noBest = null;
+const best = priced.length && !noBest ? priced.reduce((a, b) => (b.cost < a.cost ? b : a)) : null;
 $('ak-btns').classList.toggle('stack', priced.length > 0);
 if (priced.length) { const h = document.createElement('div'); h.className = 'askhint';
-  h.innerHTML = '<span>고르면 드는 돈 (예상)</span><span><i class="lamp go"></i> 제일 적게 드는 쪽</span>'; $('ak-btns').appendChild(h); }
+  h.innerHTML = noBest ? '<span>고르면 드는 돈</span><span>뒷일은 고른 대로 갈린다</span>' : '<span>고르면 드는 돈 (예상)</span><span><i class="lamp go"></i> 제일 적게 드는 쪽</span>'; $('ak-btns').appendChild(h); }
 for (const ch of choices) {
 const b = document.createElement('button');
 if (Number.isFinite(ch.cost)) {
@@ -11262,7 +11563,7 @@ function v3610Init(){
   }
   setInterval(v3610SemanticTick,1200);
   addEventListener('beforeunload',()=>{if(mainMenuSessionActive)v3610AutoSave('종료 직전',true)});
-  say('v3.23.1 · 열린 시장 수지 · 의뢰 · 항차 단계 띠와 전환 장면 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
+  say('v3.24.0 · 시대 이야기 · 열린 시장 수지 · 의뢰 · 항차 단계 띠와 전환 장면 · 태풍 항로 · 직접 접안 · 직접 천측 · 선내 소식 · 선교 창 · 경주 · 회사의 장 · 전보와 빚 · 선장과 경쟁자 항만 클릭 시장정보 · 공선 재배치 · 자동저장 A/B 활성','b');
 }
 setTimeout(v3610Init,0);
 
@@ -14785,7 +15086,7 @@ DIP_ACTIONS, normalizeDiplomacy, syncDiplomacy, diplomacyStatus, diplomacyAction
 LOAN_PRODUCTS, INSURANCE_PLANS, CHARTER_OFFERS, normalizeFinance, financeSnapshot, financeRating, financeCreditLimit, loanTerms, takeLoan, repayLoan, charterIn, charterPrepareRedelivery, charterReturnEarly, charterEarlyReturnQuote, charterRedeliveryQuote, normalizeCorporateDeals, corporateDealsMonthlyTick, buyLiquidationAuction, acquireRivalCompany, setInsurancePlan, financeMonthlyTick, openFinance,
 PE_BANKS, PE_OFFICES, PE_ACTIONS, PE_RIVAL_PATRON, normalizePoliticalEconomy, peAgenda, peRefreshFinanceTerms, peSetMainBank, peInstitutionAction, peLegacyLobbyEffect, peMonthlyTick, peSnapshot, openPoliticalEconomy,
 MG_FACTIONS, MG_ROLES, EXECUTIVE_POOL, normalizeManagement, managementSnapshot, managementFactionSnapshot, availableExecutiveCandidates, promoteFleetChief, demoteFleetChief, hireExecutive, dismissExecutive, supportManagementFaction, managementMonthlyTick, openManagement,
-get asking() { return asking; }, get draftPlan(){ return draftPlan; }, questState, questTick, questSpawn, ARCS, openQuests, questCheck, eotSeaSync, eotPlanSet, tonsCap, instrLast, debtDue, debtTotal, pollDebt, openWires, wireGo, CHAPTERS, chapterState, chapterBid, chapterDaily, openChapter, repayLoan, get gameOver(){ return sim.gameOver; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
+get asking() { return asking; }, get draftPlan(){ return draftPlan; }, questState, questTick, questSpawn, ARCS, openQuests, questCheck, chTitle, ERA_WIRES, eraWiresTick, eotSeaSync, eotPlanSet, tonsCap, instrLast, debtDue, debtTotal, pollDebt, openWires, wireGo, CHAPTERS, chapterState, chapterBid, chapterDaily, openChapter, repayLoan, get gameOver(){ return sim.gameOver; }, get mapPlanMode(){ return mapPlanMode; }, get mapCands(){ return mapCands; }, get mapSel(){ return mapSel; }, mapPlanOpen, mapPlanClose, mapTapLine, mapConfirm,
 SLOTS, SLOT_BY_ID, slotOf, slotSet, stowSnapshot, stowStability, stowShifting, stowCharacter, wharfItems, wharfPaint,
 navState, navLegReset, navTick, navOpportunities, navDoFix, navProgressFactor, navPenalty, navNearestLand, navLoranChain, navSunAlt, paintNavWatch, navCycleBerthPolicy, navBuyLoran, BERTH_POLICY,
 pilotContext, pilotSteps, pilotRun, pilotResolve, pilotMaybeApproach, pilotDeparture, pilotArrivalDelay, NAV_FIX, LORAN_CHAINS, LORAN_PRICE };
