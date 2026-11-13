@@ -1,3 +1,13 @@
+업데이트 올리는 법 (2026-11 · 포병과 같은 방식):
+ 1) 새 판을 TRAMP_LINE_1962_v<판>.html 이름으로 저장소 최상위에 올린다  예) TRAMP_LINE_1962_v3.25.0.html
+    - 파일 안 TRAMP_LINE_CONTENT_VERSION 이 파일 이름 판과 같아야 한다 (다르면 워크플로가 멈춘다)
+    - 내용이 바뀌면 판 번호를 올린다 (같은 번호면 기기에 업데이트가 안 뜬다)
+ 2) 워크플로(Auto publish TRAMP LINE update)가 알아서
+    - 가장 높은 판을 index.html 로 복사 (이미 깔린 앱이 이걸 보고 갱신 — APK 재설치 불필요)
+    - 판 HTML 은 최근 10개만 남김
+    - update.json 갱신
+ index.html 은 직접 고치지 않는다.
+
 TRAMP LINE 1962 Android v2.5
 
 1) 이 패키지의 android/ 폴더와 .github/workflows/build-apk.yml 을
